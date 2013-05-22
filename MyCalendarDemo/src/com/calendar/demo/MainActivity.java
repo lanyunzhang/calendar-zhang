@@ -42,7 +42,7 @@ import android.widget.LinearLayout.LayoutParams;
  * 
  * 
  *   1. 修复每个月日历的动态显示5或者6行
- *   2. 
+ *   2. 实现日历的滑动
  */
 public class MainActivity extends Activity{
 	// 生成日历，外层容器
@@ -100,7 +100,6 @@ public class MainActivity extends Activity{
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		System.out.println("hha");
 		// 获得屏幕宽和高，并計算出屏幕寬度分七等份的大小
 		WindowManager windowManager = getWindowManager();
 		Display display = windowManager.getDefaultDisplay();
@@ -122,8 +121,8 @@ public class MainActivity extends Activity{
 		btn_next_month.setOnClickListener(new Next_MonthOnClickListener());
 
 		// 计算本月日历中的第一天(一般是上月的某天)，并更新日历
-		
 		mainLayout.addView(generateCalendarMain());
+		
 		calStartDate = getCalendarStartDate();
 		DateWidgetDayCell daySelected = updateCalendar();
 
@@ -331,6 +330,7 @@ public class MainActivity extends Activity{
 		}
 		
 		prerow = currow;
+		//------------------------------------------------------------------
 	}
 
 	// 更新日历
