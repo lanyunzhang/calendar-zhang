@@ -32,8 +32,9 @@ import android.widget.LinearLayout.LayoutParams;
  * @Version V1.0
  */
 public class DateWidgetDayCell extends View {
-	// 字体大小
+	// 字体大小 --农历与公历的区分
 	private static final int fTextSize = 28;
+	private static final int lTextSize = 19;
 	
 	// 基本元素
 	private OnItemClick itemClick = null;
@@ -176,14 +177,15 @@ public class DateWidgetDayCell extends View {
 				-2*((int)pt.getFontMetrics().bottom);
 		
 		final int iPosXX = (int)rect.left + ((int)rect.width() >> 1)
-				- ((int) pt.measureText(sLundarDate)>>1);
+				- ((int) pt.measureText(sLundarDate)>>1)/2;
 
 		final int iPosYY = (int)(this.getHeight() - (this.getHeight() - getTextHeight())/3)
 				-((int)pt.getFontMetrics().bottom);
 		
 		canvas.drawText(sDate, iPosX, iPosY, pt);
-		canvas.drawText(sLundarDate, iPosXX, iPosYY, pt);
+		pt.setTextSize(lTextSize);
 		pt.setUnderlineText(false);
+		canvas.drawText(sLundarDate, iPosXX, iPosYY, pt);
 	}
 
 	// 得到字体高度
