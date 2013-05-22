@@ -42,7 +42,8 @@ import android.widget.LinearLayout.LayoutParams;
  * 
  * 
  *   1. 修复每个月日历的动态显示5或者6行
- *   2. 实现日历的滑动
+ *   2. 实现日历的阴历显示
+ *   3. 实现日历的滑动
  */
 public class MainActivity extends Activity{
 	// 生成日历，外层容器

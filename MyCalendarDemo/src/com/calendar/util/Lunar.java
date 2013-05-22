@@ -856,21 +856,21 @@ public class Lunar {
 	}
 	
 	//-------------------得到农历的日期显示---------------------------------
-	public String  getLunarDay(int setyear ,int setmonth ,int setday){
+	public static String  getLunarDay(int setyear ,int setmonth ,int setday){
 		// 农历处理前日期格式转换
 		SimpleDateFormat myFormatter = new SimpleDateFormat( 
 				"yyyy-MM-dd");
-
+		Date localdate=null;
 		try {
 			String dates = setyear + "-" + setmonth + "-"
 					+ setday;
-			Date date = myFormatter.parse(dates);
+			 localdate= myFormatter.parse(dates);
 
 		} catch (ParseException e) {
 			
 			e.printStackTrace();
 		}
 		
-		return new Lunar(date).getLunarDayString();
+		return new Lunar(localdate).getLunarDayString();
 	}
 }

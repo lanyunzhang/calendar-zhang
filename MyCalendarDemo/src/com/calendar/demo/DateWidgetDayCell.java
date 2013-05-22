@@ -2,6 +2,8 @@ package com.calendar.demo;
 
 import java.util.Calendar;
 
+import com.calendar.util.Lunar;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.LinearGradient;
@@ -23,9 +25,9 @@ import android.widget.LinearLayout.LayoutParams;
 
  * @Package com.calendar.demo 
 
- * @Author Hanyonglu 
+ * @Author  zhanglanyun
 
- * @Date 2012-3-17 下午03:19:34 
+ * @Date    2013-05-22 
 
  * @Version V1.0
  */
@@ -38,6 +40,7 @@ public class DateWidgetDayCell extends View {
 	private Paint pt = new Paint();
 	private RectF rect = new RectF();
 	private String sDate = "";
+	private String sLundarDate = "";
 
 	// 当前日期
 	private int iDateYear = 0;
@@ -83,6 +86,7 @@ public class DateWidgetDayCell extends View {
 		iDateDay = iDay;
 
 		this.sDate = Integer.toString(iDateDay);
+		this.sLundarDate = Lunar.getLunarDay(iDateYear, iDateMonth, iDateDay);
 		this.bIsActiveMonth = (iDateMonth == iActiveMonth);
 		this.bToday = bToday;
 		this.bHoliday = bHoliday;
@@ -144,7 +148,7 @@ public class DateWidgetDayCell extends View {
 		// }
 	}
 
-	// 绘制日历中的数字
+	// 绘制日历中的数字,这里添加对阴历的显示
 	public void drawDayNumber(Canvas canvas) {
 		// draw day number
 		pt.setTypeface(null);
@@ -164,12 +168,21 @@ public class DateWidgetDayCell extends View {
 		final int iPosX = (int) rect.left + ((int) rect.width() >> 1)
 				- ((int) pt.measureText(sDate) >> 1);
 
-		final int iPosY = (int) (this.getHeight()
-				- (this.getHeight() - getTextHeight()) / 2 - pt
-				.getFontMetrics().bottom);
+//		final int iPosY = (int) (this.getHeight()
+//				- (this.getHeight() - getTextHeight()) / 2 - pt
+//				.getFontMetrics().bottom);
+		
+		final int iPosY = (int)(this.getHeight() - 2*(this.getHeight() - getTextHeight())/3)
+				-2*((int)pt.getFontMetrics().bottom);
+		
+		final int iPosXX = (int)rect.left + ((int)rect.width() >> 1)
+				- ((int) pt.measureText(sLundarDate)>>1);
 
+		final int iPosYY = (int)(this.getHeight() - (this.getHeight() - getTextHeight())/3)
+				-((int)pt.getFontMetrics().bottom);
+		
 		canvas.drawText(sDate, iPosX, iPosY, pt);
-
+		canvas.drawText(sLundarDate, iPosXX, iPosYY, pt);
 		pt.setUnderlineText(false);
 	}
 
