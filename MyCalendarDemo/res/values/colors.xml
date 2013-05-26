@@ -38,4 +38,5 @@
     <color name="specialReminder">#FF0000</color>
     <color name="commonReminder">#BDBAB5</color>
     <color name="gray">#808080</color>
+    <color name="edittextcolor">#DDDDDD</color>
 </resources>

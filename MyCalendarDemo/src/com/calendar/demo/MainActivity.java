@@ -7,6 +7,7 @@ import java.util.Hashtable;
 import com.calendar.util.NumMonthOfYear;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -16,12 +17,17 @@ import android.os.Message;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
+import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.LinearLayout.LayoutParams;
@@ -44,6 +50,8 @@ import android.widget.LinearLayout.LayoutParams;
  *   1. 修复每个月日历的动态显示5或者6行
  *   2. 实现日历的阴历显示
  *   3. 实现日历的滑动
+ *   4. 添加记事时只显示当前周，其它周隐藏,便于去记事，不会因滑动而失去焦点
+ *   5. 动态的添加记事功能
  */
 public class MainActivity extends Activity{
 	// 生成日历，外层容器
@@ -65,6 +73,7 @@ public class MainActivity extends Activity{
 	private int numOfDay = 0;
 	private int currow = -1;
 	private int prerow = -1;
+	private int selectday = -1;
 	
 	private int Calendar_Width = 0;
 	private int Cell_Width = 0;
@@ -76,6 +85,12 @@ public class MainActivity extends Activity{
 	TextView arrange_text = null;
 	LinearLayout mainLayout = null;
 	LinearLayout arrange_layout = null;
+	
+	//--------------listview----------------
+	ListView listview = null;
+	MyAdapter adapter = null;
+	
+	
 
 	// 数据源
 	ArrayList<String> Calendar_Source = null;
@@ -107,13 +122,18 @@ public class MainActivity extends Activity{
 		int screenWidth = display.getWidth();
 		Calendar_Width = screenWidth;
 		Cell_Width = Calendar_Width / 7 + 1;
-
+		
+		
 		// 制定布局文件，并设置属性
 		mainLayout = (LinearLayout) getLayoutInflater().inflate(
 				R.layout.calendar_main, null);
 		// mainLayout.setPadding(2, 0, 2, 0);
 		setContentView(mainLayout);
 
+		listview = (ListView)getLayoutInflater().inflate(R.layout.list, null);
+		adapter = new MyAdapter(MainActivity.this);
+		listview.setAdapter(adapter);
+		
 		// 声明控件，并绑定事件
 		Top_Date = (TextView) findViewById(R.id.Top_Date);
 		btn_pre_month = (Button) findViewById(R.id.btn_pre_month);
@@ -123,6 +143,10 @@ public class MainActivity extends Activity{
 
 		// 计算本月日历中的第一天(一般是上月的某天)，并更新日历
 		mainLayout.addView(generateCalendarMain());
+		
+		
+		//添加listview
+		mainLayout.addView(listview);
 		
 		calStartDate = getCalendarStartDate();
 		DateWidgetDayCell daySelected = updateCalendar();
@@ -148,7 +172,8 @@ public class MainActivity extends Activity{
 
 		endDate = GetEndDate(startDate);
 		view.addView(arrange_layout, Param1);
-		mainLayout.addView(view);
+		
+		//mainLayout.addView(view);
 
 		// 新建线程
 		new Thread() {
@@ -357,6 +382,7 @@ public class MainActivity extends Activity{
 			if (calToday.get(Calendar.YEAR) == iYear) {
 				if (calToday.get(Calendar.MONTH) == iMonth) {
 					if (calToday.get(Calendar.DAY_OF_MONTH) == iDay) {
+						selectday = GetNumFromDate(calSelected, GetStartDate());
 						bToday = true;
 					}
 				}
@@ -502,6 +528,7 @@ public class MainActivity extends Activity{
 		public void OnClick(DateWidgetDayCell item) {
 			calSelected.setTimeInMillis(item.getDate().getTimeInMillis());
 			int day = GetNumFromDate(calSelected, startDate);
+			selectday = day;
 			
 			if (calendar_Hashtable != null
 					&& calendar_Hashtable.containsKey(day)) {
@@ -570,4 +597,108 @@ public class MainActivity extends Activity{
 		System.out.println("rowofnum="+numOfDay);
 		return numOfDay;
 	}
+	
+	public void setViewGone(){
+		int row = selectday / 7;
+		//隐藏不是row的所有行
+		for(int i=0;i<layrow.size();i++){
+			if(i != row)
+				layrow.get(i).setVisibility(View.GONE);
+		}
+	}
+	public void setViewVisble(){
+		int row = selectday / 7;
+		for(int i=0;i<layrow.size();i++){
+			if(i != row)
+				layrow.get(i).setVisibility(View.VISIBLE);
+		}
+	}
+	//listview的adapter设置
+	private class MyAdapter extends BaseAdapter {  
+		  
+        private Context context;  
+        private LayoutInflater inflater;  
+        public ArrayList<String> arr;  
+        public MyAdapter(Context context) {  
+            super();  
+            this.context = context;  
+            inflater = LayoutInflater.from(context);  
+            arr = new ArrayList<String>();  
+            arr.add("");
+        }  
+        @Override  
+        public int getCount() {  
+            // TODO Auto-generated method stub  
+            return arr.size();  
+        }  
+        @Override  
+        public Object getItem(int arg0) {  
+            // TODO Auto-generated method stub  
+            return arg0;  
+        }  
+        @Override  
+        public long getItemId(int arg0) {  
+            // TODO Auto-generated method stub  
+            return arg0;  
+        }  
+        @Override  
+        public View getView(final int position, View view, ViewGroup arg2) {  
+            // TODO Auto-generated method stub  
+            if(view == null){  
+                view = inflater.inflate(R.layout.listview_item, null);  
+            }  
+            final EditText edit = (EditText) view.findViewById(R.id.edit); 
+            
+            edit.setText(arr.get(position));    //在重构adapter的时候不至于数据错乱  
+            Button del = (Button) view.findViewById(R.id.del);  
+            
+            edit.setOnFocusChangeListener(new OnFocusChangeListener() {  
+                @Override  
+                public void onFocusChange(View v, boolean hasFocus) {  
+                    // TODO Auto-generated method stub  
+                	if(arr.size()>0){  
+                		
+                		ionFocusChange(position,edit,hasFocus);
+                    } 
+                }  
+            });  
+            del.setOnClickListener(new OnClickListener() {  
+                @Override  
+                public void onClick(View arg0){  
+                    // TODO Auto-generated method stub  
+                    //从集合中删除所删除项的EditText的内容  
+                    arr.remove(position);  
+                    adapter.notifyDataSetChanged();  
+                }  
+            });  
+            return view;  
+        }  
+        
+        public void ionFocusChange(int position,EditText edit,boolean hasFocus){
+        	if(position == arr.size()-1){
+        		
+        		if(hasFocus){
+        			edit.setText("");
+        			setViewGone();
+        		}else{
+        			if(edit.getText().toString() == "" || edit.getText().toString()==null){
+        				edit.setText(R.string.writeit);
+        				edit.setTextColor(getResources().getColorStateList(R.color.edittextcolor));
+        			}else{
+        				arr.add(position, edit.getText().toString());
+        				arr.remove(position+1);
+        				arr.add(getString(R.string.writeit));
+        			}
+        			setViewVisble();
+        		}
+        	}else{
+        		
+        		if(hasFocus){
+        			setViewGone();
+        		}
+        		
+        	}
+        }
+    }  
+	
 }

@@ -3,5 +3,7 @@
 
     <string name="hello">Hello World, MyCalendarDemoActivity!</string>
     <string name="app_name">MyCalendarDemo</string>
+    <string name="del">删除</string>
+    <string name="writeit">随手记两笔...</string>
 
 </resources>
