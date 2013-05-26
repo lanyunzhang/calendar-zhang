@@ -82,6 +82,7 @@ public class MainActivity extends Activity{
 	TextView arrange_text = null;
 	LinearLayout mainLayout = null;
 	LinearLayout arrange_layout = null;
+	NoteTaking nt = null;
 	
 	//--------------listview----------------
 	ListView listview = null;
@@ -141,12 +142,12 @@ public class MainActivity extends Activity{
 		// 计算本月日历中的第一天(一般是上月的某天)，并更新日历
 		mainLayout.addView(generateCalendarMain());
 		
-		
 		//添加listview并且添加随手记两笔textview
 		mainLayout.addView(listview);
-		NoteTaking nt = new NoteTaking(MainActivity.this,Calendar_Width,Cell_Width);
+		nt = new NoteTaking(MainActivity.this,Calendar_Width,Cell_Width);
 		nt.setOnClickListener(new tvClicklistener());
 		nt.setData(getString(R.string.writeit));
+		nt.setBackgroundDrawable(getResources().getDrawable(R.drawable.add_event_edit_bg));
 		mainLayout.addView(nt);
 		
 		calStartDate = getCalendarStartDate();
@@ -683,7 +684,6 @@ public class MainActivity extends Activity{
         		}else{
         			if(edit.getText().toString() == "" || edit.getText().toString()==null){
         				edit.setText(R.string.writeit);
-        				edit.setTextColor(getResources().getColorStateList(R.color.edittextcolor));
         			}else{
         				arr.add(position, edit.getText().toString());
         				arr.remove(position+1);
@@ -702,7 +702,12 @@ public class MainActivity extends Activity{
     }
 	
 	public void clickText(){
-		
+		//首先nt隐藏，显示添加界面，日历同样隐藏相应的部分
+		nt.setVisibility(View.GONE);
+		View v = (LinearLayout) getLayoutInflater().inflate(
+				R.layout.activity_add_event, null);
+		mainLayout.addView(v);
+		setViewGone();
 	}
 	
 	public class tvClicklistener implements View.OnClickListener{

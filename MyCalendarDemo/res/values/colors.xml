@@ -1,7 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <!-- 主应用程序 -->
+    <color name="holo_blue_bright">#ff00ddff</color>
+    <color name="monthview_week_left_bg">#ffcccccc</color>
+    <color name="monthview_divider">#88cccccc</color>
+    <color name="image_btn_press_bg">#55000000</color>
+    <color name="back_btn_pressed_bg">#55000000</color>
+    <color name="alarm_music_picker_name">#ff333333</color>
+    <color name="alarm_music_picker_time">#ff777777</color>
+    <color name="alarm_music_picker_empty">#ff333333</color>
+    <color name="monthview_month_bg">#15333333</color>
+    <color name="umeng_btn_pressed_bg">#ffe5eadd</color>
+    <color name="widget_no_this_month">#ff888888</color>
+    <color name="widget_in_this_month_normal">#ff222222</color>
+    <color name="widget_in_this_month_weekend">#eeff0000</color>
+    <color name="default_text_color">#ff333333</color>
+    <color name="fragment_day_big_week">#ffb70000</color>
+    <color name="pop_btn_normal">#55000000</color>
+    <color name="pop_btn_press">#88000000</color>
+    <color name="btn_color_picker_normal">#88ffffff</color>
+    <color name="btn_color_picker_press">#ccffffff</color>
+    
+     <!-- 主应用程序 -->
     <color name="title_icon">#ff000000</color>
     <color name="text_minor">#ff666666</color>
     <color name="application_backcolor">#fff6eade</color>
@@ -38,5 +57,4 @@
     <color name="specialReminder">#FF0000</color>
     <color name="commonReminder">#BDBAB5</color>
     <color name="gray">#808080</color>
-    <color name="edittextcolor">#DDDDDD</color>
 </resources>

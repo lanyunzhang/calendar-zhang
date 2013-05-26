@@ -5,5 +5,6 @@
     <string name="app_name">MyCalendarDemo</string>
     <string name="del">删除</string>
     <string name="writeit">随手记两笔...</string>
+    <string name="activity_add_event_save">保存</string>
 
 </resources>

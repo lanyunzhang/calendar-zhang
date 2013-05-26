@@ -15,7 +15,7 @@ import com.calendar.util.util;
 public class NoteTaking extends View{
 
 	Paint pt = new Paint();
-	private int fTextSize = 20;
+	private int fTextSize = 30;
 	private String text ;
 	public NoteTaking(Context context,int iWidth,int iHeight) {
 		super(context);
@@ -37,13 +37,12 @@ public class NoteTaking extends View{
 	    float iPosY = rect.top + (rect.bottom - rect.top -getTextHeight())/2 + pt.getFontMetrics().bottom;
 	   	canvas.drawRect(rect,pt);
 	   	
-	   	pt.setColor(MainActivity.isPresentMonth_FontColor);
+	   	pt.setColor(Color.GRAY);
 	   	pt.setTypeface(null);
 		pt.setAntiAlias(true);
 		pt.setShader(null);
 		pt.setFakeBoldText(true);
 		pt.setTextSize(fTextSize);
-		pt.setColor(MainActivity.isPresentMonth_FontColor);
 		pt.setUnderlineText(false);
 		canvas.drawText(text,iPosX, iPosY, pt);
 		
