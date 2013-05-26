@@ -19,11 +19,11 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.calendar.util.NumMonthOfYear;
 import com.calendar.util.util;
@@ -55,6 +55,8 @@ public class MainActivity extends Activity{
 	private LinearLayout layContent = null; //外层日历主体
 	private ArrayList<DateWidgetDayCell> days = new ArrayList<DateWidgetDayCell>();
 	private ArrayList<View> layrow = new ArrayList<View>();
+	
+	public ArrayList<String> arr;
 
 	// 日期变量
 	public static Calendar calStartDate = Calendar.getInstance();
@@ -74,6 +76,7 @@ public class MainActivity extends Activity{
 	
 	private int Calendar_Width = 0;
 	private int Cell_Width = 0;
+	private boolean isFiveRowExist = false;
 
 	// 页面控件
 	TextView Top_Date = null;
@@ -83,6 +86,9 @@ public class MainActivity extends Activity{
 	LinearLayout mainLayout = null;
 	LinearLayout arrange_layout = null;
 	NoteTaking nt = null;
+	View  addnote = null;
+	EditText addeventcontent = null;
+	TextView save = null;
 	
 	//--------------listview----------------
 	ListView listview = null;
@@ -207,6 +213,8 @@ public class MainActivity extends Activity{
 		common_Reminder = this.getResources().getColor(R.color.commonReminder);
 		Calendar_WeekFontColor = this.getResources().getColor(
 				R.color.Calendar_WeekFontColor);
+		
+		
 	}
 
 	protected String GetDateShortString(Calendar date) {
@@ -355,6 +363,7 @@ public class MainActivity extends Activity{
 			layrow.get(5).setVisibility(View.GONE);
 		else if (prerow == 5 && currow == 6){
 			layrow.get(5).setVisibility(View.VISIBLE);
+			isFiveRowExist = true;
 		}
 		
 		prerow = currow;
@@ -611,16 +620,17 @@ public class MainActivity extends Activity{
 	public void setViewVisble(){
 		int row = selectday / 7;
 		for(int i=0;i<layrow.size();i++){
-			if(i != row)
+			if(i != row )
 				layrow.get(i).setVisibility(View.VISIBLE);
 		}
+		if(!isFiveRowExist)
+			layrow.get(5).setVisibility(View.GONE);
 	}
 	//listview的adapter设置
 	private class MyAdapter extends BaseAdapter {  
-		  
         private Context context;  
         private LayoutInflater inflater;  
-        public ArrayList<String> arr;  
+          
         public MyAdapter(Context context) {  
             super();  
             this.context = context;  
@@ -704,18 +714,54 @@ public class MainActivity extends Activity{
 	public void clickText(){
 		//首先nt隐藏，显示添加界面，日历同样隐藏相应的部分
 		nt.setVisibility(View.GONE);
-		View v = (LinearLayout) getLayoutInflater().inflate(
+		addnote = (LinearLayout) getLayoutInflater().inflate(
 				R.layout.activity_add_event, null);
-		mainLayout.addView(v);
+		addNote();
+		mainLayout.addView(addnote);
 		setViewGone();
 	}
+
+	public void refreshListView(){
+		
+	}
 	
+	public void addNote(){
+		//处理添加事件
+		addeventcontent = (EditText)addnote.findViewById(R.id.add_event_content);
+		save = (TextView)addnote.findViewById(R.id.save);
+		
+		save.setOnClickListener(new addnoteclicklistener());
+	}
 	public class tvClicklistener implements View.OnClickListener{
 
 		@Override
 		public void onClick(View v) {
 			//添加相应事件
 			clickText();
+		}
+		
+	}
+	
+	public class addnoteclicklistener implements View.OnClickListener{
+
+		@Override
+		public void onClick(View v) {
+			
+			String content = addeventcontent.getText().toString();
+			if(content.length() == 0 || content.equals("") || content == null || 
+					content.trim().length() == 0){
+				Toast.makeText(MainActivity.this, getString(R.string.contentisnull),
+						Toast.LENGTH_SHORT).show();
+			}else{
+				//不为空的话，保存字符串，并且日历显示，随手记显示，listview添加相应的内容
+				
+				addnote.setVisibility(View.GONE);
+				setViewVisble();
+				String text = content.trim();
+				arr.add(text);
+				adapter.notifyDataSetChanged();
+				
+			}
 		}
 		
 	}

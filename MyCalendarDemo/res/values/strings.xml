@@ -6,5 +6,6 @@
     <string name="del">删除</string>
     <string name="writeit">随手记两笔...</string>
     <string name="activity_add_event_save">保存</string>
+    <string name="contentisnull">内容不能为空</string>
 
 </resources>
