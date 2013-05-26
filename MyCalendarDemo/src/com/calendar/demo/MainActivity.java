@@ -4,33 +4,30 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Hashtable;
 
-import com.calendar.util.NumMonthOfYear;
-
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
 import android.view.Display;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.View.OnClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Toast;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.LinearLayout.LayoutParams;
+
+import com.calendar.util.NumMonthOfYear;
+import com.calendar.util.util;
+import com.canlendar.demo.view.NoteTaking;
 
 /**
  * Android实现日历控件
@@ -122,7 +119,7 @@ public class MainActivity extends Activity{
 		int screenWidth = display.getWidth();
 		Calendar_Width = screenWidth;
 		Cell_Width = Calendar_Width / 7 + 1;
-		
+		util.setWidth(Cell_Width,Calendar_Width);
 		
 		// 制定布局文件，并设置属性
 		mainLayout = (LinearLayout) getLayoutInflater().inflate(
@@ -145,8 +142,12 @@ public class MainActivity extends Activity{
 		mainLayout.addView(generateCalendarMain());
 		
 		
-		//添加listview
+		//添加listview并且添加随手记两笔textview
 		mainLayout.addView(listview);
+		NoteTaking nt = new NoteTaking(MainActivity.this,Calendar_Width,Cell_Width);
+		nt.setOnClickListener(new tvClicklistener());
+		nt.setData(getString(R.string.writeit));
+		mainLayout.addView(nt);
 		
 		calStartDate = getCalendarStartDate();
 		DateWidgetDayCell daySelected = updateCalendar();
@@ -624,7 +625,6 @@ public class MainActivity extends Activity{
             this.context = context;  
             inflater = LayoutInflater.from(context);  
             arr = new ArrayList<String>();  
-            arr.add("");
         }  
         @Override  
         public int getCount() {  
@@ -658,7 +658,7 @@ public class MainActivity extends Activity{
                     // TODO Auto-generated method stub  
                 	if(arr.size()>0){  
                 		
-                		ionFocusChange(position,edit,hasFocus);
+                		//ionFocusChange(position,edit,hasFocus);
                     } 
                 }  
             });  
@@ -699,6 +699,21 @@ public class MainActivity extends Activity{
         		
         	}
         }
-    }  
+    }
+	
+	public void clickText(){
+		
+	}
+	
+	public class tvClicklistener implements View.OnClickListener{
+
+		@Override
+		public void onClick(View v) {
+			//添加相应事件
+			clickText();
+		}
+		
+	}
+	
 	
 }

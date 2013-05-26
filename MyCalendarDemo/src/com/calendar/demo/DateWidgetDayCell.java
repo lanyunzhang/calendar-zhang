@@ -65,7 +65,6 @@ public class DateWidgetDayCell extends View {
 	// ¹¹Ôìº¯Êý
 	public DateWidgetDayCell(Context context, int iWidth, int iHeight) {
 		super(context);
-		setFocusable(true);
 		setLayoutParams(new LayoutParams(iWidth, iHeight));
 	}
 
