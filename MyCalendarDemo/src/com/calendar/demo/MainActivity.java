@@ -2,12 +2,17 @@ package com.calendar.demo;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +27,7 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.ScrollView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -92,6 +98,8 @@ public class MainActivity extends Activity{
 	
 	//--------------listview----------------
 	ListView listview = null;
+	SimpleAdapter sa = null;
+	List<Map<String,String>> noteitem = new ArrayList<Map<String,String>>();
 	MyAdapter adapter = null;
 	
 	
@@ -136,7 +144,7 @@ public class MainActivity extends Activity{
 
 		listview = (ListView)getLayoutInflater().inflate(R.layout.list, null);
 		adapter = new MyAdapter(MainActivity.this);
-		listview.setAdapter(adapter);
+		//listview.setAdapter(adapter);
 		
 		// 声明控件，并绑定事件
 		Top_Date = (TextView) findViewById(R.id.Top_Date);
@@ -213,10 +221,21 @@ public class MainActivity extends Activity{
 		common_Reminder = this.getResources().getColor(R.color.commonReminder);
 		Calendar_WeekFontColor = this.getResources().getColor(
 				R.color.Calendar_WeekFontColor);
+		//这里初始化数据源，并且设置adapter
 		
-		
+		initListData();
+		listview.setAdapter(sa);
 	}
 
+	public void initListData(){
+		
+		Map m = new HashMap<String,String>();
+		m.put("text", "zhanglanyun");;
+		noteitem.add(m);
+		
+		sa = new SimpleAdapter(MainActivity.this,noteitem,
+				R.layout.item__events,new String[]{"text"},new int[]{R.id.text});
+	}
 	protected String GetDateShortString(Calendar date) {
 		String returnString = date.get(Calendar.YEAR) + "/";
 		returnString += date.get(Calendar.MONTH) + 1 + "/";
@@ -764,6 +783,18 @@ public class MainActivity extends Activity{
 			}
 		}
 		
+	}
+	
+	/**
+	 * 自定义handler事件，发送消息来进行
+	 * 
+	 */
+	public class MyHandler extends Handler{
+		
+		public void handleMessage(Message msg){
+		//这里主要是用来对设置开关进行修改的，动态的改变所需要的view	
+		}
+
 	}
 	
 	
