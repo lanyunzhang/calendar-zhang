@@ -17,7 +17,6 @@ import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.BaseAdapter;
@@ -52,9 +51,10 @@ import com.canlendar.demo.view.NoteTaking;
  * 
  *   1. 修复每个月日历的动态显示5或者6行
  *   2. 实现日历的阴历显示
- *   3. 实现日历的滑动
+ *   3. 实现日历的滑动,坡敏跟进这个问题吧
  *   4. 添加记事时只显示当前周，其它周隐藏,便于去记事，不会因滑动而失去焦点
  *   5. 动态的添加记事功能
+ *   6. 记事分别添加在每天的下面，点击日历表格切换
  */
 public class MainActivity extends Activity{
 	// 生成日历，外层容器
@@ -98,7 +98,7 @@ public class MainActivity extends Activity{
 	
 	//--------------listview----------------
 	ListView listview = null;
-	SimpleAdapter sa = null;
+	//SimpleAdapter sa = null;
 	List<Map<String,String>> noteitem = new ArrayList<Map<String,String>>();
 	MyAdapter adapter = null;
 	
@@ -144,7 +144,7 @@ public class MainActivity extends Activity{
 
 		listview = (ListView)getLayoutInflater().inflate(R.layout.list, null);
 		adapter = new MyAdapter(MainActivity.this);
-		//listview.setAdapter(adapter);
+		listview.setAdapter(adapter);
 		
 		// 声明控件，并绑定事件
 		Top_Date = (TextView) findViewById(R.id.Top_Date);
@@ -223,19 +223,20 @@ public class MainActivity extends Activity{
 				R.color.Calendar_WeekFontColor);
 		//这里初始化数据源，并且设置adapter
 		
-		initListData();
-		listview.setAdapter(sa);
+	/*	initListData();
+		listview.setAdapter(sa);*/
+		
 	}
 
-	public void initListData(){
+/*	public void initListData(){
 		
 		Map m = new HashMap<String,String>();
 		m.put("text", "zhanglanyun");;
 		noteitem.add(m);
 		
 		sa = new SimpleAdapter(MainActivity.this,noteitem,
-				R.layout.item__events,new String[]{"text"},new int[]{R.id.text});
-	}
+				R.layout.item_events,new String[]{"text"},new int[]{R.id.text});
+	}*/
 	protected String GetDateShortString(Calendar date) {
 		String returnString = date.get(Calendar.YEAR) + "/";
 		returnString += date.get(Calendar.MONTH) + 1 + "/";
@@ -389,7 +390,7 @@ public class MainActivity extends Activity{
 		//------------------------------------------------------------------
 	}
 
-	// 更新日历
+	// 更新日历,点击也要更新日历？
 	private DateWidgetDayCell updateCalendar() {
 		DateWidgetDayCell daySelected = null;
 		boolean bSelected = false;
@@ -560,16 +561,12 @@ public class MainActivity extends Activity{
 			int day = GetNumFromDate(calSelected, startDate);
 			selectday = day;
 			
-			if (calendar_Hashtable != null
-					&& calendar_Hashtable.containsKey(day)) {
-				arrange_text.setText(Calendar_Source.get(calendar_Hashtable
-						.get(day)));
-			} else {
-				arrange_text.setText("暂无数据记录");
-			}
-			
 			item.setSelected(true);
 			updateCalendar();
+			//这里改变日历数据，查询数据库-------------------------------------
+			arr.clear();
+			arr.add(selectday+"");
+			adapter.notifyDataSetChanged();
 		}
 	};
 
@@ -645,7 +642,7 @@ public class MainActivity extends Activity{
 		if(!isFiveRowExist)
 			layrow.get(5).setVisibility(View.GONE);
 	}
-	//listview的adapter设置
+	//listview的adapter设置,修改为只有一个textview显示
 	private class MyAdapter extends BaseAdapter {  
         private Context context;  
         private LayoutInflater inflater;  
@@ -675,64 +672,28 @@ public class MainActivity extends Activity{
         public View getView(final int position, View view, ViewGroup arg2) {  
             // TODO Auto-generated method stub  
             if(view == null){  
-                view = inflater.inflate(R.layout.listview_item, null);  
-            }  
-            final EditText edit = (EditText) view.findViewById(R.id.edit); 
-            
+                view = inflater.inflate(R.layout.item_events, null);  
+            }
+            final TextView tv = (TextView)view.findViewById(R.id.text);
+            /*final EditText edit = (EditText) view.findViewById(R.id.edit); 
             edit.setText(arr.get(position));    //在重构adapter的时候不至于数据错乱  
-            Button del = (Button) view.findViewById(R.id.del);  
-            
-            edit.setOnFocusChangeListener(new OnFocusChangeListener() {  
-                @Override  
-                public void onFocusChange(View v, boolean hasFocus) {  
-                    // TODO Auto-generated method stub  
-                	if(arr.size()>0){  
-                		
-                		//ionFocusChange(position,edit,hasFocus);
-                    } 
-                }  
-            });  
-            del.setOnClickListener(new OnClickListener() {  
-                @Override  
-                public void onClick(View arg0){  
-                    // TODO Auto-generated method stub  
-                    //从集合中删除所删除项的EditText的内容  
-                    arr.remove(position);  
-                    adapter.notifyDataSetChanged();  
-                }  
-            });  
+            Button del = (Button) view.findViewById(R.id.del);  */
+            tv.setText(arr.get(position));
+            tv.setOnClickListener(new OnClickListener(){
+				@Override
+				public void onClick(View arg0) {
+					System.out.println("textview clicked!");
+				}
+			});
             return view;  
         }  
         
-        public void ionFocusChange(int position,EditText edit,boolean hasFocus){
-        	if(position == arr.size()-1){
-        		
-        		if(hasFocus){
-        			edit.setText("");
-        			setViewGone();
-        		}else{
-        			if(edit.getText().toString() == "" || edit.getText().toString()==null){
-        				edit.setText(R.string.writeit);
-        			}else{
-        				arr.add(position, edit.getText().toString());
-        				arr.remove(position+1);
-        				arr.add(getString(R.string.writeit));
-        			}
-        			setViewVisble();
-        		}
-        	}else{
-        		
-        		if(hasFocus){
-        			setViewGone();
-        		}
-        		
-        	}
-        }
     }
 	
 	public void clickText(){
 		//首先nt隐藏，显示添加界面，日历同样隐藏相应的部分
 		nt.setVisibility(View.GONE);
+		listview.setVisibility(View.GONE);
 		addnote = (LinearLayout) getLayoutInflater().inflate(
 				R.layout.activity_add_event, null);
 		addNote();
@@ -773,8 +734,9 @@ public class MainActivity extends Activity{
 						Toast.LENGTH_SHORT).show();
 			}else{
 				//不为空的话，保存字符串，并且日历显示，随手记显示，listview添加相应的内容
-				
 				addnote.setVisibility(View.GONE);
+				listview.setVisibility(View.VISIBLE);
+				nt.setVisibility(View.VISIBLE);
 				setViewVisble();
 				String text = content.trim();
 				arr.add(text);
