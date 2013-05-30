@@ -145,6 +145,9 @@ public class MainActivity extends Activity{
 		listview = (ListView)getLayoutInflater().inflate(R.layout.list, null);
 		adapter = new MyAdapter(MainActivity.this);
 		listview.setAdapter(adapter);
+		listview.setDividerHeight(0);
+		listview.setCacheColorHint(Color.TRANSPARENT);
+		
 		
 		// 声明控件，并绑定事件
 		Top_Date = (TextView) findViewById(R.id.Top_Date);
