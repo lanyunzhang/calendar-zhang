@@ -86,7 +86,8 @@ public class DateWidgetDayCell extends View {
 		iDateDay = iDay;
 
 		this.sDate = Integer.toString(iDateDay);
-		this.sLundarDate = Lunar.getLunarDay(iDateYear, iDateMonth, iDateDay);
+		//这里的iDateMonth是0-11，但是Lunar中的是1-12，所以这里要加一个1
+		this.sLundarDate = Lunar.getLunarDay(iDateYear, iDateMonth+1, iDateDay);
 		this.bIsActiveMonth = (iDateMonth == iActiveMonth);
 		this.bToday = bToday;
 		this.bHoliday = bHoliday;
