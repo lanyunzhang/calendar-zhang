@@ -35,7 +35,7 @@ import com.calendar.demo.MainActivity;
 import com.calendar.demo.R;
 import com.calendar.demo.MainActivity.addnoteclicklistener;
 import com.calendar.demo.MainActivity.tvClicklistener;
-import com.canlendar.demo.view.NoteTaking;
+import com.calendar.demo.view.NoteTaking;
 /**
  * 要实现的是显示三个日历LinearLayout
  * 应该ViewGroup和日历View再分开，分别显示，这样解耦和

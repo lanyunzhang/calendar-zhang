@@ -1,4 +1,4 @@
-package com.canlendar.demo.view;
+package com.calendar.demo.view;
 
 import android.content.Context;
 import android.graphics.Canvas;
