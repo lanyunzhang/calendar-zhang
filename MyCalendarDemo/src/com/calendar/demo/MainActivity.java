@@ -57,6 +57,7 @@ import com.calendar.util.util;
  *   4. 添加记事时只显示当前周，其它周隐藏,便于去记事，不会因滑动而失去焦点
  *   5. 动态的添加记事功能
  *   6. 记事分别添加在每天的下面，点击日历表格切换
+ *   7. 阴历显示正确，但是节气显示不对
  */
 public class MainActivity extends Activity{
 	// 生成日历，外层容器
@@ -98,6 +99,9 @@ public class MainActivity extends Activity{
 	EditText addeventcontent = null;
 	TextView save = null;
 	ImageView iv = null;
+	ImageButton b_date = null;
+	ImageButton b_alarm = null;
+	
 	
 	//--------------listview----------------
 	ListView listview = null;
@@ -236,6 +240,8 @@ public class MainActivity extends Activity{
 		iv = (ImageView)findViewById(R.id.iv);
 		iv.setOnClickListener(new tvClicklistener());
 		//mainLayout.addView(iv);
+		
+		initAddView();
 		
 	}
 
@@ -704,24 +710,20 @@ public class MainActivity extends Activity{
 	
 	public void clickText(){
 		//首先nt隐藏，显示添加界面，日历同样隐藏相应的部分
-		nt.setVisibility(View.GONE);
+		iv.setVisibility(View.GONE);
 		listview.setVisibility(View.GONE);
-		addnote = (RelativeLayout) getLayoutInflater().inflate(
-				R.layout.activity_add_event, null);
 		addNote();
-		mainLayout.addView(addnote);
 		setViewGone();
-	}
-
-	public void refreshListView(){
 		
+		addeventcontent.setVisibility(View.VISIBLE);
+		addeventcontent.setText(null);
+		save.setVisibility(View.VISIBLE);
+		b_date.setVisibility(View.VISIBLE);
+		b_alarm.setVisibility(View.VISIBLE);
 	}
 	
 	public void addNote(){
 		//处理添加事件
-		addeventcontent = (EditText)addnote.findViewById(R.id.add_event_content);
-		save = (TextView)addnote.findViewById(R.id.save);
-		
 		save.setOnClickListener(new addnoteclicklistener());
 	}
 	public class tvClicklistener implements View.OnClickListener{
@@ -746,9 +748,14 @@ public class MainActivity extends Activity{
 						Toast.LENGTH_SHORT).show();
 			}else{
 				//不为空的话，保存字符串，并且日历显示，随手记显示，listview添加相应的内容
-				addnote.setVisibility(View.GONE);
+				//addnote.setVisibility(View.GONE);
+				addeventcontent.setVisibility(View.GONE);
+				save.setVisibility(View.GONE);
+				b_date.setVisibility(View.GONE);
+				b_alarm.setVisibility(View.GONE);
+				
 				listview.setVisibility(View.VISIBLE);
-				nt.setVisibility(View.VISIBLE);
+				iv.setVisibility(View.VISIBLE);
 				setViewVisble();
 				String text = content.trim();
 				arr.add(text);
@@ -759,6 +766,21 @@ public class MainActivity extends Activity{
 				
 			}
 		}
+		
+	}
+	/**
+	 * 这是对添加事件的一些控件进行初始化
+	 */
+	public void initAddView(){
+		addeventcontent = (EditText)findViewById(R.id.add_event_content);
+		save = (TextView)findViewById(R.id.save);
+		b_date = (ImageButton)findViewById(R.id.b_date);
+		b_alarm = (ImageButton)findViewById(R.id.b_alarm);
+		
+		addeventcontent.setVisibility(View.GONE);
+		save.setVisibility(View.GONE);
+		b_date.setVisibility(View.GONE);
+		b_alarm.setVisibility(View.GONE);
 		
 	}
 	
