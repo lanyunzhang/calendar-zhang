@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:orientation="vertical" 
+
+<RelativeLayout android:orientation="vertical" 
     android:id="@+id/screen_layout" 
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content"
+    
   xmlns:android="http://schemas.android.com/apk/res/android">
+  
     <EditText android:gravity="top" 
         android:id="@+id/add_event_content" 
         android:background="@drawable/add_event_edit_bg"
@@ -11,44 +14,45 @@
         android:paddingTop="6.0dip"
         android:minLines="5"
         android:layout_width="fill_parent" 
-        android:layout_height="0.0dip"
+        android:layout_height="wrap_content"
         android:layout_marginLeft="4.0dip" 
         android:layout_marginRight="4.0dip" 
         android:hint="@string/writeit" 
-        android:layout_weight="1.0" />
-    <RelativeLayout 
-        android:padding="3.0dip" 
-        android:layout_width="fill_parent" 
-        android:layout_height="wrap_content">
-        <ImageButton 
-            android:id="@+id/b_date" 
-            android:background="@drawable/back_btn_bg" 
-            android:layout_width="wrap_content" 
-            android:layout_height="wrap_content" 
-            android:layout_marginLeft="5.0dip" 
-            android:src="@drawable/ic__date"
-            android:contentDescription="date" />
-        <ImageButton 
-            android:id="@+id/b_alarm" 
-            android:background="@drawable/back_btn_bg" 
-            android:layout_width="wrap_content" 
-            android:layout_height="wrap_content" 
-            android:layout_marginLeft="20.0dip" 
-            android:src="@drawable/ic__alarm" 
-            android:layout_toRightOf="@id/b_date" 
-            android:contentDescription="alarm" />
-        <TextView 
-            android:textSize="18.0sp" 
-            android:gravity="center" 
-            android:id="@+id/save" 
-            android:background="@drawable/btn__default" 
-            android:paddingLeft="5.0dip" 
-            android:paddingRight="5.0dip" 
-            android:layout_width="wrap_content" 
-            android:layout_height="wrap_content" 
-            android:layout_marginRight="5.0dip" 
-            android:text="@string/activity_add_event_save" 
-            android:layout_alignParentRight="true" 
-            android:layout_centerVertical="true" />
-    </RelativeLayout>
-</LinearLayout>
+         />
+
+        <ImageButton
+            android:id="@+id/b_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/add_event_content"
+            android:layout_below="@+id/add_event_content"
+            android:background="@drawable/back_btn_bg"
+            android:contentDescription="date"
+            android:src="@drawable/ic__date" />
+
+        <ImageButton
+            android:id="@+id/b_alarm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/b_date"
+            android:layout_marginLeft="16dp"
+            android:layout_toRightOf="@+id/b_date"
+            android:background="@drawable/back_btn_bg"
+            android:contentDescription="alarm"
+            android:src="@drawable/ic__alarm" />
+
+        <TextView
+            android:id="@+id/save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/b_alarm"
+            android:layout_alignRight="@+id/add_event_content"
+            android:layout_marginRight="16dp"
+            android:background="@drawable/btn__default"
+            android:gravity="center"
+            android:paddingLeft="5.0dip"
+            android:paddingRight="5.0dip"
+            android:text="@string/activity_add_event_save"
+            android:textSize="18.0sp" />
+
+</RelativeLayout>

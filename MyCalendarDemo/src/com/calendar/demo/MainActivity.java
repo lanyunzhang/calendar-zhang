@@ -2,7 +2,6 @@ package com.calendar.demo;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -19,14 +18,17 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -89,12 +91,13 @@ public class MainActivity extends Activity{
 	Button btn_pre_month = null;
 	Button btn_next_month = null;
 	TextView arrange_text = null;
-	LinearLayout mainLayout = null;
+	RelativeLayout mainLayout = null;
 	LinearLayout arrange_layout = null;
 	NoteTaking nt = null;
 	View  addnote = null;
 	EditText addeventcontent = null;
 	TextView save = null;
+	ImageView iv = null;
 	
 	//--------------listview----------------
 	ListView listview = null;
@@ -137,12 +140,13 @@ public class MainActivity extends Activity{
 		util.setWidth(Cell_Width,Calendar_Width);
 		
 		// 制定布局文件，并设置属性
-		mainLayout = (LinearLayout) getLayoutInflater().inflate(
+		mainLayout = (RelativeLayout) getLayoutInflater().inflate(
 				R.layout.calendar_main, null);
 		// mainLayout.setPadding(2, 0, 2, 0);
 		setContentView(mainLayout);
 
-		listview = (ListView)getLayoutInflater().inflate(R.layout.list, null);
+		listview = (ListView)mainLayout.findViewById(R.id.listview);
+		//listview = (ListView)getLayoutInflater().inflate(R.layout.list, null);
 		adapter = new MyAdapter(MainActivity.this);
 		listview.setAdapter(adapter);
 		listview.setDividerHeight(0);
@@ -157,15 +161,15 @@ public class MainActivity extends Activity{
 		btn_next_month.setOnClickListener(new Next_MonthOnClickListener());
 
 		// 计算本月日历中的第一天(一般是上月的某天)，并更新日历
-		mainLayout.addView(generateCalendarMain());
-		
+		//mainLayout.addView(generateCalendarMain());
+		generateCalendarMain();
 		//添加listview并且添加随手记两笔textview
-		mainLayout.addView(listview);
+		//mainLayout.addView(listview);
 		nt = new NoteTaking(MainActivity.this,Calendar_Width,Cell_Width);
 		nt.setOnClickListener(new tvClicklistener());
 		nt.setData(getString(R.string.writeit));
 		nt.setBackgroundDrawable(getResources().getDrawable(R.drawable.add_event_edit_bg));
-		mainLayout.addView(nt);
+		//mainLayout.addView(nt);
 		
 		calStartDate = getCalendarStartDate();
 		DateWidgetDayCell daySelected = updateCalendar();
@@ -228,6 +232,10 @@ public class MainActivity extends Activity{
 		
 	/*	initListData();
 		listview.setAdapter(sa);*/
+		
+		iv = (ImageView)findViewById(R.id.iv);
+		iv.setOnClickListener(new tvClicklistener());
+		//mainLayout.addView(iv);
 		
 	}
 
@@ -304,7 +312,8 @@ public class MainActivity extends Activity{
 
 	// 生成日历主体
 	private View generateCalendarMain() {
-		layContent = createLayout(LinearLayout.VERTICAL);
+		//layContent = createLayout(LinearLayout.VERTICAL);
+		layContent = (LinearLayout)mainLayout.findViewById(R.id.lly);
 		// layContent.setPadding(1, 0, 1, 0);
 		layContent.setBackgroundColor(Color.argb(255, 105, 105, 103));
 		layContent.addView(generateCalendarHeader());
@@ -697,7 +706,7 @@ public class MainActivity extends Activity{
 		//首先nt隐藏，显示添加界面，日历同样隐藏相应的部分
 		nt.setVisibility(View.GONE);
 		listview.setVisibility(View.GONE);
-		addnote = (LinearLayout) getLayoutInflater().inflate(
+		addnote = (RelativeLayout) getLayoutInflater().inflate(
 				R.layout.activity_add_event, null);
 		addNote();
 		mainLayout.addView(addnote);
@@ -744,6 +753,9 @@ public class MainActivity extends Activity{
 				String text = content.trim();
 				arr.add(text);
 				adapter.notifyDataSetChanged();
+				//关掉软键盘
+				InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE); 
+				imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 				
 			}
 		}

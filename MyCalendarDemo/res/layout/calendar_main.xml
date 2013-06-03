@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:gravity="center_horizontal"
@@ -39,6 +39,32 @@
             android:layout_marginRight="30dp"
             android:background="@drawable/next_month" />
     </RelativeLayout>
+	
+    <LinearLayout
+        android:id="@+id/lly"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/relativeLayout1"
+        android:orientation="vertical" >
+        
+    </LinearLayout>
 
+    <ListView
+        android:id="@+id/listview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/lly"
+        >
+        
+    </ListView>
+    <ImageView 
+        android:id="@+id/iv"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:contentDescription="@string/addview"
+        android:layout_alignParentRight="true" 
+		android:layout_alignParentBottom="true"
+		android:src="@drawable/ic_launcher"
+        />
     
-</LinearLayout>
+</RelativeLayout>
