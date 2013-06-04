@@ -1,5 +1,6 @@
 package com.calendar.demo;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Hashtable;
@@ -7,8 +8,11 @@ import java.util.List;
 import java.util.Map;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -21,6 +25,7 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -58,6 +63,7 @@ import com.calendar.util.util;
  *   5. 动态的添加记事功能
  *   6. 记事分别添加在每天的下面，点击日历表格切换
  *   7. 阴历显示正确，但是节气显示不对
+ *   8. 添加点击日期弹出改变日期对话框，只显示日和月
  */
 public class MainActivity extends Activity{
 	// 生成日历，外层容器
@@ -74,6 +80,9 @@ public class MainActivity extends Activity{
 	private Calendar calSelected = Calendar.getInstance();
 
 	// 当前操作日期
+	private int iMonthViewCurrentMonth_Dialog = 0;
+	private int iMonthViewCurrentYear_Dialog = 0;
+	
 	private int iMonthViewCurrentMonth = 0;
 	private int iMonthViewCurrentYear = 0;
 	private int iFirstDayOfWeek = Calendar.MONDAY;
@@ -101,6 +110,7 @@ public class MainActivity extends Activity{
 	ImageView iv = null;
 	ImageButton b_date = null;
 	ImageButton b_alarm = null;
+	DatePickerDialog mDialog = null;
 	
 	
 	//--------------listview----------------
@@ -135,6 +145,9 @@ public class MainActivity extends Activity{
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		
+		System.out.println(getApplicationContext().getFilesDir().getAbsolutePath());
+		
 		// 获得屏幕宽和高，并計算出屏幕寬度分七等份的大小
 		WindowManager windowManager = getWindowManager();
 		Display display = windowManager.getDefaultDisplay();
@@ -242,18 +255,150 @@ public class MainActivity extends Activity{
 		//mainLayout.addView(iv);
 		
 		initAddView();
+		//选择月份的监听
+		Top_Date.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View arg0) {
+				mDialog = new CustomerDatePickerDialog(MainActivity.this ,
+						listener ,
+						calToday.get(Calendar.YEAR ),
+						calToday.get(Calendar.MONTH),
+						calToday.get(Calendar.DAY_OF_MONTH )
+						);
+				mDialog.setTitle(calToday.get(Calendar.YEAR )+"年"+(calToday.get(Calendar.MONTH )+1)+"月");
+				mDialog.show();
+		        
+			}
+		});
 		
 	}
+	
+	class CustomerDatePickerDialog extends DatePickerDialog {
 
-/*	public void initListData(){
-		
-		Map m = new HashMap<String,String>();
-		m.put("text", "zhanglanyun");;
-		noteitem.add(m);
-		
-		sa = new SimpleAdapter(MainActivity.this,noteitem,
-				R.layout.item_events,new String[]{"text"},new int[]{R.id.text});
-	}*/
+        public CustomerDatePickerDialog(Context context,
+                OnDateSetListener callBack, int year, int monthOfYear,
+                int dayOfMonth) {
+            super(context, callBack, year, monthOfYear, dayOfMonth);
+        }
+
+        @Override
+        public void onDateChanged(DatePicker view, int year, int month, int day) {
+            super.onDateChanged(view, year, month, day);
+            mDialog.setTitle(year + "年" + (month+1) + "月");
+            iMonthViewCurrentMonth_Dialog = year;
+            iMonthViewCurrentYear_Dialog = month;
+            
+          
+        }
+       
+        @Override
+		public void onClick(DialogInterface dialog, int which) {
+			//在这里得到年月，点击完成后更新年月，这里只是滑动，应该不会越界。但是阴历有上下界
+        	System.out.println(which);
+        	if(which == DialogInterface.BUTTON1){
+				if(iMonthViewCurrentMonth_Dialog != iMonthViewCurrentMonth || 
+						iMonthViewCurrentYear_Dialog != iMonthViewCurrentYear){
+					
+					System.out.println(iMonthViewCurrentMonth_Dialog);
+					System.out.println(iMonthViewCurrentYear_Dialog);
+					//toMonthYear(iMonthViewCurrentMonth_Dialog,iMonthViewCurrentMonth_Dialog);
+					
+				}	
+        	}
+       }
+        
+        @Override
+    	public void show() {
+    		// TODO Auto-generated method stub
+    		super.show();
+    		 DatePicker dp = findDatePicker((ViewGroup) this.getWindow().getDecorView());
+    	        if (dp != null) {
+    	        	Class c=dp.getClass();
+    	        	Field f;
+    				try {
+    						if(Build.VERSION.SDK_INT>14){
+    							f = c.getDeclaredField("mDaySpinner");
+    							f.setAccessible(true );  
+    							LinearLayout l= (LinearLayout)f.get(dp);   
+    							l.setVisibility(View.GONE);
+    						}else{
+    							f = c.getDeclaredField("mDayPicker");
+    							f.setAccessible(true );  
+    							LinearLayout l= (LinearLayout)f.get(dp);   
+    							l.setVisibility(View.GONE);
+    						}
+    				} catch (SecurityException e) {
+    					// TODO Auto-generated catch block
+    					e.printStackTrace();
+    				} catch (NoSuchFieldException e) {
+    					// TODO Auto-generated catch block
+    					e.printStackTrace();
+    				} catch (IllegalArgumentException e) {
+    					// TODO Auto-generated catch block
+    					e.printStackTrace();
+    				} catch (IllegalAccessException e) {
+    					// TODO Auto-generated catch block
+    					e.printStackTrace();
+    				}  
+    	        	
+    	        } 
+    	}
+    }
+	//从当前dialog中查找DatePicker对象
+	private DatePicker findDatePicker(ViewGroup group) {
+        if (group != null) {
+            for (int i = 0, j = group.getChildCount(); i < j; i++) {
+                View child = group.getChildAt(i);
+                if (child instanceof DatePicker) {
+                    return (DatePicker) child;
+                } else if (child instanceof ViewGroup) {
+                    DatePicker result = findDatePicker((ViewGroup) child);
+                    if (result != null)
+                        return result;
+                }
+            }
+        }
+        return null;
+    } 
+	
+	 //跳转到month 和  year 特定的年月份
+    public void toMonthYear(int month,int year){
+
+			calSelected.setTimeInMillis(0);
+			iMonthViewCurrentMonth = month;
+			iMonthViewCurrentYear  = year;
+			
+			calStartDate.set(Calendar.DAY_OF_MONTH, 1);
+			calStartDate.set(Calendar.MONTH, iMonthViewCurrentMonth);
+			calStartDate.set(Calendar.YEAR, iMonthViewCurrentYear);
+			calStartDate.set(Calendar.HOUR_OF_DAY, 0);
+			calStartDate.set(Calendar.MINUTE, 0);
+			calStartDate.set(Calendar.SECOND, 0);
+			calStartDate.set(Calendar.MILLISECOND, 0);
+			
+			
+			UpdateStartDateForMonth();
+			startDate = (Calendar) calStartDate.clone();
+			endDate = GetEndDate(startDate);
+
+			// 新建线程
+			new Thread() {
+				@Override
+				public void run() {
+
+					int day = GetNumFromDate(calToday, startDate);
+					
+					if (calendar_Hashtable != null
+							&& calendar_Hashtable.containsKey(day)) {
+						dayvalue = calendar_Hashtable.get(day);
+					}
+				}
+			}.start();
+
+			updateCalendar();
+    }
+
 	protected String GetDateShortString(Calendar date) {
 		String returnString = date.get(Calendar.YEAR) + "/";
 		returnString += date.get(Calendar.MONTH) + 1 + "/";
@@ -795,6 +940,15 @@ public class MainActivity extends Activity{
 		}
 
 	}
+	//日期选择对话框
+	private DatePickerDialog.OnDateSetListener listener = new DatePickerDialog.OnDateSetListener(){  //
+		@Override
+		public void onDateSet(DatePicker arg0, int arg1, int arg2, int arg3) {
+			
+		}
+	};
+	
+	
 	
 	
 }

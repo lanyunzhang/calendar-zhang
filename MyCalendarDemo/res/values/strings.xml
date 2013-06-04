@@ -10,5 +10,6 @@
     <string name="addview">添加</string>
     <string name="setting">设置</string>
     <string name="search">搜索</string>
+    <string name="YES">确定</string>
 
 </resources>
