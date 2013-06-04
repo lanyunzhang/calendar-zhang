@@ -64,6 +64,7 @@ import com.calendar.util.util;
  *   6. 记事分别添加在每天的下面，点击日历表格切换
  *   7. 阴历显示正确，但是节气显示不对
  *   8. 添加点击日期弹出改变日期对话框，只显示日和月
+ *   9. 可以正常调整日期，还要做闹钟，重要性，是计划还是备忘，以备以后计算
  */
 public class MainActivity extends Activity{
 	// 生成日历，外层容器
@@ -286,8 +287,8 @@ public class MainActivity extends Activity{
         public void onDateChanged(DatePicker view, int year, int month, int day) {
             super.onDateChanged(view, year, month, day);
             mDialog.setTitle(year + "年" + (month+1) + "月");
-            iMonthViewCurrentMonth_Dialog = year;
-            iMonthViewCurrentYear_Dialog = month;
+            iMonthViewCurrentMonth_Dialog = month;
+            iMonthViewCurrentYear_Dialog = year;
             
           
         }
@@ -295,16 +296,15 @@ public class MainActivity extends Activity{
         @Override
 		public void onClick(DialogInterface dialog, int which) {
 			//在这里得到年月，点击完成后更新年月，这里只是滑动，应该不会越界。但是阴历有上下界
-        	System.out.println(which);
         	if(which == DialogInterface.BUTTON1){
 				if(iMonthViewCurrentMonth_Dialog != iMonthViewCurrentMonth || 
 						iMonthViewCurrentYear_Dialog != iMonthViewCurrentYear){
 					
 					System.out.println(iMonthViewCurrentMonth_Dialog);
 					System.out.println(iMonthViewCurrentYear_Dialog);
-					//toMonthYear(iMonthViewCurrentMonth_Dialog,iMonthViewCurrentMonth_Dialog);
+					toMonthYear(iMonthViewCurrentMonth_Dialog,iMonthViewCurrentYear_Dialog);
 					
-				}	
+				}
         	}
        }
         
@@ -397,6 +397,8 @@ public class MainActivity extends Activity{
 			}.start();
 
 			updateCalendar();
+			
+			calToday.set(year, month, 3);
     }
 
 	protected String GetDateShortString(Calendar date) {
@@ -944,7 +946,7 @@ public class MainActivity extends Activity{
 	private DatePickerDialog.OnDateSetListener listener = new DatePickerDialog.OnDateSetListener(){  //
 		@Override
 		public void onDateSet(DatePicker arg0, int arg1, int arg2, int arg3) {
-			
+			System.out.println("点击之后触发！");
 		}
 	};
 	
