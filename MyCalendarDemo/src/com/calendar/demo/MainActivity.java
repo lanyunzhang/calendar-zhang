@@ -65,6 +65,8 @@ import com.calendar.util.util;
  *   7. 阴历显示正确，但是节气显示不对
  *   8. 添加点击日期弹出改变日期对话框，只显示日和月
  *   9. 可以正常调整日期，还要做闹钟，重要性，是计划还是备忘，以备以后计算
+ *   10. 保存之后会显示第六行,跳转到下个月之后，默认还是的日子是当天的日子不变
+ *   11. 点击下个月之后，选择日期，所在的行显示不正确，这里有bug，晚上修复吧
  */
 public class MainActivity extends Activity{
 	// 生成日历，外层容器
@@ -262,12 +264,11 @@ public class MainActivity extends Activity{
 			@Override
 			public void onClick(View arg0) {
 				mDialog = new CustomerDatePickerDialog(MainActivity.this ,
-						listener ,
-						calToday.get(Calendar.YEAR ),
-						calToday.get(Calendar.MONTH),
-						calToday.get(Calendar.DAY_OF_MONTH )
+						listener ,iMonthViewCurrentYear,iMonthViewCurrentMonth,
+						calToday.get(Calendar.DAY_OF_MONTH)
 						);
-				mDialog.setTitle(calToday.get(Calendar.YEAR )+"年"+(calToday.get(Calendar.MONTH )+1)+"月");
+				//mDialog.setTitle(calToday.get(Calendar.YEAR )+"年"+(calToday.get(Calendar.MONTH )+1)+"月");
+				mDialog.setTitle(iMonthViewCurrentYear + "年"+(iMonthViewCurrentMonth+1)+"月");
 				mDialog.show();
 		        
 			}
@@ -398,7 +399,7 @@ public class MainActivity extends Activity{
 
 			updateCalendar();
 			
-			calToday.set(year, month, 3);
+			calToday.set(year, month, selectday);
     }
 
 	protected String GetDateShortString(Calendar date) {
@@ -501,6 +502,8 @@ public class MainActivity extends Activity{
 	private Calendar getCalendarStartDate() {
 		calToday.setTimeInMillis(System.currentTimeMillis());
 		calToday.setFirstDayOfWeek(iFirstDayOfWeek);
+		selectday = GetNumFromDate(calToday, GetStartDate());
+		
 
 		if (calSelected.getTimeInMillis() == 0) {
 			calStartDate.setTimeInMillis(System.currentTimeMillis());
@@ -544,15 +547,16 @@ public class MainActivity extends Activity{
 		
 		//在这里更改calStartDate----------------------------------------------
 		int currow = rowOfMonth(calStartDate);
-		if ( (prerow == -1 && currow == 5) || (prerow == 6 && currow == 5) )
+		System.out.println(currow);
+		if (currow == 5){
 			layrow.get(5).setVisibility(View.GONE);
-		else if (prerow == 5 && currow == 6){
+			isFiveRowExist = false;
+		}
+		else if (currow == 6){
 			layrow.get(5).setVisibility(View.VISIBLE);
 			isFiveRowExist = true;
 		}
 		
-		prerow = currow;
-		//------------------------------------------------------------------
 	}
 
 	// 更新日历,点击也要更新日历？
@@ -648,7 +652,6 @@ public class MainActivity extends Activity{
 				iMonthViewCurrentMonth = 11;
 				iMonthViewCurrentYear--;
 			}
-			
 			calStartDate.set(Calendar.DAY_OF_MONTH, 1);
 			calStartDate.set(Calendar.MONTH, iMonthViewCurrentMonth);
 			calStartDate.set(Calendar.YEAR, iMonthViewCurrentYear);
@@ -656,7 +659,6 @@ public class MainActivity extends Activity{
 			calStartDate.set(Calendar.MINUTE, 0);
 			calStartDate.set(Calendar.SECOND, 0);
 			calStartDate.set(Calendar.MILLISECOND, 0);
-			
 			
 			UpdateStartDateForMonth();
 			startDate = (Calendar) calStartDate.clone();
@@ -798,6 +800,7 @@ public class MainActivity extends Activity{
 				layrow.get(i).setVisibility(View.GONE);
 		}
 	}
+	
 	public void setViewVisble(){
 		int row = selectday / 7;
 		for(int i=0;i<layrow.size();i++){
