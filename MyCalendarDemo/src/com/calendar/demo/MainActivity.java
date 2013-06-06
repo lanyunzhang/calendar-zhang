@@ -95,6 +95,7 @@ public class MainActivity extends Activity{
 	private int prerow = -1;
 	private int selectday = -1;
 	
+	
 	private int Calendar_Width = 0;
 	private int Cell_Width = 0;
 	private boolean isFiveRowExist = false;
@@ -399,7 +400,7 @@ public class MainActivity extends Activity{
 
 			updateCalendar();
 			
-			calToday.set(year, month, selectday);
+			selectday =iDay + calToday.get(Calendar.DAY_OF_MONTH);
     }
 
 	protected String GetDateShortString(Calendar date) {
@@ -679,6 +680,8 @@ public class MainActivity extends Activity{
 			}.start();
 
 			updateCalendar();
+			selectday =iDay + calToday.get(Calendar.DAY_OF_MONTH);
+			System.out.println(selectday+"selectday");
 		}
 
 	}
@@ -700,6 +703,14 @@ public class MainActivity extends Activity{
 			calStartDate.set(Calendar.DAY_OF_MONTH, 1);
 			calStartDate.set(Calendar.MONTH, iMonthViewCurrentMonth);
 			calStartDate.set(Calendar.YEAR, iMonthViewCurrentYear);
+			calStartDate.set(Calendar.HOUR_OF_DAY, 0);
+			calStartDate.set(Calendar.MINUTE, 0);
+			calStartDate.set(Calendar.SECOND, 0);
+			calStartDate.set(Calendar.MILLISECOND, 0);
+			
+			
+			
+			
 			UpdateStartDateForMonth();
 			startDate = (Calendar) calStartDate.clone();
 			endDate = GetEndDate(startDate);
@@ -718,9 +729,12 @@ public class MainActivity extends Activity{
 			}.start();
 
 			updateCalendar();
+			//在这里计算selectday
+			selectday =iDay + calToday.get(Calendar.DAY_OF_MONTH);
+			System.out.println(selectday+"selectday");
+			
 		}
 	}
-
 	// 点击日历，触发事件
 	private DateWidgetDayCell.OnItemClick mOnDayCellClick = new DateWidgetDayCell.OnItemClick() {
 		public void OnClick(DateWidgetDayCell item) {
@@ -793,7 +807,9 @@ public class MainActivity extends Activity{
 	}
 	
 	public void setViewGone(){
-		int row = selectday / 7;
+		
+		System.out.println("in setViewGone " + selectday);
+		int row = selectday / 8 ;
 		//隐藏不是row的所有行
 		for(int i=0;i<layrow.size();i++){
 			if(i != row)
@@ -802,7 +818,7 @@ public class MainActivity extends Activity{
 	}
 	
 	public void setViewVisble(){
-		int row = selectday / 7;
+		int row = selectday / 8;
 		for(int i=0;i<layrow.size();i++){
 			if(i != row )
 				layrow.get(i).setVisibility(View.VISIBLE);
