@@ -67,6 +67,11 @@ import com.calendar.util.util;
  *   9. 可以正常调整日期，还要做闹钟，重要性，是计划还是备忘，以备以后计算
  *   10. 保存之后会显示第六行,跳转到下个月之后，默认还是的日子是当天的日子不变
  *   11. 点击下个月之后，选择日期，所在的行显示不正确，这里有bug，晚上修复吧
+ *   12. 实现键盘向上移动的时，可以动态变化输入框的行数
+ *   
+ *   13. 在添加事件界面，不能去点击日历的左右切换和日历文本选择逻辑
+ *   14. 添加闹钟逻辑，可以选择多个闹钟，同时列出多个闹钟的时间
+ *   15. 计划和备忘的切换开关实现 
  */
 public class MainActivity extends Activity{
 	// 生成日历，外层容器
@@ -886,6 +891,10 @@ public class MainActivity extends Activity{
 		save.setVisibility(View.VISIBLE);
 		b_date.setVisibility(View.VISIBLE);
 		b_alarm.setVisibility(View.VISIBLE);
+		//自动弹出软键盘
+		InputMethodManager imm = (InputMethodManager)this.getSystemService(Context.INPUT_METHOD_SERVICE);  
+		imm.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);  
+		imm.showSoftInput(null, InputMethodManager.SHOW_IMPLICIT); 
 	}
 	
 	public void addNote(){

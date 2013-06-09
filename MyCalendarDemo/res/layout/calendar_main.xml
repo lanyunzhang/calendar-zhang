@@ -94,20 +94,30 @@
 		android:background="@drawable/button__default"
         />
     
+   <LinearLayout 
+       android:layout_width="fill_parent"
+       android:layout_height="fill_parent"
+       android:layout_below="@+id/lly"
+       android:orientation="vertical">
     <EditText
         android:id="@+id/add_event_content"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:layout_below="@id/lly"
         android:background="@drawable/add_event_edit_bg"
         android:gravity="top"
+        android:maxLines="10"
         android:hint="@string/writeit"
-        android:minLines="5"
         android:paddingLeft="9.0dip"
-        android:paddingTop="6.0dip" />
+        android:paddingTop="6.0dip" 
+        android:layout_weight="1.0"/>
 
+    <RelativeLayout 
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="3.0dip"
+        >
         <ImageButton
             android:id="@+id/b_date"
             android:layout_width="wrap_content"
@@ -134,13 +144,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/b_alarm"
-            android:layout_alignRight="@+id/add_event_content"
             android:layout_marginRight="16dp"
+            android:layout_alignParentRight="true"
             android:background="@drawable/btn__default"
             android:gravity="center"
             android:paddingLeft="5.0dip"
             android:paddingRight="5.0dip"
             android:text="@string/activity_add_event_save"
             android:textSize="18.0sp" />
-    
+    </RelativeLayout>
+   </LinearLayout>
 </RelativeLayout>
