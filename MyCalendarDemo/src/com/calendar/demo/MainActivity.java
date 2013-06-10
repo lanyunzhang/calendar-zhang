@@ -949,7 +949,16 @@ public class MainActivity extends Activity{
 	public void initAddView(){
 		addeventcontent = (EditText)findViewById(R.id.add_event_content);
 		save = (TextView)findViewById(R.id.save);
-		b_date = (ImageButton)findViewById(R.id.b_date);
+		b_date = (ImageButton)findViewById(R.id.b_mp);
+		b_date.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View view) {
+				b_date.setBackgroundDrawable(
+						getResources().getDrawable(R.drawable.setting_switch_default_off));
+			}
+			
+		});
 		b_alarm = (ImageButton)findViewById(R.id.b_alarm);
 		
 		addeventcontent.setVisibility(View.GONE);

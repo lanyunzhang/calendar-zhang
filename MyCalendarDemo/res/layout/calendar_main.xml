@@ -119,26 +119,15 @@
         android:padding="3.0dip"
         >
         <ImageButton
-            android:id="@+id/b_date"
+            android:id="@+id/b_alarm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignLeft="@+id/add_event_content"
             android:layout_below="@+id/add_event_content"
             android:background="@drawable/back_btn_bg"
             android:contentDescription="date"
-            android:src="@drawable/ic__date" />
-
-        <ImageButton
-            android:id="@+id/b_alarm"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignTop="@+id/b_date"
-            android:layout_marginLeft="16dp"
-            android:layout_toRightOf="@+id/b_date"
-            android:background="@drawable/back_btn_bg"
-            android:contentDescription="alarm"
             android:src="@drawable/ic__alarm" />
-
+		
         <TextView
             android:id="@+id/save"
             android:layout_width="wrap_content"
@@ -152,6 +141,16 @@
             android:paddingRight="5.0dip"
             android:text="@string/activity_add_event_save"
             android:textSize="18.0sp" />
+
+        <ImageButton
+            android:id="@+id/b_mp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/save"
+            android:layout_toRightOf="@+id/b_alarm"
+            android:background="@drawable/day_month_change"
+            android:contentDescription="alarm" />
+
     </RelativeLayout>
    </LinearLayout>
 </RelativeLayout>
