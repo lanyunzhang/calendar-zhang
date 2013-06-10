@@ -68,10 +68,10 @@ import com.calendar.util.util;
  *   10. 保存之后会显示第六行,跳转到下个月之后，默认还是的日子是当天的日子不变
  *   11. 点击下个月之后，选择日期，所在的行显示不正确，这里有bug，晚上修复吧
  *   12. 实现键盘向上移动的时，可以动态变化输入框的行数
+ *   13. 计划和备忘的切换开关实现 
  *   
- *   13. 在添加事件界面，不能去点击日历的左右切换和日历文本选择逻辑
- *   14. 添加闹钟逻辑，可以选择多个闹钟，同时列出多个闹钟的时间
- *   15. 计划和备忘的切换开关实现 
+ *   14. 在添加事件界面，不能去点击日历的左右切换和日历文本选择逻辑
+ *   15. 添加闹钟逻辑，可以选择多个闹钟，同时列出多个闹钟的时间
  */
 public class MainActivity extends Activity{
 	// 生成日历，外层容器
@@ -104,6 +104,7 @@ public class MainActivity extends Activity{
 	private int Calendar_Width = 0;
 	private int Cell_Width = 0;
 	private boolean isFiveRowExist = false;
+	private boolean isOff = false;
 
 	// 页面控件
 	TextView Top_Date = null;
@@ -954,8 +955,14 @@ public class MainActivity extends Activity{
 
 			@Override
 			public void onClick(View view) {
-				b_date.setBackgroundDrawable(
-						getResources().getDrawable(R.drawable.setting_switch_default_off));
+				if(!isOff){
+					b_date.setBackgroundDrawable(
+							getResources().getDrawable(R.drawable.setting_switch_default_off));
+					isOff = true;
+				}else{
+					b_date.setBackgroundDrawable(getResources().getDrawable(R.drawable.setting_switch_default_on));
+					isOff = false;
+				}
 			}
 			
 		});
