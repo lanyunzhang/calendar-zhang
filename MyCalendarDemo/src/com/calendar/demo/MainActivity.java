@@ -11,13 +11,14 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -33,12 +34,17 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
+import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.calendar.demo.view.NoteTaking;
+import com.calendar.demo.view.widget.OnWheelChangedListener;
+import com.calendar.demo.view.widget.WheelView;
+import com.calendar.demo.view.widget.adapters.ArrayWheelAdapter;
+import com.calendar.demo.view.widget.adapters.NumericWheelAdapter;
 import com.calendar.util.NumMonthOfYear;
 import com.calendar.util.util;
 
@@ -129,7 +135,6 @@ public class MainActivity extends Activity{
 	//SimpleAdapter sa = null;
 	List<Map<String,String>> noteitem = new ArrayList<Map<String,String>>();
 	MyAdapter adapter = null;
-	
 	
 
 	// 数据源
@@ -282,6 +287,9 @@ public class MainActivity extends Activity{
 			}
 		});
 		
+		selectday =iDay + calToday.get(Calendar.DAY_OF_MONTH);
+		System.out.println("onCreate---"+selectday);
+		
 	}
 	
 	class CustomerDatePickerDialog extends DatePickerDialog {
@@ -406,8 +414,8 @@ public class MainActivity extends Activity{
 			}.start();
 
 			updateCalendar();
-			
 			selectday =iDay + calToday.get(Calendar.DAY_OF_MONTH);
+			System.out.println("toMonthYear-----"+selectday);
     }
 
 	protected String GetDateShortString(Calendar date) {
@@ -688,7 +696,7 @@ public class MainActivity extends Activity{
 
 			updateCalendar();
 			selectday =iDay + calToday.get(Calendar.DAY_OF_MONTH);
-			System.out.println(selectday+"selectday");
+			System.out.println("prev_month---"+selectday);
 		}
 
 	}
@@ -738,7 +746,7 @@ public class MainActivity extends Activity{
 			updateCalendar();
 			//在这里计算selectday
 			selectday =iDay + calToday.get(Calendar.DAY_OF_MONTH);
-			System.out.println(selectday+"selectday");
+			System.out.println("next_month---"+selectday);
 			
 		}
 	}
@@ -816,7 +824,7 @@ public class MainActivity extends Activity{
 	public void setViewGone(){
 		
 		System.out.println("in setViewGone " + selectday);
-		int row = selectday / 8 ;
+		int row = (selectday-1) / 7 ;
 		//隐藏不是row的所有行
 		for(int i=0;i<layrow.size();i++){
 			if(i != row)
@@ -825,7 +833,7 @@ public class MainActivity extends Activity{
 	}
 	
 	public void setViewVisble(){
-		int row = selectday / 8;
+		int row = (selectday-1) / 7;
 		for(int i=0;i<layrow.size();i++){
 			if(i != row )
 				layrow.get(i).setVisibility(View.VISIBLE);
@@ -971,8 +979,7 @@ public class MainActivity extends Activity{
 		b_alarm.setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View view) {
-				Intent i = new Intent(MainActivity.this,DateActivity.class);
-				startActivity(i);
+				initPopUpWindow();
 			}
 			
 		});
@@ -983,6 +990,126 @@ public class MainActivity extends Activity{
 		
 	}
 	
+	private void initPopUpWindow(){
+		View popupView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.pop_up_date, null);
+		final PopupWindow  popupWindow = new PopupWindow(popupView,LayoutParams.WRAP_CONTENT,
+				LayoutParams.WRAP_CONTENT);
+		popupWindow.showAsDropDown(layContent,((layContent.getWidth()-popupView.getWidth())/4),0);
+		
+		// set the view of alarm
+		Calendar calendar = Calendar.getInstance();
+
+        final WheelView month = (WheelView) popupView.findViewById(R.id.month);
+        final WheelView year = (WheelView) popupView.findViewById(R.id.year);
+        final WheelView day = (WheelView) popupView.findViewById(R.id.day);
+        
+        OnWheelChangedListener listener = new OnWheelChangedListener() {
+            public void onChanged(WheelView wheel, int oldValue, int newValue) {
+                updateDays(year, month, day);
+            }
+        };
+
+        // month
+        int curMonth = calendar.get(Calendar.MONTH);
+        String months[] = new String[] {"January", "February", "March", "April", "May",
+                "June", "July", "August", "September", "October", "November", "December"};
+        month.setViewAdapter(new DateArrayAdapter(this, months, curMonth));
+        month.setCurrentItem(curMonth);
+        month.addChangingListener(listener);
+    
+        // year
+        int curYear = calendar.get(Calendar.YEAR);
+        year.setViewAdapter(new DateNumericAdapter(this, curYear, curYear + 10, 0));
+        year.setCurrentItem(curYear);
+        year.addChangingListener(listener);
+        
+        //day
+        updateDays(year, month, day);
+        day.setCurrentItem(calendar.get(Calendar.DAY_OF_MONTH) - 1);
+	}
+	
+	/**
+     * Updates day wheel. Sets max days according to selected month and year
+     */
+    void updateDays(WheelView year, WheelView month, WheelView day) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.YEAR, calendar.get(Calendar.YEAR) + year.getCurrentItem());
+        calendar.set(Calendar.MONTH, month.getCurrentItem());
+        
+        int maxDays = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+        day.setViewAdapter(new DateNumericAdapter(this, 1, maxDays, calendar.get(Calendar.DAY_OF_MONTH) - 1));
+        int curDay = Math.min(maxDays, day.getCurrentItem() + 1);
+        day.setCurrentItem(curDay - 1, true);
+    }
+    
+    /**
+     * Adapter for numeric wheels. Highlights the current value.
+     */
+    private class DateNumericAdapter extends NumericWheelAdapter {
+        // Index of current item
+        int currentItem;
+        // Index of item to be highlighted
+        int currentValue;
+        
+        /**
+         * Constructor
+         */
+        public DateNumericAdapter(Context context, int minValue, int maxValue, int current) {
+            super(context, minValue, maxValue);
+            this.currentValue = current;
+            setTextSize(16);
+        }
+        
+        @Override
+        protected void configureTextView(TextView view) {
+            super.configureTextView(view);
+            if (currentItem == currentValue) {
+                view.setTextColor(0xFF0000F0);
+            }
+            view.setTypeface(Typeface.SANS_SERIF);
+        }
+        
+        @Override
+        public View getItem(int index, View cachedView, ViewGroup parent) {
+            currentItem = index;
+            return super.getItem(index, cachedView, parent);
+        }
+    }
+    
+    /**
+     * Adapter for string based wheel. Highlights the current value.
+     */
+    private class DateArrayAdapter extends ArrayWheelAdapter<String> {
+        // Index of current item
+        int currentItem;
+        // Index of item to be highlighted
+        int currentValue;
+        
+        /**
+         * Constructor
+         */
+        public DateArrayAdapter(Context context, String[] items, int current) {
+            super(context, items);
+            this.currentValue = current;
+            setTextSize(16);
+        }
+        
+        @Override
+        protected void configureTextView(TextView view) {
+            super.configureTextView(view);
+            if (currentItem == currentValue) {
+                view.setTextColor(0xFF0000F0);
+            }
+            view.setTypeface(Typeface.SANS_SERIF);
+        }
+        
+        @Override
+        public View getItem(int index, View cachedView, ViewGroup parent) {
+            currentItem = index;
+            return super.getItem(index, cachedView, parent);
+        }
+    }
+    
 	/**
 	 * 自定义handler事件，发送消息来进行
 	 * 
@@ -1001,8 +1128,5 @@ public class MainActivity extends Activity{
 			System.out.println("点击之后触发！");
 		}
 	};
-	
-	
-	
 	
 }
