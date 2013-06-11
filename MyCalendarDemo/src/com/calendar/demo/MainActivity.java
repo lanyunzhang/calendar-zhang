@@ -755,8 +755,8 @@ public class MainActivity extends Activity{
 		public void OnClick(DateWidgetDayCell item) {
 			calSelected.setTimeInMillis(item.getDate().getTimeInMillis());
 			int day = GetNumFromDate(calSelected, startDate);
-			selectday = day;
-			
+			selectday = day+1;
+			System.out.println("onClick----"+selectday);
 			item.setSelected(true);
 			updateCalendar();
 			//这里改变日历数据，查询数据库-------------------------------------
