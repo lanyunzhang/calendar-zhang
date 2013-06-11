@@ -598,7 +598,7 @@ public class MainActivity extends Activity{
 			if (calToday.get(Calendar.YEAR) == iYear) {
 				if (calToday.get(Calendar.MONTH) == iMonth) {
 					if (calToday.get(Calendar.DAY_OF_MONTH) == iDay) {
-						selectday = GetNumFromDate(calSelected, GetStartDate());
+						//selectday = GetNumFromDate(calSelected, GetStartDate());
 						bToday = true;
 					}
 				}
