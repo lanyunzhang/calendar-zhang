@@ -11,6 +11,7 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -69,9 +70,9 @@ import com.calendar.util.util;
  *   11. 点击下个月之后，选择日期，所在的行显示不正确，这里有bug，晚上修复吧
  *   12. 实现键盘向上移动的时，可以动态变化输入框的行数
  *   13. 计划和备忘的切换开关实现 
+ *   14. 添加闹钟逻辑，可以选择多个闹钟，同时列出多个闹钟的时间
  *   
- *   14. 在添加事件界面，不能去点击日历的左右切换和日历文本选择逻辑
- *   15. 添加闹钟逻辑，可以选择多个闹钟，同时列出多个闹钟的时间
+ *   15. 在添加事件界面，不能去点击日历的左右切换和日历文本选择逻辑
  */
 public class MainActivity extends Activity{
 	// 生成日历，外层容器
@@ -967,7 +968,14 @@ public class MainActivity extends Activity{
 			
 		});
 		b_alarm = (ImageButton)findViewById(R.id.b_alarm);
-		
+		b_alarm.setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View view) {
+				Intent i = new Intent(MainActivity.this,DateActivity.class);
+				startActivity(i);
+			}
+			
+		});
 		addeventcontent.setVisibility(View.GONE);
 		save.setVisibility(View.GONE);
 		b_date.setVisibility(View.GONE);
