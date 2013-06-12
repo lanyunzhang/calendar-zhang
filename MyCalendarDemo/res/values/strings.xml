@@ -13,5 +13,7 @@
     <string name="YES">确定</string>
     <string name="set">设定</string>
     <string name="Cancel">取消</string>
+    <string name="plan">计划</string>
+    <string name="memo">备忘</string>
 
 </resources>
