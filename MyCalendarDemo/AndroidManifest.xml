@@ -24,6 +24,12 @@
             android:name=".DateActivity">
             
         </activity>
+        
+        <receiver android:name=".AlarmReceiver">
+             <intent-filter>
+                <action android:name="com.calendar.demo.alarm" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

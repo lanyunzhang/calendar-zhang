@@ -8,15 +8,19 @@ import java.util.List;
 import java.util.Map;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -42,6 +46,8 @@ import android.widget.Toast;
 
 import com.calendar.demo.view.NoteTaking;
 import com.calendar.demo.view.widget.OnWheelChangedListener;
+import com.calendar.demo.view.widget.OnWheelClickedListener;
+import com.calendar.demo.view.widget.OnWheelScrollListener;
 import com.calendar.demo.view.widget.WheelView;
 import com.calendar.demo.view.widget.adapters.ArrayWheelAdapter;
 import com.calendar.demo.view.widget.adapters.NumericWheelAdapter;
@@ -107,12 +113,16 @@ public class MainActivity extends Activity{
 	private int prerow = -1;
 	private int selectday = -1;
 	
+	private int curtime = 0;
+	private int curmin = 0;
 	
 	private int Calendar_Width = 0;
 	private int Cell_Width = 0;
 	private boolean isFiveRowExist = false;
 	private boolean isOff = false;
-
+	private boolean isPopup = false;
+	private boolean timeChanged = false;
+	private boolean timeScrolled = false;
 	// 页面控件
 	TextView Top_Date = null;
 	Button btn_pre_month = null;
@@ -132,9 +142,12 @@ public class MainActivity extends Activity{
 	
 	//--------------listview----------------
 	ListView listview = null;
+	ListView alarmlistview = null;
 	//SimpleAdapter sa = null;
+	List<Map<String,String>> alarmitem = new ArrayList<Map<String,String>>();
 	List<Map<String,String>> noteitem = new ArrayList<Map<String,String>>();
 	MyAdapter adapter = null;
+	MyAlarmAdapter maa = null;
 	
 
 	// 数据源
@@ -160,10 +173,6 @@ public class MainActivity extends Activity{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		
-		System.out.println(getApplicationContext().getFilesDir().getAbsolutePath());
-		
 		// 获得屏幕宽和高，并計算出屏幕寬度分七等份的大小
 		WindowManager windowManager = getWindowManager();
 		Display display = windowManager.getDefaultDisplay();
@@ -179,11 +188,18 @@ public class MainActivity extends Activity{
 		setContentView(mainLayout);
 
 		listview = (ListView)mainLayout.findViewById(R.id.listview);
+		alarmlistview= (ListView)mainLayout.findViewById(R.id.alarmlist);
+		
 		//listview = (ListView)getLayoutInflater().inflate(R.layout.list, null);
 		adapter = new MyAdapter(MainActivity.this);
 		listview.setAdapter(adapter);
 		listview.setDividerHeight(0);
 		listview.setCacheColorHint(Color.TRANSPARENT);
+		
+		maa = new MyAlarmAdapter(MainActivity.this);
+		alarmlistview.setAdapter(maa);
+		alarmlistview.setCacheColorHint(Color.TRANSPARENT);
+		
 		
 		
 		// 声明控件，并绑定事件
@@ -286,10 +302,8 @@ public class MainActivity extends Activity{
 		        
 			}
 		});
-		
 		selectday =iDay + calToday.get(Calendar.DAY_OF_MONTH);
 		System.out.println("onCreate---"+selectday);
-		
 	}
 	
 	class CustomerDatePickerDialog extends DatePickerDialog {
@@ -841,6 +855,7 @@ public class MainActivity extends Activity{
 		if(!isFiveRowExist)
 			layrow.get(5).setVisibility(View.GONE);
 	}
+	
 	//listview的adapter设置,修改为只有一个textview显示
 	private class MyAdapter extends BaseAdapter {  
         private Context context;  
@@ -888,6 +903,8 @@ public class MainActivity extends Activity{
         }  
         
     }
+	
+	
 	
 	public void clickText(){
 		//首先nt隐藏，显示添加界面，日历同样隐藏相应的部分
@@ -949,6 +966,7 @@ public class MainActivity extends Activity{
 				InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE); 
 				imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 				
+				alarmlistview.setVisibility(View.GONE);
 			}
 		}
 		
@@ -979,9 +997,9 @@ public class MainActivity extends Activity{
 		b_alarm.setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View view) {
-				initPopUpWindow();
+				if(!isPopup)
+					initPopUpWindow();
 			}
-			
 		});
 		addeventcontent.setVisibility(View.GONE);
 		save.setVisibility(View.GONE);
@@ -989,127 +1007,139 @@ public class MainActivity extends Activity{
 		b_alarm.setVisibility(View.GONE);
 		
 	}
-	
+    //处理闹钟的弹出菜单	
 	private void initPopUpWindow(){
-		View popupView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.pop_up_date, null);
+		isPopup = true;
+		// set current time
+	    Calendar c = Calendar.getInstance();
+		curtime = c.get(Calendar.HOUR_OF_DAY);
+		curmin = c.get(Calendar.MINUTE);
+		
+		
+		
+		View popupView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.time_layout, null);
 		final PopupWindow  popupWindow = new PopupWindow(popupView,LayoutParams.WRAP_CONTENT,
 				LayoutParams.WRAP_CONTENT);
 		popupWindow.showAsDropDown(layContent,((layContent.getWidth()-popupView.getWidth())/4),0);
 		
 		// set the view of alarm
 		Calendar calendar = Calendar.getInstance();
+		Button date_cancel = (Button) popupView.findViewById(R.id.date_cancel);
+		Button date_ok = (Button)popupView.findViewById(R.id.date_ok);
+		date_cancel.setOnClickListener(new OnClickListener(){
 
-        final WheelView month = (WheelView) popupView.findViewById(R.id.month);
-        final WheelView year = (WheelView) popupView.findViewById(R.id.year);
-        final WheelView day = (WheelView) popupView.findViewById(R.id.day);
+			@Override
+			public void onClick(View view) {
+				popupWindow.dismiss();
+				isPopup = false;
+		}});
+		date_ok.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View v) {
+				isPopup = false;
+				if(!timeScrolled){
+					System.out.println(curtime+" "+curmin);
+					//添加定闹钟逻辑，如果设定成功闹钟的颜色要有变化
+					setAlarm(curtime,curmin);
+					popupWindow.dismiss();
+				}
+		}});
         
-        OnWheelChangedListener listener = new OnWheelChangedListener() {
-            public void onChanged(WheelView wheel, int oldValue, int newValue) {
-                updateDays(year, month, day);
+		final WheelView hours = (WheelView) popupView.findViewById(R.id.hour);
+		NumericWheelAdapter nwa_h = new NumericWheelAdapter(this,0,23);
+		nwa_h.setTextSize(16);
+		hours.setViewAdapter(nwa_h);
+		hours.setCyclic(true);
+	
+		final WheelView mins = (WheelView) popupView.findViewById(R.id.mins);
+		NumericWheelAdapter nwa_m = new NumericWheelAdapter(this,0,59,"%02d");
+		nwa_m.setTextSize(16);
+		mins.setViewAdapter(nwa_m);
+		mins.setCyclic(true);
+	
+		hours.setCurrentItem(curtime);
+		mins.setCurrentItem(curmin);
+	
+		// add listeners
+		addChangingListener(mins, "min");
+		addChangingListener(hours, "hour");
+	
+		OnWheelChangedListener wheelListener = new OnWheelChangedListener() {
+			public void onChanged(WheelView wheel, int oldValue, int newValue) {
+				if (!timeScrolled) {
+					curtime= hours.getCurrentItem();
+					curmin = mins.getCurrentItem();
+				}
+			}
+		};
+		hours.addChangingListener(wheelListener);
+		mins.addChangingListener(wheelListener);
+		
+		OnWheelClickedListener click = new OnWheelClickedListener() {
+            public void onItemClicked(WheelView wheel, int itemIndex) {
+                wheel.setCurrentItem(itemIndex, true);
             }
         };
+        hours.addClickingListener(click);
+        mins.addClickingListener(click);
 
-        // month
-        int curMonth = calendar.get(Calendar.MONTH);
-        String months[] = new String[] {"January", "February", "March", "April", "May",
-                "June", "July", "August", "September", "October", "November", "December"};
-        month.setViewAdapter(new DateArrayAdapter(this, months, curMonth));
-        month.setCurrentItem(curMonth);
-        month.addChangingListener(listener);
-    
-        // year
-        int curYear = calendar.get(Calendar.YEAR);
-        year.setViewAdapter(new DateNumericAdapter(this, curYear, curYear + 10, 0));
-        year.setCurrentItem(curYear);
-        year.addChangingListener(listener);
-        
-        //day
-        updateDays(year, month, day);
-        day.setCurrentItem(calendar.get(Calendar.DAY_OF_MONTH) - 1);
+		OnWheelScrollListener scrollListener = new OnWheelScrollListener() {
+			public void onScrollingStarted(WheelView wheel) {
+				timeScrolled = true;
+			}
+			public void onScrollingFinished(WheelView wheel) {
+				timeScrolled = false;
+				curtime = hours.getCurrentItem();
+				curmin = mins.getCurrentItem();
+			}
+		};
+		
+		hours.addScrollingListener(scrollListener);
+		mins.addScrollingListener(scrollListener);
+		
+		
+	}
+	
+	private void addChangingListener(final WheelView wheel, final String label) {
+		wheel.addChangingListener(new OnWheelChangedListener() {
+			public void onChanged(WheelView wheel, int oldValue, int newValue) {
+				//wheel.setLabel(newValue != 1 ? label + "s" : label);
+			}
+		});
 	}
 	
 	/**
-     * Updates day wheel. Sets max days according to selected month and year
-     */
-    void updateDays(WheelView year, WheelView month, WheelView day) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.YEAR, calendar.get(Calendar.YEAR) + year.getCurrentItem());
-        calendar.set(Calendar.MONTH, month.getCurrentItem());
-        
-        int maxDays = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-        day.setViewAdapter(new DateNumericAdapter(this, 1, maxDays, calendar.get(Calendar.DAY_OF_MONTH) - 1));
-        int curDay = Math.min(maxDays, day.getCurrentItem() + 1);
-        day.setCurrentItem(curDay - 1, true);
-    }
-    
-    /**
-     * Adapter for numeric wheels. Highlights the current value.
-     */
-    private class DateNumericAdapter extends NumericWheelAdapter {
-        // Index of current item
-        int currentItem;
-        // Index of item to be highlighted
-        int currentValue;
-        
-        /**
-         * Constructor
-         */
-        public DateNumericAdapter(Context context, int minValue, int maxValue, int current) {
-            super(context, minValue, maxValue);
-            this.currentValue = current;
-            setTextSize(16);
-        }
-        
-        @Override
-        protected void configureTextView(TextView view) {
-            super.configureTextView(view);
-            if (currentItem == currentValue) {
-                view.setTextColor(0xFF0000F0);
-            }
-            view.setTypeface(Typeface.SANS_SERIF);
-        }
-        
-        @Override
-        public View getItem(int index, View cachedView, ViewGroup parent) {
-            currentItem = index;
-            return super.getItem(index, cachedView, parent);
-        }
-    }
-    
-    /**
-     * Adapter for string based wheel. Highlights the current value.
-     */
-    private class DateArrayAdapter extends ArrayWheelAdapter<String> {
-        // Index of current item
-        int currentItem;
-        // Index of item to be highlighted
-        int currentValue;
-        
-        /**
-         * Constructor
-         */
-        public DateArrayAdapter(Context context, String[] items, int current) {
-            super(context, items);
-            this.currentValue = current;
-            setTextSize(16);
-        }
-        
-        @Override
-        protected void configureTextView(TextView view) {
-            super.configureTextView(view);
-            if (currentItem == currentValue) {
-                view.setTextColor(0xFF0000F0);
-            }
-            view.setTypeface(Typeface.SANS_SERIF);
-        }
-        
-        @Override
-        public View getItem(int index, View cachedView, ViewGroup parent) {
-            currentItem = index;
-            return super.getItem(index, cachedView, parent);
-        }
-    }
-    
+	 * 设定闹钟
+	 */
+	public void setAlarm(int hour,int min){
+		//先得到年月日时分
+		System.out.println(iMonthViewCurrentMonth);
+		System.out.println(iMonthViewCurrentYear); 
+		System.out.println(selectday - iDay);
+		
+		Calendar alarmtime = Calendar.getInstance();
+		alarmtime.set(Calendar.YEAR, iMonthViewCurrentYear);
+		alarmtime.set(Calendar.MONTH, iMonthViewCurrentMonth);
+		alarmtime.set(Calendar.DAY_OF_MONTH, selectday-iDay);
+		alarmtime.set(Calendar.HOUR_OF_DAY, hour);
+		alarmtime.set(Calendar.MINUTE, min);
+		alarmtime.set(Calendar.SECOND, 0);
+		
+		 
+		Intent intent = new Intent("com.calendar.demo.alarm");
+		intent.setClass(MainActivity.this, AlarmReceiver.class);
+		PendingIntent pi=PendingIntent.getBroadcast(this, 0, intent,0);
+		
+		AlarmManager am=(AlarmManager)getSystemService(ALARM_SERVICE);
+	    am.set(AlarmManager.RTC_WAKEUP, alarmtime.getTimeInMillis(), pi);
+	    
+	    maa.getArrayList().add(iMonthViewCurrentYear+"-"+iMonthViewCurrentMonth+"-"+(selectday-iDay)
+	    		+"-"+hour+"-"+min);
+	    maa.notifyDataSetChanged();
+	    
+	    b_alarm.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic__alarm__on));
+	}
 	/**
 	 * 自定义handler事件，发送消息来进行
 	 * 

@@ -7,7 +7,7 @@
     android:orientation="vertical"
     android:background="@drawable/layout_bg">
     
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout 
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:layout_gravity="center_horizontal"
@@ -23,6 +23,27 @@
             android:layout_width="100dp"/>
         <com.calendar.demo.view.widget.WheelView android:id="@+id/year"
             android:layout_height="wrap_content"
-            android:layout_width="wrap_content"/>            
+            android:layout_width="wrap_content"/>  
+                  
     </LinearLayout>
+    
+    <LinearLayout 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:orientation="horizontal">
+        
+        <Button 
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="@string/Cancel"
+            android:id="@+id/date_cancel"
+            />
+        <Button 
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/date_ok"
+            android:text="@string/set"/>
+    </LinearLayout>
+    
 </LinearLayout>
