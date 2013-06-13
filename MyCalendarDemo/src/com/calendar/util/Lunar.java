@@ -14,8 +14,6 @@ import java.util.regex.Pattern;
 
 import android.graphics.Color;
 
-
-
 /**
  * 提供一些农历相关信息
  * 从公历到农历的转化
@@ -114,29 +112,18 @@ public class Lunar {
 	 */
 	private final static String[] sFtv = {
 		"0101*元旦",		"0214 情人节",	"0308 妇女节",		"0312 植树节",
-		"0315 消费者权益日",	"0401 愚人节",	"0501*劳动节",		"0504 青年节",
-		"0509 郝维节",		"0512 护士节",	"0601 儿童节",		"0701 建党节 香港回归纪念",
-		"0801 建军节",		"0808 父亲节",	"0816 燕衔泥节",	"0909 毛泽东逝世纪念",
-		"0910 教师节",		"0928 孔子诞辰","1001*国庆节",		"1006 老人节",
-		"1024 联合国日",	"1111 光棍节",	"1112 孙中山诞辰纪念",	"1220 澳门回归纪念",
-		"1225 圣诞节",		"1226 毛泽东诞辰纪念"
+    	"0401 愚人节",	"0501*劳动节",	"0504 青年节",        "0601 儿童节",		
+    	"0701 建党节",    "0801 建军节",   "0910 教师节",	    "1001*国庆节",
+		"1111 光棍节",	"1225 圣诞节"
 	};
 	/**
 	 * 农历节日 *表示放假日
 	 */
 	private final static String[] lFtv = {
-		"0101*春节、弥勒佛诞",	"0106 定光佛诞",	"0115 元宵节",
-		"0208 释迦牟尼佛出家",	"0215 释迦牟尼佛涅槃",	"0209 海空上师诞",
-		"0219 观世音菩萨诞",	"0221 普贤菩萨诞",	"0316 准提菩萨诞",
-		"0404 文殊菩萨诞",	"0408 释迦牟尼佛诞",	"0415 佛吉祥日——释迦牟尼佛诞生、成道、涅槃三期同一庆(即南传佛教国家的卫塞节)",
-		"0505 端午节",		"0513 伽蓝菩萨诞",	"0603 护法韦驮尊天菩萨诞",
-		"0619 观世音菩萨成道——此日放生、念佛，功德殊胜",
-		"0707 七夕情人节",	"0713 大势至菩萨诞",	"0715 中元节",
-		"0724 龙树菩萨诞",	"0730 地藏菩萨诞",	"0815 中秋节",
-		"0822 燃灯佛诞",	"0909 重阳节",		"0919 观世音菩萨出家纪念日",
-		"0930 药师琉璃光如来诞","1005 达摩祖师诞",	"1107 阿弥陀佛诞",
-		"1208 释迦如来成道日，腊八节",			"1224 小年",
-		"1229 华严菩萨诞",	"0100*除夕"
+		"0101*春节",	"0115 元宵节","0505*端午节",	
+		"0707 七夕",	"0715 中元节","0815 中秋节",
+		"0909 重阳节","1208 腊八节","1224 小年",
+		"0100*除夕"
 	};
 	/**
 	 * 某月的第几个星期几
@@ -152,6 +139,35 @@ public class Lunar {
 	}
 	private final static Pattern sFreg = Pattern.compile("^(\\d{2})(\\d{2})([\\s\\*])(.+)$");
 	private final static Pattern wFreg = Pattern.compile("^(\\d{2})(\\d)(\\d)([\\s\\*])(.+)$");
+	
+	
+	public  static String findSFestivals(int sM,int sD){
+		Matcher m;
+		for (int i=0; i<Lunar.sFtv.length; i++) {
+			m = Lunar.sFreg.matcher(Lunar.sFtv[i]);
+			if (m.find()) {
+				if (sM == Lunar.toInt(m.group(1)) && sD == Lunar.toInt(m.group(2))) {
+					return m.group(4);
+				}
+			}
+		}
+		return null;
+	}
+	
+	public static String findLFestivals(int lM,int lD){
+		
+		Matcher m;
+		for (int i=0; i<Lunar.lFtv.length; i++) {
+			m = Lunar.sFreg.matcher(Lunar.lFtv[i]);
+			if (m.find()) {
+				if (lM == Lunar.toInt(m.group(1)) && lD == Lunar.toInt(m.group(2))) {
+					return m.group(4);
+				}
+			}
+		}
+		return null;
+	}
+	
 	private synchronized void findFestival() {
 		int sM = this.getSolarMonth();
 		int sD = this.getSolarDay();

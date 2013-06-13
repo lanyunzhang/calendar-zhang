@@ -75,7 +75,6 @@ import com.calendar.util.util;
 
  * @Version V1.0
  * 
- * 
  *   1. 修复每个月日历的动态显示5或者6行
  *   2. 实现日历的阴历显示
  *   3. 实现日历的滑动,坡敏跟进这个问题吧
@@ -92,14 +91,15 @@ import com.calendar.util.util;
  *   14. 添加闹钟逻辑，可以选择多个闹钟，同时列出多个闹钟的时间
  *   15. 在添加事件界面，不能去点击日历的左右切换和日历文本选择逻辑
  *   16. 默认不区分计划和备忘，所以默认隐藏viewpager，只有当设置中打开开关之后，才区分计划和备忘
+ *   
+ *   17. 上班以及假期的计算方法
  */
 public class MainActivity extends Activity{
 	// 生成日历，外层容器
 	private LinearLayout layContent = null; //外层日历主体
 	private ArrayList<DateWidgetDayCell> days = new ArrayList<DateWidgetDayCell>();
 	private ArrayList<View> layrow = new ArrayList<View>();
-	
-	public ArrayList<String> arr;
+	public ArrayList<String> arr=null;;
 
 	// 日期变量
 	public static Calendar calStartDate = Calendar.getInstance();
@@ -110,16 +110,12 @@ public class MainActivity extends Activity{
 	// 当前操作日期
 	private int iMonthViewCurrentMonth_Dialog = 0;
 	private int iMonthViewCurrentYear_Dialog = 0;
-	
 	private int iMonthViewCurrentMonth = 0;
 	private int iMonthViewCurrentYear = 0;
 	private int iFirstDayOfWeek = Calendar.MONDAY;
 	private int iDay = 0;
 	private int numOfDay = 0;
-	private int currow = -1;
-	private int prerow = -1;
 	private int selectday = -1;
-	
 	private int curtime = 0;
 	private int curmin = 0;
 	
@@ -128,34 +124,32 @@ public class MainActivity extends Activity{
 	private boolean isFiveRowExist = false;
 	private boolean isOff = false;
 	private boolean isPopup = false;
-	private boolean timeChanged = false;
 	private boolean timeScrolled = false;
 	// 页面控件
-	TextView Top_Date = null;
-	Button btn_pre_month = null;
-	Button btn_next_month = null;
-	TextView arrange_text = null;
-	RelativeLayout mainLayout = null;
-	LinearLayout arrange_layout = null;
-	NoteTaking nt = null;
-	View  addnote = null;
-	EditText addeventcontent = null;
-	TextView save = null;
-	ImageView iv = null;
-	ImageButton b_date = null;
-	ImageButton b_alarm = null;
-	DatePickerDialog mDialog = null;
-	
-	
-	//--------------listview----------------
-	ListView listview = null;
-	ListView alarmlistview = null;
-	//SimpleAdapter sa = null;
-	List<Map<String,String>> alarmitem = new ArrayList<Map<String,String>>();
-	List<Map<String,String>> noteitem = new ArrayList<Map<String,String>>();
-	MyAdapter adapter = null;
-	MyAlarmAdapter maa = null;
-	
+	private TextView Top_Date = null;
+	private Button btn_pre_month = null;
+	private Button btn_next_month = null;
+	private TextView arrange_text = null;
+	private RelativeLayout mainLayout = null;
+	private LinearLayout arrange_layout = null;
+	private NoteTaking nt = null;
+	private EditText addeventcontent = null;
+	private TextView save = null;
+	private ImageView iv = null;
+	private ImageButton b_date = null;
+	private ImageButton b_alarm = null;
+	private DatePickerDialog mDialog = null;
+	private ViewPager mPager;//页卡内容
+    private List<View> listViews; // Tab页面列表
+    private ImageView cursor;// 动画图片
+    private TextView t1, t2;// 页卡头标
+    
+	private ListView listview = null;
+	private ListView alarmlistview = null;
+	private List<Map<String,String>> alarmitem = new ArrayList<Map<String,String>>();
+	private List<Map<String,String>> noteitem = new ArrayList<Map<String,String>>();
+	private MyAdapter adapter = null;
+	private MyAlarmAdapter maa = null;
 
 	// 数据源
 	ArrayList<String> Calendar_Source = null;
@@ -174,14 +168,7 @@ public class MainActivity extends Activity{
 	public static int special_Reminder = 0;
 	public static int common_Reminder = 0;
 	public static int Calendar_WeekFontColor = 0;
-
-	String UserName = "";
-	
-	//----选项卡
-	private ViewPager mPager;//页卡内容
-    private List<View> listViews; // Tab页面列表
-    private ImageView cursor;// 动画图片
-    private TextView t1, t2;// 页卡头标
+	public String UserName = "";
     private int offset = 0;// 动画图片偏移量
     private int currIndex = 0;// 当前页卡编号
     private int bmpW;// 动画图片宽度
@@ -200,23 +187,17 @@ public class MainActivity extends Activity{
 		// 制定布局文件，并设置属性
 		mainLayout = (RelativeLayout) getLayoutInflater().inflate(
 				R.layout.calendar_main, null);
-		// mainLayout.setPadding(2, 0, 2, 0);
 		setContentView(mainLayout);
-
 		listview = (ListView)mainLayout.findViewById(R.id.listview);
 		alarmlistview= (ListView)mainLayout.findViewById(R.id.alarmlist);
-		
-		//listview = (ListView)getLayoutInflater().inflate(R.layout.list, null);
 		adapter = new MyAdapter(MainActivity.this);
 		arr = adapter.getArrayList();
 		listview.setAdapter(adapter);
 		listview.setDividerHeight(0);
 		listview.setCacheColorHint(Color.TRANSPARENT);
-		
 		maa = new MyAlarmAdapter(MainActivity.this);
 		alarmlistview.setAdapter(maa);
 		alarmlistview.setCacheColorHint(Color.TRANSPARENT);
-		
 		// 声明控件，并绑定事件
 		Top_Date = (TextView) findViewById(R.id.Top_Date);
 		btn_pre_month = (Button) findViewById(R.id.btn_pre_month);
@@ -225,16 +206,12 @@ public class MainActivity extends Activity{
 		btn_next_month.setOnClickListener(new Next_MonthOnClickListener());
 
 		// 计算本月日历中的第一天(一般是上月的某天)，并更新日历
-		//mainLayout.addView(generateCalendarMain());
 		generateCalendarMain();
 		//添加listview并且添加随手记两笔textview
-		//mainLayout.addView(listview);
 		nt = new NoteTaking(MainActivity.this,Calendar_Width,Cell_Width);
 		nt.setOnClickListener(new tvClicklistener());
 		nt.setData(getString(R.string.writeit));
 		nt.setBackgroundDrawable(getResources().getDrawable(R.drawable.add_event_edit_bg));
-		//mainLayout.addView(nt);
-		
 		calStartDate = getCalendarStartDate();
 		DateWidgetDayCell daySelected = updateCalendar();
 
@@ -260,8 +237,6 @@ public class MainActivity extends Activity{
 		endDate = GetEndDate(startDate);
 		view.addView(arrange_layout, Param1);
 		
-		//mainLayout.addView(view);
-
 		// 新建线程
 		new Thread() {
 			@Override
@@ -294,13 +269,8 @@ public class MainActivity extends Activity{
 				R.color.Calendar_WeekFontColor);
 		//这里初始化数据源，并且设置adapter
 		
-	/*	initListData();
-		listview.setAdapter(sa);*/
-		
 		iv = (ImageView)findViewById(R.id.iv);
 		iv.setOnClickListener(new tvClicklistener());
-		//mainLayout.addView(iv);
-		
 		initAddView();
 		//选择月份的监听
 		Top_Date.setOnClickListener(new OnClickListener(){
@@ -311,15 +281,12 @@ public class MainActivity extends Activity{
 						listener ,iMonthViewCurrentYear,iMonthViewCurrentMonth,
 						calToday.get(Calendar.DAY_OF_MONTH)
 						);
-				//mDialog.setTitle(calToday.get(Calendar.YEAR )+"年"+(calToday.get(Calendar.MONTH )+1)+"月");
 				mDialog.setTitle(iMonthViewCurrentYear + "年"+(iMonthViewCurrentMonth+1)+"月");
 				mDialog.show();
 		        
 			}
 		});
 		selectday =iDay + calToday.get(Calendar.DAY_OF_MONTH);
-		System.out.println("onCreate---"+selectday);
-         
         InitImageView();
  		InitTextView();
  		InitViewPager();
@@ -332,7 +299,6 @@ public class MainActivity extends Activity{
 	private void InitTextView() {
 		t1 = (TextView) findViewById(R.id.text1);
 		t2 = (TextView) findViewById(R.id.text2);
-
 		t1.setOnClickListener(new MyOnClickListener(0));
 		t2.setOnClickListener(new MyOnClickListener(1));
 	}
@@ -466,7 +432,6 @@ public class MainActivity extends Activity{
         
         @Override
     	public void show() {
-    		// TODO Auto-generated method stub
     		super.show();
     		 DatePicker dp = findDatePicker((ViewGroup) this.getWindow().getDecorView());
     	        if (dp != null) {
@@ -485,16 +450,12 @@ public class MainActivity extends Activity{
     							l.setVisibility(View.GONE);
     						}
     				} catch (SecurityException e) {
-    					// TODO Auto-generated catch block
     					e.printStackTrace();
     				} catch (NoSuchFieldException e) {
-    					// TODO Auto-generated catch block
     					e.printStackTrace();
     				} catch (IllegalArgumentException e) {
-    					// TODO Auto-generated catch block
     					e.printStackTrace();
     				} catch (IllegalAccessException e) {
-    					// TODO Auto-generated catch block
     					e.printStackTrace();
     				}  
     	        	
@@ -554,14 +515,12 @@ public class MainActivity extends Activity{
 
 			updateCalendar();
 			selectday =iDay + calToday.get(Calendar.DAY_OF_MONTH);
-			System.out.println("toMonthYear-----"+selectday);
     }
 
 	protected String GetDateShortString(Calendar date) {
 		String returnString = date.get(Calendar.YEAR) + "/";
 		returnString += date.get(Calendar.MONTH) + 1 + "/";
 		returnString += date.get(Calendar.DAY_OF_MONTH);
-		
 		return returnString;
 	}
 
@@ -605,7 +564,6 @@ public class MainActivity extends Activity{
 	// 生成日历头部
 	private View generateCalendarHeader() {
 		LinearLayout layRow = createLayout(LinearLayout.HORIZONTAL);
-		// layRow.setBackgroundColor(Color.argb(255, 207, 207, 205));
 		
 		for (int iDay = 0; iDay < 7; iDay++) {
 			DateWidgetDayHeader day = new DateWidgetDayHeader(this, Cell_Width,
@@ -621,9 +579,7 @@ public class MainActivity extends Activity{
 
 	// 生成日历主体
 	private View generateCalendarMain() {
-		//layContent = createLayout(LinearLayout.VERTICAL);
 		layContent = (LinearLayout)mainLayout.findViewById(R.id.lly);
-		// layContent.setPadding(1, 0, 1, 0);
 		layContent.setBackgroundColor(Color.argb(255, 105, 105, 103));
 		layContent.addView(generateCalendarHeader());
 		days.clear();
@@ -631,7 +587,6 @@ public class MainActivity extends Activity{
 		for (int iRow = 0; iRow < 6; iRow++) {
 			View view = generateCalendarRow();
 			layContent.addView(view);
-			//把view放到一个集合中去，然后隐藏或者显示最后一个view
 			layrow.add(view);
 		}
 		
@@ -659,7 +614,6 @@ public class MainActivity extends Activity{
 		calToday.setFirstDayOfWeek(iFirstDayOfWeek);
 		selectday = GetNumFromDate(calToday, GetStartDate());
 		
-
 		if (calSelected.getTimeInMillis() == 0) {
 			calStartDate.setTimeInMillis(System.currentTimeMillis());
 			calStartDate.setFirstDayOfWeek(iFirstDayOfWeek);
@@ -667,7 +621,6 @@ public class MainActivity extends Activity{
 			calStartDate.setTimeInMillis(calSelected.getTimeInMillis());
 			calStartDate.setFirstDayOfWeek(iFirstDayOfWeek);
 		}
-		
 		UpdateStartDateForMonth();
 		return calStartDate;
 	}
@@ -699,10 +652,7 @@ public class MainActivity extends Activity{
 		this.iDay=iDay;
 		calStartDate.add(Calendar.DAY_OF_WEEK, -iDay);
 		
-		
-		//在这里更改calStartDate----------------------------------------------
 		int currow = rowOfMonth(calStartDate);
-		System.out.println(currow);
 		if (currow == 5){
 			layrow.get(5).setVisibility(View.GONE);
 			isFiveRowExist = false;
@@ -737,7 +687,6 @@ public class MainActivity extends Activity{
 			if (calToday.get(Calendar.YEAR) == iYear) {
 				if (calToday.get(Calendar.MONTH) == iMonth) {
 					if (calToday.get(Calendar.DAY_OF_MONTH) == iDay) {
-						//selectday = GetNumFromDate(calSelected, GetStartDate());
 						bToday = true;
 					}
 				}
@@ -767,7 +716,6 @@ public class MainActivity extends Activity{
 			
 			if (flag != null && flag[i] == true && calendar_Hashtable != null
 					&& calendar_Hashtable.containsKey(i)) {
-				// hasRecord = flag[i];
 				hasRecord = Calendar_Source.get(calendar_Hashtable.get(i))
 						.contains(UserName);
 			}
@@ -781,7 +729,6 @@ public class MainActivity extends Activity{
 			calCalendar.add(Calendar.DAY_OF_MONTH, 1);
 		}
 		//在重绘之前判断是否要显示几行
-		
 		layContent.invalidate();
 		
 		return daySelected;
@@ -798,7 +745,6 @@ public class MainActivity extends Activity{
 	class Pre_MonthOnClickListener implements OnClickListener {
 		@Override
 		public void onClick(View v) {
-			// TODO Auto-generated method stub
 			arrange_text.setText("");
 			calSelected.setTimeInMillis(0);
 			iMonthViewCurrentMonth--;
@@ -825,7 +771,6 @@ public class MainActivity extends Activity{
 				public void run() {
 
 					int day = GetNumFromDate(calToday, startDate);
-					
 					if (calendar_Hashtable != null
 							&& calendar_Hashtable.containsKey(day)) {
 						dayvalue = calendar_Hashtable.get(day);
@@ -844,7 +789,6 @@ public class MainActivity extends Activity{
 	class Next_MonthOnClickListener implements OnClickListener {
 		@Override
 		public void onClick(View v) {
-			// TODO Auto-generated method stub
 			arrange_text.setText("");
 			calSelected.setTimeInMillis(0);
 			iMonthViewCurrentMonth++;
@@ -861,9 +805,6 @@ public class MainActivity extends Activity{
 			calStartDate.set(Calendar.MINUTE, 0);
 			calStartDate.set(Calendar.SECOND, 0);
 			calStartDate.set(Calendar.MILLISECOND, 0);
-			
-			
-			
 			
 			UpdateStartDateForMonth();
 			startDate = (Calendar) calStartDate.clone();
@@ -883,9 +824,7 @@ public class MainActivity extends Activity{
 			}.start();
 
 			updateCalendar();
-			//在这里计算selectday
 			selectday =iDay + calToday.get(Calendar.DAY_OF_MONTH);
-			System.out.println("next_month---"+selectday);
 			
 		}
 	}
@@ -898,7 +837,6 @@ public class MainActivity extends Activity{
 			System.out.println("onClick----"+selectday);
 			item.setSelected(true);
 			updateCalendar();
-			//这里改变日历数据，查询数据库-------------------------------------
 			arr.clear();
 			arr.add(selectday+"");
 			adapter.notifyDataSetChanged();
@@ -924,9 +862,7 @@ public class MainActivity extends Activity{
 		cal_Now.set(Calendar.MINUTE, 0);
 		cal_Now.set(Calendar.SECOND, 0);
 		cal_Now.setFirstDayOfWeek(Calendar.MONDAY);
-
 		iDay = cal_Now.get(Calendar.DAY_OF_WEEK) - Calendar.MONDAY;
-		
 		if (iDay < 0) {
 			iDay = 6;
 		}
@@ -938,11 +874,8 @@ public class MainActivity extends Activity{
 	}
 
 	public Calendar GetEndDate(Calendar startDate) {
-		// Calendar end = GetStartDate(enddate);
 		Calendar endDate = Calendar.getInstance();
 		endDate = (Calendar) startDate.clone();
-		//row = rowOfMonth(startDate) / 7;
-		
 		endDate.add(Calendar.DAY_OF_MONTH, 41);
 		return endDate;
 	}
@@ -950,8 +883,6 @@ public class MainActivity extends Activity{
 	public int rowOfMonth(Calendar startDate){
 		
 		int day_num = NumMonthOfYear.dayOfMonth(iMonthViewCurrentYear, iMonthViewCurrentMonth) + iDay;
-        //System.out.println(iMonthViewCurrentYear+ " " + iMonthViewCurrentMonth + " " + iDay+" ");
-        //System.out.println("day_num" + day_num);
 		if(day_num < 36)
 			numOfDay = 5;
 		else
@@ -1025,7 +956,6 @@ public class MainActivity extends Activity{
 						Toast.LENGTH_SHORT).show();
 			}else{
 				//不为空的话，保存字符串，并且日历显示，随手记显示，listview添加相应的内容
-				//addnote.setVisibility(View.GONE);
 				addeventcontent.setVisibility(View.GONE);
 				save.setVisibility(View.GONE);
 				b_date.setVisibility(View.GONE);
@@ -1089,8 +1019,6 @@ public class MainActivity extends Activity{
 	    Calendar c = Calendar.getInstance();
 		curtime = c.get(Calendar.HOUR_OF_DAY);
 		curmin = c.get(Calendar.MINUTE);
-		
-		
 		
 		View popupView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.time_layout, null);
 		final PopupWindow  popupWindow = new PopupWindow(popupView,LayoutParams.WRAP_CONTENT,

@@ -1,6 +1,9 @@
 package com.calendar.demo;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 import com.calendar.util.Lunar;
 
@@ -47,7 +50,8 @@ public class DateWidgetDayCell extends View {
 	private int iDateYear = 0;
 	private int iDateMonth = 0;
 	private int iDateDay = 0;
-
+	private  Date date;
+	private Lunar l ;
 	// 布尔变量
 	private boolean bSelected = false;
 	private boolean bIsActiveMonth = false;
@@ -55,7 +59,7 @@ public class DateWidgetDayCell extends View {
 	private boolean bTouchedDown = false;
 	private boolean bHoliday = false;
 	private boolean hasRecord = false;
-
+	
 	public static int ANIM_ALPHA_DURATION = 100;
 
 	public interface OnItemClick {
@@ -66,6 +70,8 @@ public class DateWidgetDayCell extends View {
 	public DateWidgetDayCell(Context context, int iWidth, int iHeight) {
 		super(context);
 		setLayoutParams(new LayoutParams(iWidth, iHeight));
+		
+		
 	}
 
 	// 取变量值
@@ -92,6 +98,18 @@ public class DateWidgetDayCell extends View {
 		this.bToday = bToday;
 		this.bHoliday = bHoliday;
 		this.hasRecord = hasRecord;
+		
+		
+		 SimpleDateFormat myFormatter = new SimpleDateFormat("yyyy-MM-dd");
+		  try {
+		 date = myFormatter.parse(iDateYear+"-"+(iDateMonth+1)+"-"+iDateDay);
+
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	
+		l = new Lunar(date);
 	}
 
 	// 重载绘制方法
@@ -186,7 +204,18 @@ public class DateWidgetDayCell extends View {
 		canvas.drawText(sDate, iPosX, iPosY, pt);
 		pt.setTextSize(lTextSize);
 		pt.setUnderlineText(false);
-		canvas.drawText(sLundarDate, iPosXX, iPosYY, pt);
+		
+		//添加公历节日以及农历节日
+		String sF = Lunar.findSFestivals(iDateMonth+1 , iDateDay);
+		String lF = Lunar.findLFestivals(l.getLunarMonth(), l.getLunarDay());
+		if(sF != null)
+			canvas.drawText(sF, iPosXX, iPosYY, pt);
+		else if(lF != null){
+			canvas.drawText(lF, iPosXX, iPosYY, pt);
+			System.out.println(lF);
+		}
+		else
+			canvas.drawText(sLundarDate, iPosXX, iPosYY, pt);
 	}
 
 	// 得到字体高度
