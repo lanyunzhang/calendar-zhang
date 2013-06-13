@@ -91,6 +91,7 @@ import com.calendar.util.util;
  *   13. 计划和备忘的切换开关实现 
  *   14. 添加闹钟逻辑，可以选择多个闹钟，同时列出多个闹钟的时间
  *   15. 在添加事件界面，不能去点击日历的左右切换和日历文本选择逻辑
+ *   16. 默认不区分计划和备忘，所以默认隐藏viewpager，只有当设置中打开开关之后，才区分计划和备忘
  */
 public class MainActivity extends Activity{
 	// 生成日历，外层容器
@@ -180,7 +181,7 @@ public class MainActivity extends Activity{
 	private ViewPager mPager;//页卡内容
     private List<View> listViews; // Tab页面列表
     private ImageView cursor;// 动画图片
-    private TextView t1, t2, t3;// 页卡头标
+    private TextView t1, t2;// 页卡头标
     private int offset = 0;// 动画图片偏移量
     private int currIndex = 0;// 当前页卡编号
     private int bmpW;// 动画图片宽度
@@ -207,6 +208,7 @@ public class MainActivity extends Activity{
 		
 		//listview = (ListView)getLayoutInflater().inflate(R.layout.list, null);
 		adapter = new MyAdapter(MainActivity.this);
+		arr = adapter.getArrayList();
 		listview.setAdapter(adapter);
 		listview.setDividerHeight(0);
 		listview.setCacheColorHint(Color.TRANSPARENT);
@@ -214,8 +216,6 @@ public class MainActivity extends Activity{
 		maa = new MyAlarmAdapter(MainActivity.this);
 		alarmlistview.setAdapter(maa);
 		alarmlistview.setCacheColorHint(Color.TRANSPARENT);
-		
-		
 		
 		// 声明控件，并绑定事件
 		Top_Date = (TextView) findViewById(R.id.Top_Date);
@@ -323,6 +323,7 @@ public class MainActivity extends Activity{
         InitImageView();
  		InitTextView();
  		InitViewPager();
+ 		
 	}
 	
 	/**
@@ -331,11 +332,9 @@ public class MainActivity extends Activity{
 	private void InitTextView() {
 		t1 = (TextView) findViewById(R.id.text1);
 		t2 = (TextView) findViewById(R.id.text2);
-		t3 = (TextView) findViewById(R.id.text3);
 
 		t1.setOnClickListener(new MyOnClickListener(0));
 		t2.setOnClickListener(new MyOnClickListener(1));
-		t3.setOnClickListener(new MyOnClickListener(2));
 	}
 
 	/**
@@ -347,7 +346,6 @@ public class MainActivity extends Activity{
 		LayoutInflater mInflater = getLayoutInflater();
 		listViews.add(mInflater.inflate(R.layout.lay1, null));
 		listViews.add(mInflater.inflate(R.layout.lay2, null));
-		listViews.add(mInflater.inflate(R.layout.lay3, null));
 		mPager.setAdapter(new MyPagerAdapter(listViews));
 		mPager.setCurrentItem(0);
 		mPager.setOnPageChangeListener(new MyOnPageChangeListener());
@@ -363,7 +361,7 @@ public class MainActivity extends Activity{
 		DisplayMetrics dm = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(dm);
 		int screenW = dm.widthPixels;// 获取分辨率宽度
-		offset = (screenW / 3 - bmpW) / 2;// 计算偏移量
+		offset = (screenW / 2 - bmpW) / 2;// 计算偏移量
 		Matrix matrix = new Matrix();
 		matrix.postTranslate(offset, 0);
 		cursor.setImageMatrix(matrix);// 设置动画初始位置
@@ -952,8 +950,8 @@ public class MainActivity extends Activity{
 	public int rowOfMonth(Calendar startDate){
 		
 		int day_num = NumMonthOfYear.dayOfMonth(iMonthViewCurrentYear, iMonthViewCurrentMonth) + iDay;
-//		System.out.println(iMonthViewCurrentYear+ " " + iMonthViewCurrentMonth + " " + iDay+" ");
-//		System.out.println("day_num" + day_num);
+        //System.out.println(iMonthViewCurrentYear+ " " + iMonthViewCurrentMonth + " " + iDay+" ");
+        //System.out.println("day_num" + day_num);
 		if(day_num < 36)
 			numOfDay = 5;
 		else
@@ -982,56 +980,6 @@ public class MainActivity extends Activity{
 		if(!isFiveRowExist)
 			layrow.get(5).setVisibility(View.GONE);
 	}
-	
-	//listview的adapter设置,修改为只有一个textview显示
-	private class MyAdapter extends BaseAdapter {  
-        private Context context;  
-        private LayoutInflater inflater;  
-          
-        public MyAdapter(Context context) {  
-            super();  
-            this.context = context;  
-            inflater = LayoutInflater.from(context);  
-            arr = new ArrayList<String>();  
-        }  
-        @Override  
-        public int getCount() {  
-            // TODO Auto-generated method stub  
-            return arr.size();  
-        }  
-        @Override  
-        public Object getItem(int arg0) {  
-            // TODO Auto-generated method stub  
-            return arg0;  
-        }  
-        @Override  
-        public long getItemId(int arg0) {  
-            // TODO Auto-generated method stub  
-            return arg0;  
-        }  
-        @Override  
-        public View getView(final int position, View view, ViewGroup arg2) {  
-            // TODO Auto-generated method stub  
-            if(view == null){  
-                view = inflater.inflate(R.layout.item_events, null);  
-            }
-            final TextView tv = (TextView)view.findViewById(R.id.text);
-            /*final EditText edit = (EditText) view.findViewById(R.id.edit); 
-            edit.setText(arr.get(position));    //在重构adapter的时候不至于数据错乱  
-            Button del = (Button) view.findViewById(R.id.del);  */
-            tv.setText(arr.get(position));
-            tv.setOnClickListener(new OnClickListener(){
-				@Override
-				public void onClick(View arg0) {
-					System.out.println("textview clicked!");
-				}
-			});
-            return view;  
-        }  
-        
-    }
-	
-	
 	
 	public void clickText(){
 		//首先nt隐藏，显示添加界面，日历同样隐藏相应的部分
