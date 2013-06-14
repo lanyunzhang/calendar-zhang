@@ -31,7 +31,7 @@ public class DB {
 					+ Info.TASKDETAIL + " TEXT,"
 					+ Info.TASKCREATETIME + " INTEGER,"
 					+ Info.TASKSTARTTIME + " INTEGER,"
-					+ Info.TASKENDTIME + " INTEGER,"
+					+ Info.TASKENDTIME + " INTEGER,"     
 					+ Info.TASKEDITTIME + " INTEGER,"
 					+ Info.TASKIMPORTANT + " INTEGER,"
 					+ Info.TASKCOMPLETE + " INTEGER,"
