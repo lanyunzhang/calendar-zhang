@@ -127,8 +127,8 @@ public class Lunar {
 	};
 	/**
 	 * 2013放假安排
-	 * 元旦	1月1日~3日	1月5日（周六）、1月6日（周日）	3天
-		春节	2月9日~15日	2月16日（周六）、2月17日（周日）	7天
+	 *  元旦	    1月1日~3日	1月5日（周六）、1月6日（周日）	3天
+		春节	    2月9日~15日	2月16日（周六）、2月17日（周日）	7天
 		清明节	4月4日~6日	4月7日（周日）	3天
 		劳动节	4月29日~5月1日	4月27日（周六）、4月28日（周日）	3天
 		端午节	6月10日~12日	6月8日（周六）、6月9日（周日）	3天
@@ -169,17 +169,26 @@ public class Lunar {
 	private final static Pattern wFreg = Pattern.compile("^(\\d{2})(\\d)(\\d)([\\s\\*])(.+)$");
 	private final static Pattern wh_Freg = Pattern.compile("^(\\d{2})(\\d{2})$");
 	
-	public boolean findWorkOrHoliday(int month, int day){
+	public int findWorkOrHoliday(int month, int day){
 		
 		Matcher m;
 		for(int i=0;i<Lunar.F_2013.length;i++){
 			m=Lunar.wh_Freg.matcher(Lunar.F_2013[i]);
 			if(m.find()){
 				if(month == Lunar.toInt(m.group(1))&&day == Lunar.toInt(m.group(2)))
-					return true;
+					return 1;
 			}
 		}
-		return false;
+		
+		for(int i=0;i<Lunar.B_2013.length;i++){
+			m=Lunar.wh_Freg.matcher(Lunar.B_2013[i]);
+			if(m.find()){
+				if(month == Lunar.toInt(m.group(1))&&day == Lunar.toInt(m.group(2)))
+					return 2;
+			}
+		}
+		
+		return -1;
 		
 	}
 	

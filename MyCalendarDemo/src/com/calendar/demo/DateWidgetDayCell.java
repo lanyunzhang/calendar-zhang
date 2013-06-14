@@ -46,6 +46,7 @@ public class DateWidgetDayCell extends View {
 	private Paint pt = new Paint();
 	private RectF rect = new RectF();
 	private RectF bitmapRect = new RectF();
+	private RectF rectbackground = new RectF();
 	private String sDate = "";
 	private String sLundarDate = "";
 
@@ -202,6 +203,16 @@ public class DateWidgetDayCell extends View {
 		final int iPosYY = (int)(this.getHeight() - (this.getHeight() - getTextHeight())/3)
 				-((int)pt.getFontMetrics().bottom);
 		
+		if(iDateYear == 2013){
+			if(l.findWorkOrHoliday(iDateMonth+1, iDateDay) == 1){
+				canvas.drawBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.date_bg_jia),
+						null, bitmapRect, null);
+				
+			}else if (l.findWorkOrHoliday(iDateMonth+1, iDateDay)== 2)
+				canvas.drawBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.date_bg_ban),null,
+						bitmapRect, null);
+		}
+		
 		canvas.drawText(sDate, iPosX, iPosY, pt);
 		pt.setTextSize(lTextSize);
 		pt.setUnderlineText(false);
@@ -218,12 +229,7 @@ public class DateWidgetDayCell extends View {
 		else
 			canvas.drawText(sLundarDate, iPosXX, iPosYY, pt);
 		
-		if(iDateYear == 2013){
-			if(l.findWorkOrHoliday(iDateMonth+1, iDateDay)){
-				canvas.drawBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.date_bg_jia),
-						null, bitmapRect, null);
-			}
-		}
+		
 	}
 
 	// 得到字体高度
