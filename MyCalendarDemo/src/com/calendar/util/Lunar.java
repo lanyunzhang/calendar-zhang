@@ -126,6 +126,34 @@ public class Lunar {
 		"0100*除夕"
 	};
 	/**
+	 * 2013放假安排
+	 * 元旦	1月1日~3日	1月5日（周六）、1月6日（周日）	3天
+		春节	2月9日~15日	2月16日（周六）、2月17日（周日）	7天
+		清明节	4月4日~6日	4月7日（周日）	3天
+		劳动节	4月29日~5月1日	4月27日（周六）、4月28日（周日）	3天
+		端午节	6月10日~12日	6月8日（周六）、6月9日（周日）	3天
+		中秋节	9月19日~21日	9月22日（周日）	3天
+		国庆节	10月1日~7日	9月29日（周日）、10月12日（周六）	7天
+	 */
+	private final static String[] F_2013 = {
+		"0101","0102","0103",
+		"0209","0210","0211","0212","0213","0214","0215",
+		"0404","0405","0406",
+		"0429","0430","0501",
+		"0610","0611","0612",
+		"0919","0920","0921",
+		"1001","1002","1003","1004","1005","1006","1007"
+	};
+	private final static String[] B_2013 = {
+		"0105","0106",
+		"0216","0217",
+		"0407",
+		"0427","0428",
+		"0608","0609",
+		"0922",
+		"0929","1012"
+	};
+	/**
 	 * 某月的第几个星期几
 	 */
 	private static String[] wFtv = {
@@ -139,6 +167,21 @@ public class Lunar {
 	}
 	private final static Pattern sFreg = Pattern.compile("^(\\d{2})(\\d{2})([\\s\\*])(.+)$");
 	private final static Pattern wFreg = Pattern.compile("^(\\d{2})(\\d)(\\d)([\\s\\*])(.+)$");
+	private final static Pattern wh_Freg = Pattern.compile("^(\\d{2})(\\d{2})$");
+	
+	public boolean findWorkOrHoliday(int month, int day){
+		
+		Matcher m;
+		for(int i=0;i<Lunar.F_2013.length;i++){
+			m=Lunar.wh_Freg.matcher(Lunar.F_2013[i]);
+			if(m.find()){
+				if(month == Lunar.toInt(m.group(1))&&day == Lunar.toInt(m.group(2)))
+					return true;
+			}
+		}
+		return false;
+		
+	}
 	
 	
 	public  static String findSFestivals(int sM,int sD){

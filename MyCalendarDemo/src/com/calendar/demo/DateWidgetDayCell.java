@@ -8,8 +8,10 @@ import java.util.Date;
 import com.calendar.util.Lunar;
 
 import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.LinearGradient;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
@@ -43,6 +45,7 @@ public class DateWidgetDayCell extends View {
 	private OnItemClick itemClick = null;
 	private Paint pt = new Paint();
 	private RectF rect = new RectF();
+	private RectF bitmapRect = new RectF();
 	private String sDate = "";
 	private String sLundarDate = "";
 
@@ -105,7 +108,6 @@ public class DateWidgetDayCell extends View {
 		 date = myFormatter.parse(iDateYear+"-"+(iDateMonth+1)+"-"+iDateDay);
 
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	
@@ -115,14 +117,13 @@ public class DateWidgetDayCell extends View {
 	// 重载绘制方法
 	@Override
 	protected void onDraw(Canvas canvas) {
-		// TODO Auto-generated method stub
 		super.onDraw(canvas);
 
 		rect.set(0, 0, this.getWidth(), this.getHeight());
+		bitmapRect.set(this.getWidth()/2, 0, this.getWidth(), this.getHeight()/2);
 		rect.inset(1, 1);
 
 		final boolean bFocused = IsViewFocused();
-
 		drawDayView(canvas, bFocused);
 		drawDayNumber(canvas);
 	}
@@ -216,6 +217,13 @@ public class DateWidgetDayCell extends View {
 		}
 		else
 			canvas.drawText(sLundarDate, iPosXX, iPosYY, pt);
+		
+		if(iDateYear == 2013){
+			if(l.findWorkOrHoliday(iDateMonth+1, iDateDay)){
+				canvas.drawBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.date_bg_jia),
+						null, bitmapRect, null);
+			}
+		}
 	}
 
 	// 得到字体高度
