@@ -13,8 +13,7 @@ import android.util.Log;
 
 public class DB {
 	private static SQLiteDatabase db;
-	
-	private DB(Context context) {
+	public DB(Context context) {
 		if(db == null) {
 			db = context.openOrCreateDatabase(Info.TODOLIST_DB, Context.MODE_PRIVATE, null);
 			String sql = "CREATE TABLE IF NOT EXISTS "
@@ -63,6 +62,7 @@ public class DB {
 	}
 	
 	public synchronized long add(Record r) {
+		
 		ContentValues cv = new ContentValues();
 		cv.put(Info.OPTYPE, Info.OP_ADD);
 		cv.put(Info.UID, r.getUid());
@@ -240,16 +240,17 @@ public class DB {
 	}
 	
 	public synchronized ArrayList<Record> getPeriodRecordsByDate(long uid, Date date) {
+		System.out.println(date.getTime());
 		long start;
 		long end;
 		date.setHours(0);
 		date.setMinutes(0);
 		date.setSeconds(0);
-		start = date.getTime() / 1000;
+		start = date.getTime();
 		date.setHours(23);
 		date.setMinutes(59);
 		date.setSeconds(59);
-		end = date.getTime() / 1000;
+		end = date.getTime();
 		String sql = "SELECT * FROM " + Info.TABLE + " WHERE " + Info.UID + " =? and " + Info.ALARMTIME + " >= ? and "
 				+ Info.ALARMTIME + " <= ? and " + Info.TASKSTATUS + " != ?";
 		Cursor cursor = db.rawQuery(sql, new String[]{String.valueOf(uid), String.valueOf(start), String.valueOf(end), String.valueOf(Info.YES_DELETE)});

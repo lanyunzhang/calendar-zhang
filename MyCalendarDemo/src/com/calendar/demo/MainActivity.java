@@ -1,8 +1,11 @@
 package com.calendar.demo;
 
 import java.lang.reflect.Field;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +61,9 @@ import com.calendar.demo.view.widget.OnWheelScrollListener;
 import com.calendar.demo.view.widget.WheelView;
 import com.calendar.demo.view.widget.adapters.ArrayWheelAdapter;
 import com.calendar.demo.view.widget.adapters.NumericWheelAdapter;
+import com.calendar.util.DB;
 import com.calendar.util.NumMonthOfYear;
+import com.calendar.util.Record;
 import com.calendar.util.util;
 
 /**
@@ -91,8 +96,8 @@ import com.calendar.util.util;
  *   14. 添加闹钟逻辑，可以选择多个闹钟，同时列出多个闹钟的时间
  *   15. 在添加事件界面，不能去点击日历的左右切换和日历文本选择逻辑
  *   16. 默认不区分计划和备忘，所以默认隐藏viewpager，只有当设置中打开开关之后，才区分计划和备忘
- *   
  *   17. 上班以及假期的计算方法
+ *   18. 时间插入数据库，从数据库中得到结果
  */
 public class MainActivity extends Activity{
 	// 生成日历，外层容器
@@ -143,6 +148,7 @@ public class MainActivity extends Activity{
     private List<View> listViews; // Tab页面列表
     private ImageView cursor;// 动画图片
     private TextView t1, t2;// 页卡头标
+    private View memoView,planView;
     
 	private ListView listview = null;
 	private ListView alarmlistview = null;
@@ -172,6 +178,9 @@ public class MainActivity extends Activity{
     private int offset = 0;// 动画图片偏移量
     private int currIndex = 0;// 当前页卡编号
     private int bmpW;// 动画图片宽度
+    
+    //数据库对象
+    DB db = APP.getDatabase();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -291,6 +300,23 @@ public class MainActivity extends Activity{
  		InitTextView();
  		InitViewPager();
  		
+ 		mPager.setVisibility(View.GONE);
+ 		memoView.setVisibility(View.GONE);
+ 		planView.setVisibility(View.GONE);
+ 		t1.setVisibility(View.GONE);
+ 		t2.setVisibility(View.GONE);
+ 		cursor.setVisibility(View.GONE);
+ 		
+ 		//第一次进入，读取今天的数据
+ 		arr.clear();
+		ArrayList<Record> record = db.getPeriodRecordsByDate(1, getDate());
+		if(record != null){
+			for(Record records:record){
+				arr.add(records.getTaskDetail());
+			}
+			adapter.notifyDataSetChanged();
+		}
+		
 	}
 	
 	/**
@@ -310,8 +336,10 @@ public class MainActivity extends Activity{
 		mPager = (ViewPager) findViewById(R.id.vPager);
 		listViews = new ArrayList<View>();
 		LayoutInflater mInflater = getLayoutInflater();
-		listViews.add(mInflater.inflate(R.layout.lay1, null));
-		listViews.add(mInflater.inflate(R.layout.lay2, null));
+		memoView = mInflater.inflate(R.layout.lay1, null);
+		listViews.add(memoView);
+		planView = mInflater.inflate(R.layout.lay2, null);
+		listViews.add(planView);
 		mPager.setAdapter(new MyPagerAdapter(listViews));
 		mPager.setCurrentItem(0);
 		mPager.setOnPageChangeListener(new MyOnPageChangeListener());
@@ -834,12 +862,25 @@ public class MainActivity extends Activity{
 			calSelected.setTimeInMillis(item.getDate().getTimeInMillis());
 			int day = GetNumFromDate(calSelected, startDate);
 			selectday = day+1;
-			System.out.println("onClick----"+selectday);
+			System.out.println("onClick----"+(selectday-iDay));
 			item.setSelected(true);
 			updateCalendar();
+			
+			//从数据库中读取数据，然后填充到arr中
 			arr.clear();
-			arr.add(selectday+"");
-			adapter.notifyDataSetChanged();
+			ArrayList<Record> record = db.getPeriodRecordsByDate(1, getDate());
+			if(record != null){
+				for(Record records:record){
+					arr.add(records.getTaskDetail());
+				}
+				adapter.notifyDataSetChanged();
+			}else{
+				//还没有记事，添加记事的背景图片
+				System.out.println("null");
+				arr.clear();
+				adapter.notifyDataSetChanged();
+			}
+			
 		}
 	};
 
@@ -970,11 +1011,39 @@ public class MainActivity extends Activity{
 				//关掉软键盘
 				InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE); 
 				imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-				
 				alarmlistview.setVisibility(View.GONE);
+				
+				//区分是添加还是更新，从入口区分
+				Date date = getDate();
+				Record record = new Record();
+				record.setTaskDetail(text);
+				record.setUid(1);
+				record.setAlarmTime(date.getTime());
+				db.add(record);
 			}
 		}
 		
+	}
+	/**
+	 * 得到日期对象
+	 */
+	
+	private Date getDate(){
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		 Calendar c = Calendar.getInstance();
+		Date date = null;
+		try {
+			date = sdf.parse(iMonthViewCurrentYear +"-"+(iMonthViewCurrentMonth+1)+"-"+(selectday-iDay));
+			date.setHours(c.get(Calendar.HOUR_OF_DAY));
+			date.setMinutes(c.get(Calendar.MINUTE));
+			date.setSeconds(c.get(Calendar.SECOND));
+			
+			System.out.println(iMonthViewCurrentYear +"-"+(iMonthViewCurrentMonth+1)+"-"+(selectday-iDay)+"-"
+					+date.getHours()+"-"+date.getMinutes()+"-"+date.getSeconds());
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return date;
 	}
 	/**
 	 * 这是对添加事件的一些控件进行初始化
