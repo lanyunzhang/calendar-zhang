@@ -33,6 +33,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -99,9 +100,14 @@ import com.calendar.util.util;
  *   15. 在添加事件界面，不能去点击日历的左右切换和日历文本选择逻辑
  *   16. 默认不区分计划和备忘，所以默认隐藏viewpager，只有当设置中打开开关之后，才区分计划和备忘
  *   17. 上班以及假期的计算方法
- *   18. 时间插入数据库，从数据库中得到结果
+ *   18. 时间插入数据库，从数据库中得到结果,删除数据，更新数据
+ *   19. back键的监控，标记所在页面
+ *   
+ *   20. 切换备忘，计划
  */
 public class MainActivity extends Activity{
+	
+
 	// 生成日历，外层容器
 	private LinearLayout layContent = null; //外层日历主体
 	private ArrayList<DateWidgetDayCell> days = new ArrayList<DateWidgetDayCell>();
@@ -133,6 +139,7 @@ public class MainActivity extends Activity{
 	private boolean isPopup = false;
 	private boolean timeScrolled = false;
 	private boolean isAddOrUpdate = true;
+	private boolean isInCalendarActivity = true;
 	// 页面控件
 	private TextView Top_Date = null;
 	private Button btn_pre_month = null;
@@ -328,6 +335,27 @@ public class MainActivity extends Activity{
 	}
 	
 	/**
+	 * 监听back键
+	 */
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		
+		if(keyCode == KeyEvent.KEYCODE_BACK && !isInCalendarActivity ){
+			addeventcontent.setVisibility(View.GONE);
+			save.setVisibility(View.GONE);
+			b_date.setVisibility(View.GONE);
+			b_alarm.setVisibility(View.GONE);
+			
+			listview.setVisibility(View.VISIBLE);
+			iv.setVisibility(View.VISIBLE);
+			setViewVisble();
+			alarmlistview.setVisibility(View.GONE);
+			return false;
+		}
+		return super.onKeyDown(keyCode, event);
+		
+	}
+	/**
 	 * 初始化头标
 	 */
 	private void InitTextView() {
@@ -432,7 +460,10 @@ public class MainActivity extends Activity{
 		public void onPageScrollStateChanged(int arg0) {
 		}
 	}
-	
+/**
+ * 	
+ * 日期选取器
+ */
 	class CustomerDatePickerDialog extends DatePickerDialog {
 
         public CustomerDatePickerDialog(Context context,
@@ -551,8 +582,20 @@ public class MainActivity extends Activity{
 
 			updateCalendar();
 			selectday =iDay + calToday.get(Calendar.DAY_OF_MONTH);
+			refreshMonthData();
     }
 
+    private void refreshMonthData(){
+    	arr.clear();
+		ArrayList<Record> records =db.getPeriodRecordsByDate(1, getDate());
+		if(records != null){
+			for(Record record : records){
+				arr.add(record);
+			}
+		}
+		adapter.notifyDataSetChanged();
+    }
+    
 	protected String GetDateShortString(Calendar date) {
 		String returnString = date.get(Calendar.YEAR) + "/";
 		returnString += date.get(Calendar.MONTH) + 1 + "/";
@@ -817,6 +860,8 @@ public class MainActivity extends Activity{
 			updateCalendar();
 			selectday =iDay + calToday.get(Calendar.DAY_OF_MONTH);
 			System.out.println("prev_month---"+selectday);
+			
+			refreshMonthData();
 		}
 
 	}
@@ -861,7 +906,7 @@ public class MainActivity extends Activity{
 
 			updateCalendar();
 			selectday =iDay + calToday.get(Calendar.DAY_OF_MONTH);
-			
+			refreshMonthData();
 		}
 	}
 	// 点击日历，触发事件
@@ -963,6 +1008,7 @@ public class MainActivity extends Activity{
 	
 	public void clickText(Record record){
 		//首先nt隐藏，显示添加界面，日历同样隐藏相应的部分
+		isInCalendarActivity = false;
 		iv.setVisibility(View.GONE);
 		listview.setVisibility(View.GONE);
 		addNote();
@@ -1040,6 +1086,7 @@ public class MainActivity extends Activity{
 					db.update(record);
 				}
 			}
+			isInCalendarActivity = true;
 		}
 		
 	}
