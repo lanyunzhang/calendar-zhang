@@ -15,5 +15,7 @@
     <string name="Cancel">取消</string>
     <string name="plan">计划</string>
     <string name="memo">备忘</string>
+    <string name="tip">提示</string>
+    <string name="isDelete">确定要删除吗？</string>
 
 </resources>

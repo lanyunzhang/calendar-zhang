@@ -12,8 +12,10 @@ import java.util.Map;
 
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.PendingIntent;
+import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -104,7 +106,7 @@ public class MainActivity extends Activity{
 	private LinearLayout layContent = null; //外层日历主体
 	private ArrayList<DateWidgetDayCell> days = new ArrayList<DateWidgetDayCell>();
 	private ArrayList<View> layrow = new ArrayList<View>();
-	public ArrayList<String> arr=null;;
+	public ArrayList<Record> arr=null;
 
 	// 日期变量
 	public static Calendar calStartDate = Calendar.getInstance();
@@ -130,6 +132,7 @@ public class MainActivity extends Activity{
 	private boolean isOff = false;
 	private boolean isPopup = false;
 	private boolean timeScrolled = false;
+	private boolean isAddOrUpdate = true;
 	// 页面控件
 	private TextView Top_Date = null;
 	private Button btn_pre_month = null;
@@ -164,7 +167,8 @@ public class MainActivity extends Activity{
 	Calendar startDate = null;
 	Calendar endDate = null;
 	int dayvalue = -1;
-
+	private Record record = null;
+	
 	public static int Calendar_WeekBgColor = 0;
 	public static int Calendar_DayBgColor = 0;
 	public static int isHoliday_BgColor = 0;
@@ -174,6 +178,8 @@ public class MainActivity extends Activity{
 	public static int special_Reminder = 0;
 	public static int common_Reminder = 0;
 	public static int Calendar_WeekFontColor = 0;
+	public static final int UPDATE_LIST = 0;
+	public static final int DELETE_LIST = 1;
 	public String UserName = "";
     private int offset = 0;// 动画图片偏移量
     private int currIndex = 0;// 当前页卡编号
@@ -185,6 +191,8 @@ public class MainActivity extends Activity{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		new APP().setHandler(new MyHandler());
+		
 		// 获得屏幕宽和高，并計算出屏幕寬度分七等份的大小
 		WindowManager windowManager = getWindowManager();
 		Display display = windowManager.getDefaultDisplay();
@@ -312,7 +320,7 @@ public class MainActivity extends Activity{
 		ArrayList<Record> record = db.getPeriodRecordsByDate(1, getDate());
 		if(record != null){
 			for(Record records:record){
-				arr.add(records.getTaskDetail());
+				arr.add(records);
 			}
 			adapter.notifyDataSetChanged();
 		}
@@ -871,7 +879,7 @@ public class MainActivity extends Activity{
 			ArrayList<Record> record = db.getPeriodRecordsByDate(1, getDate());
 			if(record != null){
 				for(Record records:record){
-					arr.add(records.getTaskDetail());
+					arr.add(records);
 				}
 				adapter.notifyDataSetChanged();
 			}else{
@@ -953,15 +961,19 @@ public class MainActivity extends Activity{
 			layrow.get(5).setVisibility(View.GONE);
 	}
 	
-	public void clickText(){
+	public void clickText(Record record){
 		//首先nt隐藏，显示添加界面，日历同样隐藏相应的部分
 		iv.setVisibility(View.GONE);
 		listview.setVisibility(View.GONE);
 		addNote();
 		setViewGone();
+		this.record = record;
 		
 		addeventcontent.setVisibility(View.VISIBLE);
-		addeventcontent.setText(null);
+		if(record != null)
+			addeventcontent.setText(record.getTaskDetail());
+		else
+			addeventcontent.setText(null);
 		save.setVisibility(View.VISIBLE);
 		b_date.setVisibility(View.VISIBLE);
 		b_alarm.setVisibility(View.VISIBLE);
@@ -980,7 +992,8 @@ public class MainActivity extends Activity{
 		@Override
 		public void onClick(View v) {
 			//添加相应事件
-			clickText();
+			isAddOrUpdate = true;
+			clickText(null);
 		}
 		
 	}
@@ -1006,20 +1019,26 @@ public class MainActivity extends Activity{
 				iv.setVisibility(View.VISIBLE);
 				setViewVisble();
 				String text = content.trim();
-				arr.add(text);
-				adapter.notifyDataSetChanged();
 				//关掉软键盘
 				InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE); 
 				imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 				alarmlistview.setVisibility(View.GONE);
 				
 				//区分是添加还是更新，从入口区分
-				Date date = getDate();
-				Record record = new Record();
-				record.setTaskDetail(text);
-				record.setUid(1);
-				record.setAlarmTime(date.getTime());
-				db.add(record);
+				//为什么不执行datasetchange也可以呢？
+				if(isAddOrUpdate){
+					Date date = getDate();
+					Record record = new Record();
+					record.setTaskDetail(text);
+					record.setUid(1);
+					record.setAlarmTime(date.getTime());
+					record.setId(db.add(record));
+					arr.add(record);
+					
+				}else{
+					record.setTaskDetail(text);
+					db.update(record);
+				}
 			}
 		}
 		
@@ -1213,6 +1232,13 @@ public class MainActivity extends Activity{
 	    b_alarm.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic__alarm__on));
 	}
 	/**
+	 * 更新事件
+	 */
+	private void updateNote(Record record){
+		clickText(record);
+		isAddOrUpdate = false;
+	}
+	/**
 	 * 自定义handler事件，发送消息来进行
 	 * 
 	 */
@@ -1220,6 +1246,16 @@ public class MainActivity extends Activity{
 		
 		public void handleMessage(Message msg){
 		//这里主要是用来对设置开关进行修改的，动态的改变所需要的view	
+			switch(msg.arg1){
+				case UPDATE_LIST:
+					updateNote((Record)msg.obj);
+					break;
+				case DELETE_LIST:
+					dialog((Record)msg.obj,msg.arg2);
+					break;
+				default:
+					break;
+			}
 		}
 
 	}
@@ -1230,5 +1266,30 @@ public class MainActivity extends Activity{
 			System.out.println("点击之后触发！");
 		}
 	};
+	
+	//删除对话框
+    protected void dialog(Record record, final int position) {
+      final long id = record.getId();
+  	  AlertDialog.Builder builder = new Builder(MainActivity.this);
+  	  builder.setMessage(getString(R.string.isDelete));
+  	  builder.setTitle(getString(R.string.tip));
+  	  builder.setPositiveButton(getString(R.string.YES), new DialogInterface.OnClickListener(){
+		@Override
+		public void onClick(DialogInterface dialog, int which) {
+			//删除之后，更新arr
+			db.delete(id);
+			arr.remove(position);
+			adapter.notifyDataSetChanged();
+			
+		}});
+  	  builder.setNegativeButton(getString(R.string.Cancel), new DialogInterface.OnClickListener(){
+
+		@Override
+		public void onClick(DialogInterface dialog, int which) {
+			dialog.dismiss();
+		}});
+
+  	  builder.create().show();
+  	 }
 	
 }

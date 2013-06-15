@@ -12,16 +12,17 @@ import android.database.sqlite.SQLiteDatabase;
  *
  */
 public class APP extends Application {
-	private MyHandler myhandler = null;
+	private static MyHandler myhandler = null;
 	private static DB db = null;
 	private static APP app= null;
+	
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		app = this;
 	}
 
-	public MyHandler getHandler(){
+	public static MyHandler getHandler(){
 		return myhandler;
 	}
 	

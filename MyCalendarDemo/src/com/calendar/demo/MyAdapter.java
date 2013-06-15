@@ -2,11 +2,17 @@ package com.calendar.demo;
 
 import java.util.ArrayList;
 
+import com.calendar.util.Record;
+
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.content.Context;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
+import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 /**
@@ -17,13 +23,13 @@ import android.widget.TextView;
 public class MyAdapter extends BaseAdapter {  
     private Context context;  
     private LayoutInflater inflater;
-    private ArrayList<String> arr = null;
+    private ArrayList<Record> arr = null;
       
     public MyAdapter(Context context) {  
         super();  
         this.context = context;  
         inflater = LayoutInflater.from(context);  
-        arr = new ArrayList<String>();  
+        arr = new ArrayList<Record>();  
     }  
     @Override  
     public int getCount() {  
@@ -43,20 +49,42 @@ public class MyAdapter extends BaseAdapter {
             view = inflater.inflate(R.layout.item_events, null);  
         }
         final TextView tv = (TextView)view.findViewById(R.id.text);
-        /*final EditText edit = (EditText) view.findViewById(R.id.edit); 
-        edit.setText(arr.get(position));    //在重构adapter的时候不至于数据错乱  
-        Button del = (Button) view.findViewById(R.id.del);  */
-        tv.setText(arr.get(position));
+        tv.setText(arr.get(position).getTaskDetail());
         tv.setOnClickListener(new OnClickListener(){
 			@Override
-			public void onClick(View arg0) {
+			public void onClick(View v) {
+				//点击之后进入修改页面
 				System.out.println("textview clicked!");
+				if(APP.getHandler() != null){
+					Message msg = new Message();
+					msg.obj = arr.get(position);
+					msg.arg1 = MainActivity.UPDATE_LIST;
+					APP.getHandler().sendMessage(msg);
+				}
 			}
 		});
+        tv.setOnLongClickListener(new OnLongClickListener(){
+
+			@Override
+			public boolean onLongClick(View view) {
+				//弹出一个对话框，点击确定删除
+				if(APP.getHandler()!=null){
+					Message msg = new Message();
+					msg.obj = arr.get(position);
+					msg.arg1 = MainActivity.DELETE_LIST;
+					msg.arg2 = position;
+					APP.getHandler().sendMessage(msg);
+					
+				}
+				return false;
+			}});
         return view;  
     }  
     
-    public ArrayList<String> getArrayList(){
+    
+    public ArrayList<Record> getArrayList(){
     	return arr;
     }
+    
+
 }
