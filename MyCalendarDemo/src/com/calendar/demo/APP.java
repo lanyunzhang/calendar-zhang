@@ -2,6 +2,7 @@ package com.calendar.demo;
 
 import com.calendar.demo.MainActivity.MyHandler;
 import com.calendar.util.DB;
+import com.calendar.util.Preference;
 
 import android.app.Application;
 import android.content.Context;
@@ -15,11 +16,12 @@ public class APP extends Application {
 	private static MyHandler myhandler = null;
 	private static DB db = null;
 	private static APP app= null;
-	
+	private static Preference preference = null;
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		app = this;
+		preference = Preference.getPreferences(this);
 	}
 
 	public static MyHandler getHandler(){
@@ -36,5 +38,8 @@ public class APP extends Application {
 		return db;
 	}
 	
+	public static Preference getpreferences(){
+		return preference;
+	}
 	 
 }

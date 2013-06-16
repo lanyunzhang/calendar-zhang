@@ -135,7 +135,7 @@ public class MainActivity extends Activity{
 	private int Calendar_Width = 0;
 	private int Cell_Width = 0;
 	private boolean isFiveRowExist = false;
-	private boolean isOff = false;
+	private boolean isOff = true;
 	private boolean isPopup = false;
 	private boolean timeScrolled = false;
 	private boolean isAddOrUpdate = true;
@@ -151,6 +151,7 @@ public class MainActivity extends Activity{
 	private EditText addeventcontent = null;
 	private TextView save = null;
 	private ImageView iv = null;
+	private ImageView ivs = null;
 	private ImageButton b_date = null;
 	private ImageButton b_alarm = null;
 	private DatePickerDialog mDialog = null;
@@ -159,6 +160,7 @@ public class MainActivity extends Activity{
     private ImageView cursor;// 动画图片
     private TextView t1, t2;// 页卡头标
     private View memoView,planView;
+    private PopupWindow  popupWindow;
     
 	private ListView listview = null;
 	private ListView alarmlistview = null;
@@ -187,6 +189,10 @@ public class MainActivity extends Activity{
 	public static int Calendar_WeekFontColor = 0;
 	public static final int UPDATE_LIST = 0;
 	public static final int DELETE_LIST = 1;
+	public static final int SET_OFF = 2;
+	public static final int SET_ON = 3;
+	public static final int NOMEMOPLAN = 0;
+	public static final int MEMOPLAN = 1;
 	public String UserName = "";
     private int offset = 0;// 动画图片偏移量
     private int currIndex = 0;// 当前页卡编号
@@ -228,7 +234,9 @@ public class MainActivity extends Activity{
 		btn_next_month = (Button) findViewById(R.id.btn_next_month);
 		btn_pre_month.setOnClickListener(new Pre_MonthOnClickListener());
 		btn_next_month.setOnClickListener(new Next_MonthOnClickListener());
-
+		ivs = (ImageView)findViewById(R.id.ivs);
+		ivs.setOnClickListener(new ivsClicklistener());
+		
 		// 计算本月日历中的第一天(一般是上月的某天)，并更新日历
 		generateCalendarMain();
 		//添加listview并且添加随手记两笔textview
@@ -315,12 +323,7 @@ public class MainActivity extends Activity{
  		InitTextView();
  		InitViewPager();
  		
- 		mPager.setVisibility(View.GONE);
- 		memoView.setVisibility(View.GONE);
- 		planView.setVisibility(View.GONE);
- 		t1.setVisibility(View.GONE);
- 		t2.setVisibility(View.GONE);
- 		cursor.setVisibility(View.GONE);
+ 	
  		
  		//第一次进入，读取今天的数据
  		arr.clear();
@@ -331,6 +334,10 @@ public class MainActivity extends Activity{
 			}
 			adapter.notifyDataSetChanged();
 		}
+		
+		setTest();
+		delMemoPlan();
+		b_alarm.setVisibility(View.GONE);
 		
 	}
 	
@@ -345,11 +352,13 @@ public class MainActivity extends Activity{
 			save.setVisibility(View.GONE);
 			b_date.setVisibility(View.GONE);
 			b_alarm.setVisibility(View.GONE);
+			alarmlistview.setVisibility(View.GONE);
 			
 			listview.setVisibility(View.VISIBLE);
 			iv.setVisibility(View.VISIBLE);
 			setViewVisble();
-			alarmlistview.setVisibility(View.GONE);
+			
+			isInCalendarActivity = true;
 			return false;
 		}
 		return super.onKeyDown(keyCode, event);
@@ -1006,15 +1015,26 @@ public class MainActivity extends Activity{
 			layrow.get(5).setVisibility(View.GONE);
 	}
 	
-	public void clickText(Record record){
-		//首先nt隐藏，显示添加界面，日历同样隐藏相应的部分
-		isInCalendarActivity = false;
+	public void clickText(Record record,int arg){
+		
+		if(arg == NOMEMOPLAN){
+			
+		}else if(arg == MEMOPLAN){
+			
+	    	mPager.setVisibility(View.GONE);
+	 		memoView.setVisibility(View.GONE);
+	 		planView.setVisibility(View.GONE);
+	 		t1.setVisibility(View.GONE);
+	 		t2.setVisibility(View.GONE);
+	 		cursor.setVisibility(View.GONE);
+		}
+		ivs.setVisibility(View.GONE);
 		iv.setVisibility(View.GONE);
+		isInCalendarActivity = false;
 		listview.setVisibility(View.GONE);
 		addNote();
 		setViewGone();
 		this.record = record;
-		
 		addeventcontent.setVisibility(View.VISIBLE);
 		if(record != null)
 			addeventcontent.setText(record.getTaskDetail());
@@ -1022,24 +1042,41 @@ public class MainActivity extends Activity{
 			addeventcontent.setText(null);
 		save.setVisibility(View.VISIBLE);
 		b_date.setVisibility(View.VISIBLE);
-		b_alarm.setVisibility(View.VISIBLE);
+		//b_alarm.setVisibility(View.VISIBLE);
 		//自动弹出软键盘
 		InputMethodManager imm = (InputMethodManager)this.getSystemService(Context.INPUT_METHOD_SERVICE);  
 		imm.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);  
 		imm.showSoftInput(null, InputMethodManager.SHOW_IMPLICIT); 
 	}
 	
+	
 	public void addNote(){
 		//处理添加事件
 		save.setOnClickListener(new addnoteclicklistener());
 	}
+	/**
+	 * 普通添加监听
+	 *
+	 */
 	public class tvClicklistener implements View.OnClickListener{
 
 		@Override
 		public void onClick(View v) {
 			//添加相应事件
 			isAddOrUpdate = true;
-			clickText(null);
+			clickText(null,0);
+		}
+		
+	}
+	/**
+	 * 切换之后的添加按钮监听
+	 *
+	 */
+	public class ivsClicklistener implements View.OnClickListener{
+
+		@Override
+		public void onClick(View v) {
+			clickText(null,1);
 		}
 		
 	}
@@ -1060,15 +1097,26 @@ public class MainActivity extends Activity{
 				save.setVisibility(View.GONE);
 				b_date.setVisibility(View.GONE);
 				b_alarm.setVisibility(View.GONE);
+				alarmlistview.setVisibility(View.GONE);
 				
-				listview.setVisibility(View.VISIBLE);
-				iv.setVisibility(View.VISIBLE);
+				if(!APP.getpreferences().getMemoPlan()){
+					listview.setVisibility(View.VISIBLE);
+					iv.setVisibility(View.VISIBLE);
+				}else{
+					ivs.setVisibility(View.VISIBLE);
+					mPager.setVisibility(View.VISIBLE);
+			 		memoView.setVisibility(View.VISIBLE);
+			 		planView.setVisibility(View.VISIBLE);
+			 		t1.setVisibility(View.VISIBLE);
+			 		t2.setVisibility(View.VISIBLE);
+			 		cursor.setVisibility(View.VISIBLE);
+				}
 				setViewVisble();
 				String text = content.trim();
 				//关掉软键盘
 				InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE); 
 				imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-				alarmlistview.setVisibility(View.GONE);
+				
 				
 				//区分是添加还是更新，从入口区分
 				//为什么不执行datasetchange也可以呢？
@@ -1126,9 +1174,16 @@ public class MainActivity extends Activity{
 					b_date.setBackgroundDrawable(
 							getResources().getDrawable(R.drawable.setting_switch_default_off));
 					isOff = true;
+					b_alarm.setVisibility(View.GONE);
+					if(isPopup){
+						popupWindow.dismiss();
+						isPopup = false;
+					}
 				}else{
 					b_date.setBackgroundDrawable(getResources().getDrawable(R.drawable.setting_switch_default_on));
 					isOff = false;
+					b_alarm.setVisibility(View.VISIBLE);
+					
 				}
 			}
 			
@@ -1156,7 +1211,7 @@ public class MainActivity extends Activity{
 		curmin = c.get(Calendar.MINUTE);
 		
 		View popupView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.time_layout, null);
-		final PopupWindow  popupWindow = new PopupWindow(popupView,LayoutParams.WRAP_CONTENT,
+		popupWindow = new PopupWindow(popupView,LayoutParams.WRAP_CONTENT,
 				LayoutParams.WRAP_CONTENT);
 		popupWindow.showAsDropDown(layContent,((layContent.getWidth()-popupView.getWidth())/4),0);
 		
@@ -1282,7 +1337,7 @@ public class MainActivity extends Activity{
 	 * 更新事件
 	 */
 	private void updateNote(Record record){
-		clickText(record);
+		clickText(record,0);
 		isAddOrUpdate = false;
 	}
 	/**
@@ -1299,6 +1354,12 @@ public class MainActivity extends Activity{
 					break;
 				case DELETE_LIST:
 					dialog((Record)msg.obj,msg.arg2);
+					break;
+				case SET_ON:
+					setMemoPlan();
+					break;
+				case SET_OFF:
+					delMemoPlan();
 					break;
 				default:
 					break;
@@ -1338,5 +1399,53 @@ public class MainActivity extends Activity{
 
   	  builder.create().show();
   	 }
+    
+    /**
+     * 计划备忘切换视图
+     */
+    
+    private  void setMemoPlan(){
+    	
+    	listview.setVisibility(View.GONE);
+    	
+    	ivs.setVisibility(View.VISIBLE);
+    	mPager.setVisibility(View.VISIBLE);
+ 		memoView.setVisibility(View.VISIBLE);
+ 		planView.setVisibility(View.VISIBLE);
+ 		t1.setVisibility(View.VISIBLE);
+ 		t2.setVisibility(View.VISIBLE);
+ 		cursor.setVisibility(View.VISIBLE);
+    }
+    
+    /**
+     * 取消计划备忘视图
+     */
+    
+    private void delMemoPlan(){
+    	ivs.setVisibility(View.GONE);
+    	mPager.setVisibility(View.GONE);
+ 		memoView.setVisibility(View.GONE);
+ 		planView.setVisibility(View.GONE);
+ 		t1.setVisibility(View.GONE);
+ 		t2.setVisibility(View.GONE);
+ 		cursor.setVisibility(View.GONE);
+ 		
+ 		iv.setVisibility(View.VISIBLE);
+ 		listview.setVisibility(View.VISIBLE);
+    }
+    
+    private void setTest(){
+    	Button b = (Button) findViewById(R.id.setting);
+    	b.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View view) {
+				Intent i = new Intent();
+				i.setClass(MainActivity.this, SetActivity.class);
+				startActivity(i);
+			}
+    		
+    	});
+    }
 	
 }

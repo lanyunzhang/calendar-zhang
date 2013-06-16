@@ -4,7 +4,7 @@
     android:layout_height="fill_parent"
     android:gravity="center_horizontal"
     android:orientation="vertical" >
-
+ <!-- 表头 -->
     <RelativeLayout
         android:id="@+id/relativeLayout1"
         android:layout_width="match_parent"
@@ -66,6 +66,7 @@
         
     </RelativeLayout>
 	
+    <!-- 日历主体 -->
     <LinearLayout
         android:id="@+id/lly"
         android:layout_width="match_parent"
@@ -75,58 +76,7 @@
         
     </LinearLayout>
 
-<LinearLayout 
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:layout_below="@id/lly"
-    android:orientation="vertical" >
 
-    <LinearLayout
-        android:id="@+id/linearLayout1"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:background="#FFFFFF" >
-
-        <TextView
-            android:id="@+id/text1"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_weight="1.0"
-            android:gravity="center"
-            android:text="@string/memo"
-            android:textColor="#000000"
-            android:textSize="22.0dip" />
-
-        <TextView
-            android:id="@+id/text2"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_weight="1.0"
-            android:gravity="center"
-            android:text="@string/plan"
-            android:textColor="#000000"
-            android:textSize="22.0dip" />
-
-    </LinearLayout>
-
-    <ImageView
-        android:id="@+id/cursor"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:scaleType="matrix"
-        android:src="@drawable/a" />
-
-    <android.support.v4.view.ViewPager
-        android:id="@+id/vPager"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_weight="1.0"
-        android:background="#000000"
-        android:flipInterval="30"
-        android:persistentDrawingCache="animation" />
-
-</LinearLayout>
     <ListView
         android:id="@+id/listview"
         android:layout_width="match_parent"
@@ -136,7 +86,7 @@
         
     </ListView>
     
-    <ImageView 
+     <ImageView 
         android:id="@+id/iv"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
@@ -144,9 +94,10 @@
         android:layout_centerHorizontal="true"
 		android:layout_alignParentBottom="true"
 		android:background="@drawable/button__default"
-        />
+     />
     
    <LinearLayout 
+       android:id="@+id/addnote"
        android:layout_width="fill_parent"
        android:layout_height="fill_parent"
        android:layout_below="@+id/lly"
@@ -201,12 +152,80 @@
             android:background="@drawable/day_month_change"
             android:contentDescription="alarm" />
 
+    
+   
     </RelativeLayout>
-    <ListView 
+     <ListView 
         android:id="@+id/alarmlist"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content">
         
     </ListView>
+    
    </LinearLayout>
+   
+   <LinearLayout 
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/lly"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF" >
+
+        <TextView
+            android:id="@+id/text1"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1.0"
+            android:gravity="center"
+            android:text="@string/memo"
+            android:textColor="#000000"
+            android:textSize="22.0dip" />
+
+        <TextView
+            android:id="@+id/text2"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1.0"
+            android:gravity="center"
+            android:text="@string/plan"
+            android:textColor="#000000"
+            android:textSize="22.0dip" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/cursor"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:scaleType="matrix"
+        android:src="@drawable/a" />
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/vPager"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_weight="1.0"
+        android:background="#000000"
+        android:flipInterval="30"
+        android:persistentDrawingCache="animation" />
+
+</LinearLayout>
+
+    <ImageView 
+        android:id="@+id/ivs"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:contentDescription="@string/addview"
+        android:layout_centerHorizontal="true"
+		android:layout_alignParentBottom="true"
+		android:background="@drawable/button__default"
+     />
+    
+
 </RelativeLayout>
