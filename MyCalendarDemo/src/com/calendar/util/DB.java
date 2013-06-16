@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
+import utils.Info;
+
 import android.R.integer;
 import android.content.ContentValues;
 import android.content.Context;
@@ -239,7 +241,7 @@ public class DB {
 		return ans;
 	}
 	
-	public synchronized ArrayList<Record> getPeriodRecordsByDate(long uid, Date date) {
+	public synchronized ArrayList<Record> getPeriodRecordsByDate(long uid, Date date,int planOrNote) {
 		System.out.println(date.getTime());
 		long start;
 		long end;
@@ -251,9 +253,9 @@ public class DB {
 		date.setMinutes(59);
 		date.setSeconds(59);
 		end = date.getTime();
-		String sql = "SELECT * FROM " + Info.TABLE + " WHERE " + Info.UID + " =? and " + Info.ALARMTIME + " >= ? and "
+		String sql = "SELECT * FROM " + Info.TABLE + " WHERE " + Info.UID + " =? and " + Info.ALARM + " =? and " + Info.ALARMTIME + " >= ? and "
 				+ Info.ALARMTIME + " <= ? and " + Info.TASKSTATUS + " != ?";
-		Cursor cursor = db.rawQuery(sql, new String[]{String.valueOf(uid), String.valueOf(start), String.valueOf(end), String.valueOf(Info.YES_DELETE)});
+		Cursor cursor = db.rawQuery(sql, new String[]{String.valueOf(uid), String.valueOf(planOrNote),String.valueOf(start), String.valueOf(end), String.valueOf(Info.YES_DELETE)});
 //		String sql = "SELECT * FROM " + Info.TABLE + " WHERE " + Info.UID + " =?";
 //		Cursor cursor = db.rawQuery(sql, new String[]{"1"});
 		ArrayList<Record> records = null;
