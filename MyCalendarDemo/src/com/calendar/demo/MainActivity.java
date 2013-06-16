@@ -65,6 +65,7 @@ import com.calendar.demo.view.widget.WheelView;
 import com.calendar.demo.view.widget.adapters.ArrayWheelAdapter;
 import com.calendar.demo.view.widget.adapters.NumericWheelAdapter;
 import com.calendar.util.DB;
+import com.calendar.util.Info;
 import com.calendar.util.NumMonthOfYear;
 import com.calendar.util.Record;
 import com.calendar.util.util;
@@ -103,7 +104,7 @@ import com.calendar.util.util;
  *   18. 时间插入数据库，从数据库中得到结果,删除数据，更新数据
  *   19. back键的监控，标记所在页面
  *   
- *   20. 切换备忘，计划
+ *   20. 切换备忘，计划,备忘和计划分别在数据库中查找，如何区分，插入的时候区分备忘和计划
  */
 public class MainActivity extends Activity{
 	
@@ -161,6 +162,8 @@ public class MainActivity extends Activity{
     private TextView t1, t2;// 页卡头标
     private View memoView,planView;
     private PopupWindow  popupWindow;
+    private ListView memolistview = null;
+    private ListView planlistview = null;
     
 	private ListView listview = null;
 	private ListView alarmlistview = null;
@@ -327,7 +330,7 @@ public class MainActivity extends Activity{
  		
  		//第一次进入，读取今天的数据
  		arr.clear();
-		ArrayList<Record> record = db.getPeriodRecordsByDate(1, getDate());
+		ArrayList<Record> record = db.getPeriodRecordsByDate(1, getDate(),Info.NOTE);
 		if(record != null){
 			for(Record records:record){
 				arr.add(records);
@@ -382,12 +385,21 @@ public class MainActivity extends Activity{
 		listViews = new ArrayList<View>();
 		LayoutInflater mInflater = getLayoutInflater();
 		memoView = mInflater.inflate(R.layout.lay1, null);
+		memolistview = (ListView) memoView.findViewById(R.id.memo);
+		memolistview.setAdapter(adapter);
 		listViews.add(memoView);
 		planView = mInflater.inflate(R.layout.lay2, null);
+		planlistview = (ListView)planView.findViewById(R.id.plan);
 		listViews.add(planView);
 		mPager.setAdapter(new MyPagerAdapter(listViews));
 		mPager.setCurrentItem(0);
 		mPager.setOnPageChangeListener(new MyOnPageChangeListener());
+		
+		memolistview.setDividerHeight(0);
+		memolistview.setCacheColorHint(Color.TRANSPARENT);
+		planlistview.setDividerHeight(0);
+		planlistview.setCacheColorHint(Color.TRANSPARENT);
+		
 	}
 
 	/**
@@ -596,7 +608,7 @@ public class MainActivity extends Activity{
 
     private void refreshMonthData(){
     	arr.clear();
-		ArrayList<Record> records =db.getPeriodRecordsByDate(1, getDate());
+		ArrayList<Record> records =db.getPeriodRecordsByDate(1, getDate(),Info.NOTE);
 		if(records != null){
 			for(Record record : records){
 				arr.add(record);
@@ -930,7 +942,7 @@ public class MainActivity extends Activity{
 			
 			//从数据库中读取数据，然后填充到arr中
 			arr.clear();
-			ArrayList<Record> record = db.getPeriodRecordsByDate(1, getDate());
+			ArrayList<Record> record = db.getPeriodRecordsByDate(1, getDate(),Info.NOTE);
 			if(record != null){
 				for(Record records:record){
 					arr.add(records);

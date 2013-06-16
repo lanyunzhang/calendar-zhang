@@ -9,7 +9,7 @@
         android:id="@+id/relativeLayout1"
         android:layout_width="match_parent"
         android:layout_height="40dip"
-        android:background="#EDE8DD" >
+        android:background="@drawable/title" >
 
         <TextView
             android:id="@+id/Top_Date"
@@ -28,8 +28,7 @@
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
             android:layout_marginLeft="15dip"
-            android:text="@string/search"
-            android:background="@drawable/btn__default"
+            android:background="@drawable/search"
             android:textSize="18sp"
             android:textColor="#FFFFFF" />
 
@@ -39,8 +38,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="75dip"
-            android:background="@drawable/previous_month" />
+            android:layout_marginLeft="95dip"
+            android:background="@drawable/pmonth" />
 
         <Button
             android:id="@+id/btn_next_month"
@@ -48,8 +47,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginRight="75dip"
-            android:background="@drawable/next_month" />
+            android:layout_marginRight="95dip"
+            android:background="@drawable/nmonth" />
         
         <Button
             android:id="@+id/setting"
@@ -58,8 +57,7 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="15dip"
-            android:text="@string/setting"
-            android:background="@drawable/btn__default"
+            android:background="@drawable/set"
             android:textSize="18sp"
             android:textColor="#FFFFFF"
              />
