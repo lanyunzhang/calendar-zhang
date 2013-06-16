@@ -48,4 +48,6 @@ public class Info {
 	public static final int NO_COMPLETE = 0;
 	public static final int YES_DELETE = -1;
 	public static final int YES_ALARM = 1;
+	public static final int PLAN = 1;
+	public static final int NOTE = 0;
 }
