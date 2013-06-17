@@ -163,7 +163,7 @@
             android:layout_height="wrap_content"
             android:layout_alignTop="@+id/save"
             android:layout_toRightOf="@+id/b_alarm"
-            android:background="@drawable/day_month_change"
+            android:background="@drawable/setting_switch_default_off"
             android:contentDescription="alarm" />
 
     

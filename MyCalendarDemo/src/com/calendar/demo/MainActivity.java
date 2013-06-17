@@ -1066,6 +1066,7 @@ public class MainActivity extends Activity{
 		cancel.setVisibility(View.VISIBLE);
 		save.setVisibility(View.VISIBLE);
 		b_date.setVisibility(View.VISIBLE);
+		b_date.setBackgroundDrawable(getResources().getDrawable(R.drawable.setting_switch_default_off));
 		//b_alarm.setVisibility(View.VISIBLE);
 		//×Ô¶¯µ¯³öÈí¼üÅÌ
 		InputMethodManager imm = (InputMethodManager)this.getSystemService(Context.INPUT_METHOD_SERVICE);  
@@ -1199,15 +1200,16 @@ public class MainActivity extends Activity{
 			public void onClick(View view) {
 				if(!isOff){
 					b_date.setBackgroundDrawable(
-							getResources().getDrawable(R.drawable.setting_switch_default_on));
-					isOff = true;
+							getResources().getDrawable(R.drawable.setting_switch_default_off));
+				    isOff = true;
 					b_alarm.setVisibility(View.GONE);
 					if(isPopup){
 						popupWindow.dismiss();
 						isPopup = false;
 					}
+					
 				}else{
-					b_date.setBackgroundDrawable(getResources().getDrawable(R.drawable.setting_switch_default_off));
+					b_date.setBackgroundDrawable(getResources().getDrawable(R.drawable.setting_switch_default_on));
 					isOff = false;
 					b_alarm.setVisibility(View.VISIBLE);
 					
