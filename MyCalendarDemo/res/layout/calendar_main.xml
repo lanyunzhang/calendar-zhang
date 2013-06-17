@@ -212,12 +212,19 @@
 
     </LinearLayout>
 
+    <LinearLayout 
+        android:id="@+id/cursorlayout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/out_cursor">
     <ImageView
         android:id="@+id/cursor"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:scaleType="matrix"
         android:src="@drawable/a" />
+    
+    </LinearLayout>
 
     <android.support.v4.view.ViewPager
         android:id="@+id/vPager"

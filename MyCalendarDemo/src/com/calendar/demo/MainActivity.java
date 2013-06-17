@@ -80,7 +80,7 @@ import com.calendar.util.util;
 
  * @Author zhanglanyun 
 
- * @Date 2013-5-21 
+ * @Date 2013-5-21
 
  * @Version V1.0
  * 
@@ -102,7 +102,7 @@ import com.calendar.util.util;
  *   16. 默认不区分计划和备忘，所以默认隐藏viewpager，只有当设置中打开开关之后，才区分计划和备忘
  *   17. 上班以及假期的计算方法
  *   18. 时间插入数据库，从数据库中得到结果,删除数据，更新数据
- *   19. back键的监控，标记所在页面
+ *   19. back键的监控，标记所在页面,取消键的设置监听
  *   
  *   20. 切换备忘，计划,备忘和计划分别在数据库中查找，如何区分，插入的时候区分备忘和计划
  *   21. 有事件就显示黑色的小角，当时间都删除后，黑色的小边角消失
@@ -173,6 +173,7 @@ public class MainActivity extends Activity{
 	private MyAdapter adapter = null;
 	private MyAlarmAdapter maa = null;
 	private TextView cancel = null;
+	private LinearLayout cursorLayout = null;
 
 	// 数据源
 	ArrayList<String> Calendar_Source = null;
@@ -355,6 +356,7 @@ public class MainActivity extends Activity{
 		if(keyCode == KeyEvent.KEYCODE_BACK && !isInCalendarActivity ){
 			addeventcontent.setVisibility(View.GONE);
 			save.setVisibility(View.GONE);
+			cancel.setVisibility(View.GONE);
 			b_date.setVisibility(View.GONE);
 			b_alarm.setVisibility(View.GONE);
 			alarmlistview.setVisibility(View.GONE);
@@ -392,6 +394,7 @@ public class MainActivity extends Activity{
 		listViews.add(memoView);
 		planView = mInflater.inflate(R.layout.lay2, null);
 		planlistview = (ListView)planView.findViewById(R.id.plan);
+		planlistview.setAdapter(adapter);
 		listViews.add(planView);
 		mPager.setAdapter(new MyPagerAdapter(listViews));
 		mPager.setCurrentItem(0);
@@ -408,6 +411,7 @@ public class MainActivity extends Activity{
 	 * 初始化动画
 	 */
 	private void InitImageView() {
+		cursorLayout = (LinearLayout) findViewById(R.id.cursorlayout);
 		cursor = (ImageView) findViewById(R.id.cursor);
 		bmpW = BitmapFactory.decodeResource(getResources(), R.drawable.a)
 				.getWidth();// 获取图片宽度
@@ -509,11 +513,12 @@ public class MainActivity extends Activity{
 		public void onClick(DialogInterface dialog, int which) {
 			//在这里得到年月，点击完成后更新年月，这里只是滑动，应该不会越界。但是阴历有上下界
         	if(which == DialogInterface.BUTTON1){
-				if(iMonthViewCurrentMonth_Dialog != iMonthViewCurrentMonth || 
-						iMonthViewCurrentYear_Dialog != iMonthViewCurrentYear){
+				if((iMonthViewCurrentMonth_Dialog != iMonthViewCurrentMonth || 
+						iMonthViewCurrentYear_Dialog != iMonthViewCurrentYear)
+						&& iMonthViewCurrentYear_Dialog != 0){
 					
-					System.out.println(iMonthViewCurrentMonth_Dialog);
-					System.out.println(iMonthViewCurrentYear_Dialog);
+					System.out.println("month"+iMonthViewCurrentMonth_Dialog);
+					System.out.println("year"+iMonthViewCurrentYear_Dialog);
 					toMonthYear(iMonthViewCurrentMonth_Dialog,iMonthViewCurrentYear_Dialog);
 					
 				}
@@ -1041,6 +1046,7 @@ public class MainActivity extends Activity{
 	 		t1.setVisibility(View.GONE);
 	 		t2.setVisibility(View.GONE);
 	 		cursor.setVisibility(View.GONE);
+	 		cursorLayout.setVisibility(View.GONE);
 		}
 		ivs.setVisibility(View.GONE);
 		iv.setVisibility(View.GONE);
@@ -1050,6 +1056,8 @@ public class MainActivity extends Activity{
 		setViewGone();
 		this.record = record;
 		addeventcontent.setVisibility(View.VISIBLE);
+		addeventcontent.requestFocus();
+		System.out.println("HSHHSHS");
 		if(record != null)
 			addeventcontent.setText(record.getTaskDetail());
 		else
@@ -1111,6 +1119,7 @@ public class MainActivity extends Activity{
 				//不为空的话，保存字符串，并且日历显示，随手记显示，listview添加相应的内容
 				addeventcontent.setVisibility(View.GONE);
 				save.setVisibility(View.GONE);
+				cancel.setVisibility(View.GONE);
 				b_date.setVisibility(View.GONE);
 				b_alarm.setVisibility(View.GONE);
 				alarmlistview.setVisibility(View.GONE);
@@ -1126,6 +1135,7 @@ public class MainActivity extends Activity{
 			 		t1.setVisibility(View.VISIBLE);
 			 		t2.setVisibility(View.VISIBLE);
 			 		cursor.setVisibility(View.VISIBLE);
+			 		cursorLayout.setVisibility(View.VISIBLE);
 				}
 				setViewVisble();
 				String text = content.trim();
@@ -1217,7 +1227,25 @@ public class MainActivity extends Activity{
 
 			@Override
 			public void onClick(View view) {
-				System.out.println("HAHA");
+				if(!isInCalendarActivity){
+					
+					//软键盘？？？
+					InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE); 
+					imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+					
+					addeventcontent.setVisibility(View.GONE);
+					save.setVisibility(View.GONE);
+					cancel.setVisibility(View.GONE);
+					b_date.setVisibility(View.GONE);
+					b_alarm.setVisibility(View.GONE);
+					alarmlistview.setVisibility(View.GONE);
+			
+					listview.setVisibility(View.VISIBLE);
+					iv.setVisibility(View.VISIBLE);
+					setViewVisble();
+					
+					isInCalendarActivity = true;
+				}
 			}});
 		cancel.setVisibility(View.GONE);
 		addeventcontent.setVisibility(View.GONE);
@@ -1314,7 +1342,6 @@ public class MainActivity extends Activity{
 		
 		hours.addScrollingListener(scrollListener);
 		mins.addScrollingListener(scrollListener);
-		
 		
 	}
 	
@@ -1439,6 +1466,7 @@ public class MainActivity extends Activity{
  		t1.setVisibility(View.VISIBLE);
  		t2.setVisibility(View.VISIBLE);
  		cursor.setVisibility(View.VISIBLE);
+ 		cursorLayout.setVisibility(View.VISIBLE);
     }
     
     /**
@@ -1453,6 +1481,7 @@ public class MainActivity extends Activity{
  		t1.setVisibility(View.GONE);
  		t2.setVisibility(View.GONE);
  		cursor.setVisibility(View.GONE);
+ 		cursorLayout.setVisibility(View.GONE);
  		
  		iv.setVisibility(View.VISIBLE);
  		listview.setVisibility(View.VISIBLE);
