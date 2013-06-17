@@ -121,7 +121,7 @@ public class DateWidgetDayCell extends View {
 		super.onDraw(canvas);
 
 		rect.set(0, 0, this.getWidth(), this.getHeight());
-		bitmapRect.set(this.getWidth()/2, 0, this.getWidth(), this.getHeight()/2);
+		bitmapRect.set((this.getWidth()*2)/3, 0, this.getWidth(), (this.getHeight())/3);
 		rect.inset(1, 1);
 
 		final boolean bFocused = IsViewFocused();

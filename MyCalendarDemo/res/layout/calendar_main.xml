@@ -28,7 +28,7 @@
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
             android:layout_marginLeft="15dip"
-            android:background="@drawable/search"
+            android:background="@drawable/search__default"
             android:textSize="18sp"
             android:textColor="#FFFFFF" />
 
@@ -39,7 +39,7 @@
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
             android:layout_marginLeft="95dip"
-            android:background="@drawable/pmonth" />
+            android:background="@drawable/prev_month" />
 
         <Button
             android:id="@+id/btn_next_month"
@@ -48,7 +48,7 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="95dip"
-            android:background="@drawable/nmonth" />
+            android:background="@drawable/next_month" />
         
         <Button
             android:id="@+id/setting"
@@ -57,7 +57,7 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="15dip"
-            android:background="@drawable/set"
+            android:background="@drawable/set__default"
             android:textSize="18sp"
             android:textColor="#FFFFFF"
              />
@@ -106,7 +106,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:background="@drawable/add_event_edit_bg"
+        android:background="@drawable/bg_edittext"
         android:gravity="top"
         android:maxLines="10"
         android:hint="@string/writeit"
@@ -126,12 +126,26 @@
             android:background="@drawable/back_btn_bg"
             android:contentDescription="date"
             android:src="@drawable/ic__alarm" />
+        
+        <TextView
+            android:id="@+id/cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/b_alarm"
+            android:layout_toLeftOf="@id/save"
+            android:background="@drawable/cancel_btn__default"
+            android:gravity="center"
+            android:paddingLeft="5.0dip"
+            android:paddingRight="5.0dip"
+            android:text="@string/Cancel"
+            android:textColor="#000000"
+            android:textSize="18.0sp" />
 		
         <TextView
             android:id="@+id/save"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/b_alarm"
+            android:layout_alignBottom="@+id/cancel"
             android:layout_marginRight="16dp"
             android:layout_alignParentRight="true"
             android:background="@drawable/btn__default"
@@ -139,7 +153,9 @@
             android:paddingLeft="5.0dip"
             android:paddingRight="5.0dip"
             android:text="@string/activity_add_event_save"
+            android:textColor="#000000"
             android:textSize="18.0sp" />
+        
 
         <ImageButton
             android:id="@+id/b_mp"

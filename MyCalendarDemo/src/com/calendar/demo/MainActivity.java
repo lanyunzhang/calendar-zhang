@@ -105,6 +105,7 @@ import com.calendar.util.util;
  *   19. back键的监控，标记所在页面
  *   
  *   20. 切换备忘，计划,备忘和计划分别在数据库中查找，如何区分，插入的时候区分备忘和计划
+ *   21. 有事件就显示黑色的小角，当时间都删除后，黑色的小边角消失
  */
 public class MainActivity extends Activity{
 	
@@ -171,6 +172,7 @@ public class MainActivity extends Activity{
 	private List<Map<String,String>> noteitem = new ArrayList<Map<String,String>>();
 	private MyAdapter adapter = null;
 	private MyAlarmAdapter maa = null;
+	private TextView cancel = null;
 
 	// 数据源
 	ArrayList<String> Calendar_Source = null;
@@ -1052,6 +1054,8 @@ public class MainActivity extends Activity{
 			addeventcontent.setText(record.getTaskDetail());
 		else
 			addeventcontent.setText(null);
+		
+		cancel.setVisibility(View.VISIBLE);
 		save.setVisibility(View.VISIBLE);
 		b_date.setVisibility(View.VISIBLE);
 		//b_alarm.setVisibility(View.VISIBLE);
@@ -1177,6 +1181,7 @@ public class MainActivity extends Activity{
 	public void initAddView(){
 		addeventcontent = (EditText)findViewById(R.id.add_event_content);
 		save = (TextView)findViewById(R.id.save);
+		cancel = (TextView)findViewById(R.id.cancel);
 		b_date = (ImageButton)findViewById(R.id.b_mp);
 		b_date.setOnClickListener(new OnClickListener(){
 
@@ -1184,7 +1189,7 @@ public class MainActivity extends Activity{
 			public void onClick(View view) {
 				if(!isOff){
 					b_date.setBackgroundDrawable(
-							getResources().getDrawable(R.drawable.setting_switch_default_off));
+							getResources().getDrawable(R.drawable.setting_switch_default_on));
 					isOff = true;
 					b_alarm.setVisibility(View.GONE);
 					if(isPopup){
@@ -1192,7 +1197,7 @@ public class MainActivity extends Activity{
 						isPopup = false;
 					}
 				}else{
-					b_date.setBackgroundDrawable(getResources().getDrawable(R.drawable.setting_switch_default_on));
+					b_date.setBackgroundDrawable(getResources().getDrawable(R.drawable.setting_switch_default_off));
 					isOff = false;
 					b_alarm.setVisibility(View.VISIBLE);
 					
@@ -1208,6 +1213,13 @@ public class MainActivity extends Activity{
 					initPopUpWindow();
 			}
 		});
+		cancel.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View view) {
+				System.out.println("HAHA");
+			}});
+		cancel.setVisibility(View.GONE);
 		addeventcontent.setVisibility(View.GONE);
 		save.setVisibility(View.GONE);
 		b_date.setVisibility(View.GONE);
