@@ -62,7 +62,6 @@ import com.calendar.demo.view.widget.OnWheelChangedListener;
 import com.calendar.demo.view.widget.OnWheelClickedListener;
 import com.calendar.demo.view.widget.OnWheelScrollListener;
 import com.calendar.demo.view.widget.WheelView;
-import com.calendar.demo.view.widget.adapters.ArrayWheelAdapter;
 import com.calendar.demo.view.widget.adapters.NumericWheelAdapter;
 import com.calendar.util.DB;
 import com.calendar.util.Info;
@@ -115,6 +114,8 @@ public class MainActivity extends Activity{
 	private ArrayList<DateWidgetDayCell> days = new ArrayList<DateWidgetDayCell>();
 	private ArrayList<View> layrow = new ArrayList<View>();
 	public ArrayList<Record> arr=null;
+	public ArrayList<Record> arrMemoList = null;
+	public ArrayList<Record> arrPlanList = null;
 
 	// 日期变量
 	public static Calendar calStartDate = Calendar.getInstance();
@@ -171,6 +172,8 @@ public class MainActivity extends Activity{
 	private List<Map<String,String>> alarmitem = new ArrayList<Map<String,String>>();
 	private List<Map<String,String>> noteitem = new ArrayList<Map<String,String>>();
 	private MyAdapter adapter = null;
+	private MyAdapter memoAdapter = null;
+	private MyAdapter planAdapter = null;
 	private MyAlarmAdapter maa = null;
 	private TextView cancel = null;
 	private LinearLayout cursorLayout = null;
@@ -227,8 +230,13 @@ public class MainActivity extends Activity{
 		listview = (ListView)mainLayout.findViewById(R.id.listview);
 		alarmlistview= (ListView)mainLayout.findViewById(R.id.alarmlist);
 		adapter = new MyAdapter(MainActivity.this);
+		memoAdapter = new MyAdapter(MainActivity.this);
+		planAdapter = new MyAdapter(MainActivity.this);
 		arr = adapter.getArrayList();
+		arrMemoList = memoAdapter.getArrayList();
+		arrPlanList = planAdapter.getArrayList();
 		listview.setAdapter(adapter);
+		
 		listview.setDividerHeight(0);
 		listview.setCacheColorHint(Color.TRANSPARENT);
 		maa = new MyAlarmAdapter(MainActivity.this);
@@ -390,11 +398,11 @@ public class MainActivity extends Activity{
 		LayoutInflater mInflater = getLayoutInflater();
 		memoView = mInflater.inflate(R.layout.lay1, null);
 		memolistview = (ListView) memoView.findViewById(R.id.memo);
-		memolistview.setAdapter(adapter);
+		memolistview.setAdapter(memoAdapter);
 		listViews.add(memoView);
 		planView = mInflater.inflate(R.layout.lay2, null);
 		planlistview = (ListView)planView.findViewById(R.id.plan);
-		planlistview.setAdapter(adapter);
+		planlistview.setAdapter(planAdapter);
 		listViews.add(planView);
 		mPager.setAdapter(new MyPagerAdapter(listViews));
 		mPager.setCurrentItem(0);
@@ -947,21 +955,42 @@ public class MainActivity extends Activity{
 			item.setSelected(true);
 			updateCalendar();
 			
-			//从数据库中读取数据，然后填充到arr中
-			arr.clear();
-			ArrayList<Record> record = db.getPeriodRecordsByDate(1, getDate(),Info.NOTE);
-			if(record != null){
-				for(Record records:record){
-					arr.add(records);
-				}
-				adapter.notifyDataSetChanged();
-			}else{
-				//还没有记事，添加记事的背景图片
-				System.out.println("null");
+			//从数据库中读取数据，然后填充到arr中,这里区分在那个视图
+			if(!APP.getpreferences().getMemoPlan()){
 				arr.clear();
-				adapter.notifyDataSetChanged();
+				ArrayList<Record> record = db.getPeriodRecordsByDate(1, getDate());
+				if(record != null){
+					for(Record records:record){
+						arr.add(records);
+					}
+					adapter.notifyDataSetChanged();
+				}else{
+					//还没有记事，添加记事的背景图片
+					System.out.println("null");
+					arr.clear();
+					adapter.notifyDataSetChanged();
+				}
+			}else{ // 在计划备忘界面
+				if(currIndex == 0){ // 备忘
+					arrMemoList.clear();
+					ArrayList<Record> record = db.getPeriodRecordsByDate(1, getDate(), 0);
+					if(record != null){
+						for(Record records : record){
+							arrMemoList.add(records);
+						}
+						memoAdapter.notifyDataSetChanged();
+					}
+				}else{ //计划
+					arrPlanList.clear();
+					ArrayList<Record> record = db.getPeriodRecordsByDate(1, getDate(), 1);
+					if(record != null){
+						for(Record records : record){
+							arrPlanList.add(records);
+						}
+						planAdapter.notifyDataSetChanged();
+					}
+				}
 			}
-			
 		}
 	};
 
@@ -1067,6 +1096,8 @@ public class MainActivity extends Activity{
 		save.setVisibility(View.VISIBLE);
 		b_date.setVisibility(View.VISIBLE);
 		b_date.setBackgroundDrawable(getResources().getDrawable(R.drawable.setting_switch_default_off));
+		alarmlistview.setVisibility(View.VISIBLE);
+		
 		//b_alarm.setVisibility(View.VISIBLE);
 		//自动弹出软键盘
 		InputMethodManager imm = (InputMethodManager)this.getSystemService(Context.INPUT_METHOD_SERVICE);  
@@ -1125,10 +1156,28 @@ public class MainActivity extends Activity{
 				b_alarm.setVisibility(View.GONE);
 				alarmlistview.setVisibility(View.GONE);
 				
+				setViewVisble();
+				String text = content.trim();
+				//普通模式
 				if(!APP.getpreferences().getMemoPlan()){
 					listview.setVisibility(View.VISIBLE);
 					iv.setVisibility(View.VISIBLE);
-				}else{
+					
+					if(isAddOrUpdate){
+						Date date = getDate();
+						Record record = new Record();
+						record.setTaskDetail(text);
+						record.setUid(1);
+						record.setAlarmTime(date.getTime());
+						record.setId(db.add(record));
+						arr.add(record);
+						
+					}else{
+						record.setTaskDetail(text);
+						db.update(record);
+					}
+					
+				}else{ // 计划和备忘的插入和更新
 					ivs.setVisibility(View.VISIBLE);
 					mPager.setVisibility(View.VISIBLE);
 			 		memoView.setVisibility(View.VISIBLE);
@@ -1137,9 +1186,39 @@ public class MainActivity extends Activity{
 			 		t2.setVisibility(View.VISIBLE);
 			 		cursor.setVisibility(View.VISIBLE);
 			 		cursorLayout.setVisibility(View.VISIBLE);
+			 		
+			 		if(currIndex == 0){ //计划
+				 		if(isAddOrUpdate){
+				 			Date date = getDate();
+				 			Record record = new Record();
+				 			record.setTaskDetail(text);
+				 			record.setUid(1);
+				 			record.setAlarm(0);
+				 			record.setAlarmTime(date.getTime());
+				 			record.setId(db.add(record));
+				 			arrMemoList.add(record);
+				 			
+				 		}else{
+				 			record.setTaskDetail(text);
+				 			db.update(record);
+				 		}
+			 		}else if (currIndex == 1){ //备忘
+			 			if(isAddOrUpdate){
+			 				Date date = getDate();
+				 			Record record = new Record();
+				 			record.setTaskDetail(text);
+				 			record.setUid(1);
+				 			record.setAlarm(1);
+				 			record.setAlarmTime(date.getTime());
+				 			record.setId(db.add(record));
+				 			arrPlanList.add(record);
+			 			}else{
+			 				record.setTaskDetail(text);
+			 				db.update(record);
+			 			}
+			 		}
 				}
-				setViewVisble();
-				String text = content.trim();
+				
 				//关掉软键盘
 				InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE); 
 				imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
@@ -1147,19 +1226,7 @@ public class MainActivity extends Activity{
 				
 				//区分是添加还是更新，从入口区分
 				//为什么不执行datasetchange也可以呢？
-				if(isAddOrUpdate){
-					Date date = getDate();
-					Record record = new Record();
-					record.setTaskDetail(text);
-					record.setUid(1);
-					record.setAlarmTime(date.getTime());
-					record.setId(db.add(record));
-					arr.add(record);
-					
-				}else{
-					record.setTaskDetail(text);
-					db.update(record);
-				}
+			
 			}
 			isInCalendarActivity = true;
 		}
@@ -1390,7 +1457,13 @@ public class MainActivity extends Activity{
 	 * 更新事件
 	 */
 	private void updateNote(Record record){
-		clickText(record,0);
+		
+		if(APP.getpreferences().getMemoPlan()){
+			clickText(record,MEMOPLAN);
+		}else{
+			clickText(record,NOMEMOPLAN);
+		}
+		
 		isAddOrUpdate = false;
 	}
 	/**

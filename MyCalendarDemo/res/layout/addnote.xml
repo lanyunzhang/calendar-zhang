@@ -1,46 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical" >
-
+   <LinearLayout 
+       android:id="@+id/addnote"
+       android:layout_width="fill_parent"
+       android:layout_height="fill_parent"
+       xmlns:android="http://schemas.android.com/apk/res/android"
+       android:orientation="vertical">
     <EditText
-        android:id="@+id/editText1"
-        android:layout_width="wrap_content"
+        android:id="@+id/add_event_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:ems="10"
-        android:inputType="textMultiLine" >
+        android:background="@drawable/bg_edittext"
+        android:gravity="top"
+        android:maxLines="10"
+        android:hint="@string/writeit"
+        android:paddingLeft="9.0dip"
+        android:paddingTop="6.0dip" 
+        android:layout_weight="1.0"/>
 
-        <requestFocus />
-    </EditText>
-
-    <ImageView
-        android:id="@+id/imageView1"
-        android:layout_width="wrap_content"
+    <RelativeLayout 
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/editText1"
-        android:src="@drawable/ic_launcher" />
+        android:padding="3.0dip"
+        >
+        <ImageButton
+            android:id="@+id/b_alarm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/back_btn_bg"
+            android:contentDescription="date"
+            android:src="@drawable/ic__alarm" />
+        
+        <TextView
+            android:id="@+id/cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/b_alarm"
+            android:layout_toLeftOf="@id/save"
+            android:background="@drawable/cancel_btn__default"
+            android:gravity="center"
+            android:paddingLeft="5.0dip"
+            android:paddingRight="5.0dip"
+            android:text="@string/Cancel"
+            android:textColor="#000000"
+            android:textSize="18.0sp" />
+		
+        <TextView
+            android:id="@+id/save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/cancel"
+            android:layout_marginRight="16dp"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/btn__default"
+            android:gravity="center"
+            android:paddingLeft="5.0dip"
+            android:paddingRight="5.0dip"
+            android:text="@string/activity_add_event_save"
+            android:textColor="#000000"
+            android:textSize="18.0sp" />
 
-    <ImageView
-        android:id="@+id/imageView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/editText1"
-        android:layout_toRightOf="@+id/imageView1"
-        android:src="@drawable/ic_launcher" />
-
-    <Button
-        android:id="@+id/button1"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/imageView2"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="28dp"
-        android:text="Button" />
-
-</RelativeLayout>
+        <ImageButton
+            android:id="@+id/b_mp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/b_alarm"
+            android:layout_alignTop="@+id/b_alarm"
+            android:layout_toRightOf="@+id/b_alarm"
+            android:background="@drawable/setting_switch_default_off"
+            android:contentDescription="alarm" />
+   
+    </RelativeLayout>
+    
+     <ListView 
+        android:id="@+id/alarmlist"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+        
+    </ListView>
+    
+   </LinearLayout>

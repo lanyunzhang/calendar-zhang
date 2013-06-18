@@ -292,6 +292,57 @@ public class DB {
 		return records;
 	}
 	
+	public synchronized ArrayList<Record> getPeriodRecordsByDate(long uid, Date date) {
+		System.out.println(date.getTime());
+		long start;
+		long end;
+		date.setHours(0);
+		date.setMinutes(0);
+		date.setSeconds(0);
+		start = date.getTime();
+		date.setHours(23);
+		date.setMinutes(59);
+		date.setSeconds(59);
+		end = date.getTime();
+		String sql = "SELECT * FROM " + Info.TABLE + " WHERE " + Info.UID + " =? and " + Info.ALARMTIME + " >= ? and "
+				+ Info.ALARMTIME + " <= ? and " + Info.TASKSTATUS + " != ?";
+		Cursor cursor = db.rawQuery(sql, new String[]{String.valueOf(uid),String.valueOf(start), String.valueOf(end), String.valueOf(Info.YES_DELETE)});
+//		String sql = "SELECT * FROM " + Info.TABLE + " WHERE " + Info.UID + " =?";
+//		Cursor cursor = db.rawQuery(sql, new String[]{"1"});
+		ArrayList<Record> records = null;
+		if(cursor.getCount() > 0) {
+			records = new ArrayList<Record>();
+			
+			while(cursor.moveToNext()) {
+				records.add(new Record(
+						cursor.getLong(cursor.getColumnIndex(Info.ID)),
+						cursor.getLong(cursor.getColumnIndex(Info.TASKID)),
+						cursor.getInt(cursor.getColumnIndex(Info.UID)),
+						cursor.getInt(cursor.getColumnIndex(Info.OPTYPE)),
+						cursor.getInt(cursor.getColumnIndex(Info.SYN)),
+						cursor.getString(cursor.getColumnIndex(Info.NICKNAME)),
+						cursor.getString(cursor.getColumnIndex(Info.TASKNAME)),
+						cursor.getString(cursor.getColumnIndex(Info.TASKTAG)),
+						cursor.getString(cursor.getColumnIndex(Info.TASKDETAIL)),
+						cursor.getLong(cursor.getColumnIndex(Info.TASKCREATETIME)),
+						cursor.getLong(cursor.getColumnIndex(Info.TASKSTARTTIME)),
+						cursor.getLong(cursor.getColumnIndex(Info.TASKENDTIME)),
+						cursor.getLong(cursor.getColumnIndex(Info.TASKEDITTIME)),
+						cursor.getInt(cursor.getColumnIndex(Info.TASKIMPORTANT)),
+						cursor.getInt(cursor.getColumnIndex(Info.TASKCOMPLETE)),
+						cursor.getInt(cursor.getColumnIndex(Info.TASKSTATUS)),
+						cursor.getInt(cursor.getColumnIndex(Info.TASKTYPE)),
+						cursor.getInt(cursor.getColumnIndex(Info.ALARM)),
+						cursor.getInt(cursor.getColumnIndex(Info.ALARMTYPE)),
+						cursor.getInt(cursor.getColumnIndex(Info.ALARMCYCLE)),
+						cursor.getLong(cursor.getColumnIndex(Info.ALARMTIME))
+						));
+			}
+		}
+		cursor.close();
+		return records;
+	}
+	
 	public synchronized ArrayList<Record> getPeriodRecords(long uid, long start, long end) {
 		String sql = "SELECT * FROM " + Info.TABLE + " WHERE " + Info.UID + " =? and " + Info.ALARMTIME + " >= ? and "
 				+ Info.ALARMTIME + " <= ? and " + Info.TASKSTATUS + " != ?";

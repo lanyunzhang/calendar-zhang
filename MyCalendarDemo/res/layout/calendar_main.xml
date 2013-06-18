@@ -169,6 +169,7 @@
     
    
     </RelativeLayout>
+    
      <ListView 
         android:id="@+id/alarmlist"
         android:layout_width="fill_parent"
