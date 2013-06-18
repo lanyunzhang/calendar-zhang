@@ -102,9 +102,11 @@ import com.calendar.util.util;
  *   17. 上班以及假期的计算方法
  *   18. 时间插入数据库，从数据库中得到结果,删除数据，更新数据
  *   19. back键的监控，标记所在页面,取消键的设置监听
- *   
  *   20. 切换备忘，计划,备忘和计划分别在数据库中查找，如何区分，插入的时候区分备忘和计划
- *   21. 有事件就显示黑色的小角，当时间都删除后，黑色的小边角消失
+ *   21. 取消和back按钮的逻辑，应该有问题
+ *   22. 有事件就显示黑色的小角，当时间都删除后，黑色的小边角消失
+ *   23. 每个页面更新的显示,删除以及更新的一致性,闹钟如何显示，如何做
+ *   
  */
 public class MainActivity extends Activity{
 	
@@ -489,10 +491,13 @@ public class MainActivity extends Activity{
 
 		@Override
 		public void onPageScrolled(int arg0, float arg1, int arg2) {
+			System.out.println("scrolled"+arg0+" "+arg1+" "+arg2);
 		}
+		
 
 		@Override
 		public void onPageScrollStateChanged(int arg0) {
+			System.out.println("changed"+arg0);
 		}
 	}
 /**
@@ -971,25 +976,22 @@ public class MainActivity extends Activity{
 					adapter.notifyDataSetChanged();
 				}
 			}else{ // 在计划备忘界面
-				if(currIndex == 0){ // 备忘
 					arrMemoList.clear();
 					ArrayList<Record> record = db.getPeriodRecordsByDate(1, getDate(), 0);
 					if(record != null){
 						for(Record records : record){
 							arrMemoList.add(records);
 						}
-						memoAdapter.notifyDataSetChanged();
 					}
-				}else{ //计划
+					memoAdapter.notifyDataSetChanged();
 					arrPlanList.clear();
-					ArrayList<Record> record = db.getPeriodRecordsByDate(1, getDate(), 1);
+					record = db.getPeriodRecordsByDate(1, getDate(), 1);
 					if(record != null){
 						for(Record records : record){
 							arrPlanList.add(records);
 						}
-						planAdapter.notifyDataSetChanged();
-					}
-				}
+				    }
+					planAdapter.notifyDataSetChanged();
 			}
 		}
 	};
