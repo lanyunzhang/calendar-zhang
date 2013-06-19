@@ -5,13 +5,10 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-import com.calendar.util.Lunar;
-
 import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.LinearGradient;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
@@ -21,6 +18,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.widget.LinearLayout.LayoutParams;
+
+import com.calendar.util.DB;
+import com.calendar.util.Lunar;
 
 /**
  * 日历控件单元格绘制类
@@ -65,7 +65,7 @@ public class DateWidgetDayCell extends View {
 	private boolean hasRecord = false;
 	
 	public static int ANIM_ALPHA_DURATION = 100;
-
+    private DB db = null;
 	public interface OnItemClick {
 		public void OnClick(DateWidgetDayCell item);
 	}
@@ -75,7 +75,8 @@ public class DateWidgetDayCell extends View {
 		super(context);
 		setLayoutParams(new LayoutParams(iWidth, iHeight));
 		
-		
+		db = APP.getDatabase();
+		System.out.println("db"+ db == null);
 	}
 
 	// 取变量值
@@ -122,6 +123,7 @@ public class DateWidgetDayCell extends View {
 
 		rect.set(0, 0, this.getWidth(), this.getHeight());
 		bitmapRect.set((this.getWidth()*2)/3, 0, this.getWidth(), (this.getHeight())/3);
+		rectbackground.set(0,0,this.getWidth()/3,this.getHeight()/3);
 		rect.inset(1, 1);
 
 		final boolean bFocused = IsViewFocused();
@@ -228,10 +230,31 @@ public class DateWidgetDayCell extends View {
 		}
 		else
 			canvas.drawText(sLundarDate, iPosXX, iPosYY, pt);
+	
 		
-		
+		if((db.getPeriodRecordsByDate(1, getDates()))!=null){
+			if(db.getPeriodRecordsByDate(1, getDates()).size()>0)
+				canvas.drawBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.noteflag),
+					null, rectbackground, null);
+		}
 	}
 
+	private Date getDates(){
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Calendar c = Calendar.getInstance();
+		Date date = null;
+		try {
+			date = sdf.parse(iDateYear +"-"+(iDateMonth+1)+"-"+(iDateDay));
+			date.setHours(c.get(Calendar.HOUR_OF_DAY));
+			date.setMinutes(c.get(Calendar.MINUTE));
+			date.setSeconds(c.get(Calendar.SECOND));
+			
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return date;
+	}
+	
 	// 得到字体高度
 	private int getTextHeight() {
 		return (int) (-pt.ascent() + pt.descent());

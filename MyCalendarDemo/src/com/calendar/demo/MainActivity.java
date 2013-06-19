@@ -106,6 +106,7 @@ import com.calendar.util.util;
  *   21. 取消和back按钮的逻辑，应该有问题
  *   22. 有事件就显示黑色的小角，当时间都删除后，黑色的小边角消失
  *   23. 每个页面更新的显示,删除以及更新的一致性,闹钟如何显示，如何做
+ *   24. 根据是备忘或者计划来更新数据，正确的显示备忘或者计划
  *   
  */
 public class MainActivity extends Activity{
@@ -339,8 +340,6 @@ public class MainActivity extends Activity{
  		InitTextView();
  		InitViewPager();
  		
- 	
- 		
  		//第一次进入，读取今天的数据
  		arr.clear();
 		ArrayList<Record> record = db.getPeriodRecordsByDate(1, getDate(),Info.NOTE);
@@ -354,9 +353,39 @@ public class MainActivity extends Activity{
 		setTest();
 		delMemoPlan();
 		b_alarm.setVisibility(View.GONE);
+		refreshMonthData();
 		
 	}
 	
+	/**
+	 * 取消的设置
+	 */
+	private void cancelSetVisibility(){
+		addeventcontent.setVisibility(View.GONE);
+		save.setVisibility(View.GONE);
+		cancel.setVisibility(View.GONE);
+		b_date.setVisibility(View.GONE);
+		b_alarm.setVisibility(View.GONE);
+		alarmlistview.setVisibility(View.GONE);
+		setViewVisble();
+		if(!APP.getpreferences().getMemoPlan()){
+			listview.setVisibility(View.VISIBLE);
+			iv.setVisibility(View.VISIBLE);
+		}else{
+			mPager.setVisibility(View.VISIBLE);
+	 		memoView.setVisibility(View.VISIBLE);
+	 		planView.setVisibility(View.VISIBLE);
+	 		t1.setVisibility(View.VISIBLE);
+	 		t2.setVisibility(View.VISIBLE);
+	 		cursor.setVisibility(View.VISIBLE);
+	 		cursorLayout.setVisibility(View.VISIBLE);
+	 		
+	 		memolistview.setVisibility(View.VISIBLE);
+	 		planlistview.setVisibility(View.VISIBLE);
+	 		ivs.setVisibility(View.VISIBLE);
+		}
+		isInCalendarActivity = true;
+	}
 	/**
 	 * 监听back键
 	 */
@@ -364,18 +393,7 @@ public class MainActivity extends Activity{
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		
 		if(keyCode == KeyEvent.KEYCODE_BACK && !isInCalendarActivity ){
-			addeventcontent.setVisibility(View.GONE);
-			save.setVisibility(View.GONE);
-			cancel.setVisibility(View.GONE);
-			b_date.setVisibility(View.GONE);
-			b_alarm.setVisibility(View.GONE);
-			alarmlistview.setVisibility(View.GONE);
-			
-			listview.setVisibility(View.VISIBLE);
-			iv.setVisibility(View.VISIBLE);
-			setViewVisble();
-			
-			isInCalendarActivity = true;
+			cancelSetVisibility();
 			return false;
 		}
 		return super.onKeyDown(keyCode, event);
@@ -627,14 +645,41 @@ public class MainActivity extends Activity{
     }
 
     private void refreshMonthData(){
-    	arr.clear();
-		ArrayList<Record> records =db.getPeriodRecordsByDate(1, getDate(),Info.NOTE);
-		if(records != null){
-			for(Record record : records){
-				arr.add(record);
+    	if(!APP.getpreferences().getMemoPlan()){
+    		System.out.println("notmemoplan");
+			arr.clear();
+			ArrayList<Record> record = db.getPeriodRecordsByDate(1, getDate());
+			if(record != null){
+				for(Record records:record){
+					arr.add(records);
+				}
+				adapter.notifyDataSetChanged();
+			}else{
+				//还没有记事，添加记事的背景图片
+				System.out.println("null");
+				arr.clear();
+				adapter.notifyDataSetChanged();
 			}
+		}else{ // 在计划备忘界面
+				arrMemoList.clear();
+				ArrayList<Record> record = db.getPeriodRecordsByDate(1, getDate(), 0);
+				if(record != null){
+					for(Record records : record){
+						arrMemoList.add(records);
+					}
+				}
+				memoAdapter.notifyDataSetChanged();
+				arrPlanList.clear();
+				record = db.getPeriodRecordsByDate(1, getDate(), 1);
+				if(record != null){
+					for(Record records : record){
+						arrPlanList.add(records);
+					}
+			    }else{
+			    	System.out.println("record is null");
+			    }
+				planAdapter.notifyDataSetChanged();
 		}
-		adapter.notifyDataSetChanged();
     }
     
 	protected String GetDateShortString(Calendar date) {
@@ -1088,7 +1133,6 @@ public class MainActivity extends Activity{
 		this.record = record;
 		addeventcontent.setVisibility(View.VISIBLE);
 		addeventcontent.requestFocus();
-		System.out.println("HSHHSHS");
 		if(record != null)
 			addeventcontent.setText(record.getTaskDetail());
 		else
@@ -1098,6 +1142,7 @@ public class MainActivity extends Activity{
 		save.setVisibility(View.VISIBLE);
 		b_date.setVisibility(View.VISIBLE);
 		b_date.setBackgroundDrawable(getResources().getDrawable(R.drawable.setting_switch_default_off));
+		isOff = true;
 		alarmlistview.setVisibility(View.VISIBLE);
 		
 		//b_alarm.setVisibility(View.VISIBLE);
@@ -1166,11 +1211,15 @@ public class MainActivity extends Activity{
 					iv.setVisibility(View.VISIBLE);
 					
 					if(isAddOrUpdate){
+						
 						Date date = getDate();
 						Record record = new Record();
 						record.setTaskDetail(text);
 						record.setUid(1);
 						record.setAlarmTime(date.getTime());
+						if(!isOff){
+							record.setAlarm(1);
+						}
 						record.setId(db.add(record));
 						arr.add(record);
 						
@@ -1189,7 +1238,7 @@ public class MainActivity extends Activity{
 			 		cursor.setVisibility(View.VISIBLE);
 			 		cursorLayout.setVisibility(View.VISIBLE);
 			 		
-			 		if(currIndex == 0){ //计划
+			 		if(currIndex == 0){ //备忘
 				 		if(isAddOrUpdate){
 				 			Date date = getDate();
 				 			Record record = new Record();
@@ -1204,7 +1253,7 @@ public class MainActivity extends Activity{
 				 			record.setTaskDetail(text);
 				 			db.update(record);
 				 		}
-			 		}else if (currIndex == 1){ //备忘
+			 		}else if (currIndex == 1){ //计划
 			 			if(isAddOrUpdate){
 			 				Date date = getDate();
 				 			Record record = new Record();
@@ -1240,7 +1289,7 @@ public class MainActivity extends Activity{
 	
 	private Date getDate(){
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		 Calendar c = Calendar.getInstance();
+		Calendar c = Calendar.getInstance();
 		Date date = null;
 		try {
 			date = sdf.parse(iMonthViewCurrentYear +"-"+(iMonthViewCurrentMonth+1)+"-"+(selectday-iDay));
@@ -1276,12 +1325,12 @@ public class MainActivity extends Activity{
 						popupWindow.dismiss();
 						isPopup = false;
 					}
-					
+					System.out.println(isOff);
 				}else{
 					b_date.setBackgroundDrawable(getResources().getDrawable(R.drawable.setting_switch_default_on));
 					isOff = false;
 					b_alarm.setVisibility(View.VISIBLE);
-					
+					System.out.println(isOff);
 				}
 			}
 			
@@ -1303,18 +1352,7 @@ public class MainActivity extends Activity{
 					//软键盘？？？
 					InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE); 
 					imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-					
-					addeventcontent.setVisibility(View.GONE);
-					save.setVisibility(View.GONE);
-					cancel.setVisibility(View.GONE);
-					b_date.setVisibility(View.GONE);
-					b_alarm.setVisibility(View.GONE);
-					alarmlistview.setVisibility(View.GONE);
-			
-					listview.setVisibility(View.VISIBLE);
-					iv.setVisibility(View.VISIBLE);
-					setViewVisble();
-					
+					cancelSetVisibility();
 					isInCalendarActivity = true;
 				}
 			}});
@@ -1514,9 +1552,22 @@ public class MainActivity extends Activity{
 		public void onClick(DialogInterface dialog, int which) {
 			//删除之后，更新arr
 			db.delete(id);
-			arr.remove(position);
-			adapter.notifyDataSetChanged();
-			
+			if( db.getPeriodRecordsByDate(1, getDate()) == null){
+				updateCalendar();
+				System.out.println("update calendar!");
+  	  		}
+			if(!APP.getpreferences().getMemoPlan()){
+				arr.remove(position);
+				adapter.notifyDataSetChanged();
+			}else{
+				if(currIndex == 0){
+					arrMemoList.remove(position);
+					memoAdapter.notifyDataSetChanged();
+				}else{
+					arrPlanList.remove(position);
+					memoAdapter.notifyDataSetChanged();
+				}
+			}
 		}});
   	  builder.setNegativeButton(getString(R.string.Cancel), new DialogInterface.OnClickListener(){
 
@@ -1544,6 +1595,7 @@ public class MainActivity extends Activity{
  		t2.setVisibility(View.VISIBLE);
  		cursor.setVisibility(View.VISIBLE);
  		cursorLayout.setVisibility(View.VISIBLE);
+ 		refreshMonthData();
     }
     
     /**
@@ -1562,6 +1614,7 @@ public class MainActivity extends Activity{
  		
  		iv.setVisibility(View.VISIBLE);
  		listview.setVisibility(View.VISIBLE);
+ 		refreshMonthData();
     }
     
     private void setTest(){
