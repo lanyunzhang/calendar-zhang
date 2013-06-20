@@ -17,5 +17,6 @@
     <string name="memo">备忘</string>
     <string name="tip">提示</string>
     <string name="isDelete">确定要删除吗？</string>
+    <string name="settime">请设置时间</string>
 
 </resources>

@@ -242,7 +242,6 @@ public class DB {
 	}
 	
 	public synchronized ArrayList<Record> getPeriodRecordsByDate(long uid, Date date,int planOrNote) {
-		System.out.println(date.getTime());
 		long start;
 		long end;
 		date.setHours(0);
@@ -293,7 +292,6 @@ public class DB {
 	}
 	
 	public synchronized ArrayList<Record> getPeriodRecordsByDate(long uid, Date date) {
-		System.out.println(date.getTime());
 		long start;
 		long end;
 		date.setHours(0);

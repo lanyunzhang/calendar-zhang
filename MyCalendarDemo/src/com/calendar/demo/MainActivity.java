@@ -32,16 +32,21 @@ import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
+import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.GestureDetector.OnGestureListener;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -62,6 +67,7 @@ import com.calendar.demo.view.widget.OnWheelChangedListener;
 import com.calendar.demo.view.widget.OnWheelClickedListener;
 import com.calendar.demo.view.widget.OnWheelScrollListener;
 import com.calendar.demo.view.widget.WheelView;
+import com.calendar.demo.view.widget.adapters.ArrayWheelAdapter;
 import com.calendar.demo.view.widget.adapters.NumericWheelAdapter;
 import com.calendar.util.DB;
 import com.calendar.util.Info;
@@ -109,8 +115,10 @@ import com.calendar.util.util;
  *   24. 根据是备忘或者计划来更新数据，正确的显示备忘或者计划
  *   
  */
-public class MainActivity extends Activity{
+public class MainActivity extends Activity implements OnGestureListener{
 	
+
+
 
 	// 生成日历，外层容器
 	private LinearLayout layContent = null; //外层日历主体
@@ -119,13 +127,14 @@ public class MainActivity extends Activity{
 	public ArrayList<Record> arr=null;
 	public ArrayList<Record> arrMemoList = null;
 	public ArrayList<Record> arrPlanList = null;
+	private int  count = 0;
 
 	// 日期变量
 	public static Calendar calStartDate = Calendar.getInstance();
 	private Calendar calToday = Calendar.getInstance();
 	private Calendar calCalendar = Calendar.getInstance();
 	private Calendar calSelected = Calendar.getInstance();
-
+	private GestureDetector gd = null;
 	// 当前操作日期
 	private int iMonthViewCurrentMonth_Dialog = 0;
 	private int iMonthViewCurrentYear_Dialog = 0;
@@ -140,6 +149,7 @@ public class MainActivity extends Activity{
 	
 	private int Calendar_Width = 0;
 	private int Cell_Width = 0;
+	private int Vposition = 0;
 	private boolean isFiveRowExist = false;
 	private boolean isOff = true;
 	private boolean isPopup = false;
@@ -169,6 +179,11 @@ public class MainActivity extends Activity{
     private PopupWindow  popupWindow;
     private ListView memolistview = null;
     private ListView planlistview = null;
+    private TextView tv1;
+    private TextView tv2;
+    private TextView tv3;
+    private TextView tv4;
+    private TextView tv5;
     
 	private ListView listview = null;
 	private ListView alarmlistview = null;
@@ -180,6 +195,7 @@ public class MainActivity extends Activity{
 	private MyAlarmAdapter maa = null;
 	private TextView cancel = null;
 	private LinearLayout cursorLayout = null;
+	private TextView title = null;
 
 	// 数据源
 	ArrayList<String> Calendar_Source = null;
@@ -222,6 +238,7 @@ public class MainActivity extends Activity{
 		WindowManager windowManager = getWindowManager();
 		Display display = windowManager.getDefaultDisplay();
 		int screenWidth = display.getWidth();
+		
 		Calendar_Width = screenWidth;
 		Cell_Width = Calendar_Width / 7 + 1;
 		util.setWidth(Cell_Width,Calendar_Width);
@@ -229,8 +246,10 @@ public class MainActivity extends Activity{
 		// 制定布局文件，并设置属性
 		mainLayout = (RelativeLayout) getLayoutInflater().inflate(
 				R.layout.calendar_main, null);
+		gd = new GestureDetector(this);
 		setContentView(mainLayout);
 		listview = (ListView)mainLayout.findViewById(R.id.listview);
+		//listview.setEnabled(false);
 		alarmlistview= (ListView)mainLayout.findViewById(R.id.alarmlist);
 		adapter = new MyAdapter(MainActivity.this);
 		memoAdapter = new MyAdapter(MainActivity.this);
@@ -240,6 +259,17 @@ public class MainActivity extends Activity{
 		arrPlanList = planAdapter.getArrayList();
 		listview.setAdapter(adapter);
 		
+	/*	listview.setOnScrollListener(new OnScrollListener(){
+
+			@Override
+			public void onScroll(AbsListView arg0, int arg1, int arg2, int arg3) {
+				// TODO Auto-generated method stub
+			}	
+			@Override
+			public void onScrollStateChanged(AbsListView arg0, int arg1) {
+				// TODO Auto-generated method stub
+				
+			}});*/
 		listview.setDividerHeight(0);
 		listview.setCacheColorHint(Color.TRANSPARENT);
 		maa = new MyAlarmAdapter(MainActivity.this);
@@ -355,6 +385,14 @@ public class MainActivity extends Activity{
 		b_alarm.setVisibility(View.GONE);
 		refreshMonthData();
 		
+	}
+	/**
+	 * 触摸时间的监听
+	 */
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		gd.onTouchEvent(event);
+		return true; 
 	}
 	
 	/**
@@ -1038,6 +1076,8 @@ public class MainActivity extends Activity{
 				    }
 					planAdapter.notifyDataSetChanged();
 			}
+			
+			
 		}
 	};
 
@@ -1113,7 +1153,7 @@ public class MainActivity extends Activity{
 	public void clickText(Record record,int arg){
 		
 		if(arg == NOMEMOPLAN){
-			
+			b_alarm.setVisibility(View.VISIBLE);
 		}else if(arg == MEMOPLAN){
 			
 	    	mPager.setVisibility(View.GONE);
@@ -1123,6 +1163,18 @@ public class MainActivity extends Activity{
 	 		t2.setVisibility(View.GONE);
 	 		cursor.setVisibility(View.GONE);
 	 		cursorLayout.setVisibility(View.GONE);
+	 		
+	 		if(currIndex == 0){
+	 			b_alarm.setVisibility(View.GONE);
+	 			b_date.setVisibility(View.VISIBLE);
+	 			b_date.setBackgroundDrawable(getResources().getDrawable(R.drawable.setting_switch_default_off));
+				isOff = true;
+	 		}else{
+	 			b_alarm.setVisibility(View.VISIBLE);
+	 			b_date.setVisibility(View.VISIBLE);
+	 			b_date.setBackgroundDrawable(getResources().getDrawable(R.drawable.setting_switch_default_on));
+				isOff = false;
+	 		}
 		}
 		ivs.setVisibility(View.GONE);
 		iv.setVisibility(View.GONE);
@@ -1140,12 +1192,12 @@ public class MainActivity extends Activity{
 		
 		cancel.setVisibility(View.VISIBLE);
 		save.setVisibility(View.VISIBLE);
-		b_date.setVisibility(View.VISIBLE);
-		b_date.setBackgroundDrawable(getResources().getDrawable(R.drawable.setting_switch_default_off));
+		//b_date.setVisibility(View.VISIBLE);
+		//b_date.setBackgroundDrawable(getResources().getDrawable(R.drawable.setting_switch_default_off));
 		isOff = true;
 		alarmlistview.setVisibility(View.VISIBLE);
 		
-		//b_alarm.setVisibility(View.VISIBLE);
+		
 		//自动弹出软键盘
 		InputMethodManager imm = (InputMethodManager)this.getSystemService(Context.INPUT_METHOD_SERVICE);  
 		imm.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);  
@@ -1222,6 +1274,7 @@ public class MainActivity extends Activity{
 						}
 						record.setId(db.add(record));
 						arr.add(record);
+						adapter.notifyDataSetChanged();
 						
 					}else{
 						record.setTaskDetail(text);
@@ -1280,6 +1333,9 @@ public class MainActivity extends Activity{
 			
 			}
 			isInCalendarActivity = true;
+			
+			
+		
 		}
 		
 	}
@@ -1316,21 +1372,24 @@ public class MainActivity extends Activity{
 
 			@Override
 			public void onClick(View view) {
-				if(!isOff){
-					b_date.setBackgroundDrawable(
-							getResources().getDrawable(R.drawable.setting_switch_default_off));
-				    isOff = true;
-					b_alarm.setVisibility(View.GONE);
-					if(isPopup){
-						popupWindow.dismiss();
-						isPopup = false;
+				
+				if(APP.getpreferences().getMemoPlan()){
+					if(!isOff){
+						b_date.setBackgroundDrawable(
+								getResources().getDrawable(R.drawable.setting_switch_default_off));
+					    isOff = true;
+						b_alarm.setVisibility(View.GONE);
+						if(isPopup){
+							popupWindow.dismiss();
+							isPopup = false;
+						}
+						System.out.println(isOff);
+					}else{
+						b_date.setBackgroundDrawable(getResources().getDrawable(R.drawable.setting_switch_default_on));
+						isOff = false;
+						b_alarm.setVisibility(View.VISIBLE);
+						System.out.println(isOff);
 					}
-					System.out.println(isOff);
-				}else{
-					b_date.setBackgroundDrawable(getResources().getDrawable(R.drawable.setting_switch_default_on));
-					isOff = false;
-					b_alarm.setVisibility(View.VISIBLE);
-					System.out.println(isOff);
 				}
 			}
 			
@@ -1371,7 +1430,13 @@ public class MainActivity extends Activity{
 		curtime = c.get(Calendar.HOUR_OF_DAY);
 		curmin = c.get(Calendar.MINUTE);
 		
-		View popupView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.time_layout, null);
+		View popupView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.pop_up_date, null);
+		tv1 = (TextView) popupView.findViewById(R.id.tv1);
+		tv2 = (TextView) popupView.findViewById(R.id.tv2);
+		tv3 = (TextView) popupView.findViewById(R.id.tv3);
+		tv4 = (TextView) popupView.findViewById(R.id.tv4);
+		tv5 = (TextView) popupView.findViewById(R.id.tv5);
+		
 		popupWindow = new PopupWindow(popupView,LayoutParams.WRAP_CONTENT,
 				LayoutParams.WRAP_CONTENT);
 		popupWindow.showAsDropDown(layContent,((layContent.getWidth()-popupView.getWidth())/4),0);
@@ -1400,6 +1465,34 @@ public class MainActivity extends Activity{
 				}
 		}});
         
+        final WheelView month = (WheelView) popupView.findViewById(R.id.month);
+        final WheelView year = (WheelView) popupView.findViewById(R.id.year);
+        final WheelView day = (WheelView) popupView.findViewById(R.id.day);
+	        
+        OnWheelChangedListener listener = new OnWheelChangedListener() {
+            public void onChanged(WheelView wheel, int oldValue, int newValue) {
+                updateDays(year, month, day);
+            }
+        };
+
+        // month
+        int curMonth = calendar.get(Calendar.MONTH);
+        String months[] = new String[] {"1", "2", "3", "4", "5",
+                "6", "7", "8", "9", "10", "11", "12"};
+        month.setViewAdapter(new DateArrayAdapter(this, months, curMonth));
+        month.setCurrentItem(curMonth);
+        month.addChangingListener(listener);
+    
+        // year
+        int curYear = calendar.get(Calendar.YEAR);
+        year.setViewAdapter(new DateNumericAdapter(this, curYear-100, curYear + 100, 100));
+        year.setCurrentItem(100);
+        year.addChangingListener(listener);
+        
+        //day
+        updateDays(year, month, day);
+        day.setCurrentItem(calendar.get(Calendar.DAY_OF_MONTH) - 1);
+	        
 		final WheelView hours = (WheelView) popupView.findViewById(R.id.hour);
 		NumericWheelAdapter nwa_h = new NumericWheelAdapter(this,0,23);
 		nwa_h.setTextSize(16);
@@ -1412,7 +1505,7 @@ public class MainActivity extends Activity{
 		mins.setViewAdapter(nwa_m);
 		mins.setCyclic(true);
 	
-		hours.setCurrentItem(curtime);
+	/*	hours.setCurrentItem(curtime);
 		mins.setCurrentItem(curmin);
 	
 		// add listeners
@@ -1450,10 +1543,92 @@ public class MainActivity extends Activity{
 		};
 		
 		hours.addScrollingListener(scrollListener);
-		mins.addScrollingListener(scrollListener);
+		mins.addScrollingListener(scrollListener);*/
 		
 	}
 	
+	  /**
+     * Adapter for numeric wheels. Highlights the current value.
+     */
+    private class DateNumericAdapter extends NumericWheelAdapter {
+        // Index of current item
+        int currentItem;
+        // Index of item to be highlighted
+        int currentValue;
+        
+        /**
+         * Constructor
+         */
+        public DateNumericAdapter(Context context, int minValue, int maxValue, int current) {
+            super(context, minValue, maxValue);
+            this.currentValue = current;
+            setTextSize(16);
+        }
+        
+        @Override
+        protected void configureTextView(TextView view) {
+            super.configureTextView(view);
+            if (currentItem == currentValue) {
+                view.setTextColor(0xFF0000F0);
+            }
+            view.setTypeface(Typeface.SANS_SERIF);
+        }
+        
+        @Override
+        public View getItem(int index, View cachedView, ViewGroup parent) {
+            currentItem = index;
+            return super.getItem(index, cachedView, parent);
+        }
+    }
+    
+    /**
+     * Updates day wheel. Sets max days according to selected month and year
+     */
+    void updateDays(WheelView year, WheelView month, WheelView day) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.YEAR, calendar.get(Calendar.YEAR) + year.getCurrentItem());
+        calendar.set(Calendar.MONTH, month.getCurrentItem());
+        
+        int maxDays = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+        day.setViewAdapter(new DateNumericAdapter(this, 1, maxDays, calendar.get(Calendar.DAY_OF_MONTH) - 1));
+        int curDay = Math.min(maxDays, day.getCurrentItem() + 1);
+        day.setCurrentItem(curDay - 1, true);
+    }
+    
+    /**
+     * Adapter for string based wheel. Highlights the current value.
+     */
+    private class DateArrayAdapter extends ArrayWheelAdapter<String> {
+        // Index of current item
+        int currentItem;
+        // Index of item to be highlighted
+        int currentValue;
+        
+        /**
+         * Constructor
+         */
+        public DateArrayAdapter(Context context, String[] items, int current) {
+            super(context, items);
+            this.currentValue = current;
+            setTextSize(16);
+        }
+        
+        @Override
+        protected void configureTextView(TextView view) {
+            super.configureTextView(view);
+            if (currentItem == currentValue) {
+                view.setTextColor(0xFF0000F0);
+            }
+            view.setTypeface(Typeface.SANS_SERIF);
+        }
+        
+        @Override
+        public View getItem(int index, View cachedView, ViewGroup parent) {
+            currentItem = index;
+            return super.getItem(index, cachedView, parent);
+        }
+    }
+    
 	private void addChangingListener(final WheelView wheel, final String label) {
 		wheel.addChangingListener(new OnWheelChangedListener() {
 			public void onChanged(WheelView wheel, int oldValue, int newValue) {
@@ -1630,5 +1805,60 @@ public class MainActivity extends Activity{
     		
     	});
     }
-	
+
+	@Override
+	public boolean onDown(MotionEvent e) {
+		return false;
+	}
+
+	@Override
+	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+			float velocityY) {
+		
+		System.out.println("onFling");
+		if(e1.getY() - e2.getY() > 0 && Math.abs(velocityX) > 3){
+				upFling();
+			
+		}
+		return false;
+	}
+
+	@Override
+	public void onLongPress(MotionEvent e) {
+		
+	}
+
+	/**
+	 * 监听滑动事件
+	 */
+	@Override
+	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
+			float distanceY) {
+		
+		return false;
+	}
+
+	@Override
+	public void onShowPress(MotionEvent e) {
+		
+	}
+
+	@Override
+	public boolean onSingleTapUp(MotionEvent e) {
+		return false;
+	}
+	/**
+	 * 当可视的条目看不到时，点击上滑，收起日历
+	 */
+	private void upFling(){
+		System.out.println("upFiling");
+		System.out.println(arr.size()-1);
+		Vposition = listview.getLastVisiblePosition();
+		System.out.println(Vposition);
+		/*if(arr.size()-1 !=-1 && Vposition != arr.size()-1){
+			System.out.println("hahahaaahahahahhahah");
+			System.out.println(listview.getLastVisiblePosition());
+			setViewGone();
+		}*/
+	}
 }
