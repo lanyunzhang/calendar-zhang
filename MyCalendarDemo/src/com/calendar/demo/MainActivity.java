@@ -116,6 +116,7 @@ import com.calendar.util.util;
  *   25. 闹钟界面字体设置，修改2月有31天的问题
  *   26. 某些机器点击日历日期，切换不正确
  *   27. 先设置一个闹钟看一下是否正确
+ *   28. 闹钟的取消已调研清楚，闹钟的数据也已经正常
  *   
  */
 public class MainActivity extends Activity implements OnGestureListener{
@@ -1409,6 +1410,9 @@ public class MainActivity extends Activity implements OnGestureListener{
 			public void onClick(View view) {
 				if(!isPopup)
 					initPopUpWindow();
+				//关掉软键盘
+				InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE); 
+				imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 			}
 		});
 		cancel.setOnClickListener(new OnClickListener(){
@@ -1436,6 +1440,9 @@ public class MainActivity extends Activity implements OnGestureListener{
 		isPopup = true;
 		// set current time
 	    Calendar c = Calendar.getInstance();
+	    curyear = 100;
+	    curmonth = c.get(Calendar.MONTH);
+	    curday = c.get(Calendar.DAY_OF_MONTH);
 		curhour = c.get(Calendar.HOUR_OF_DAY);
 		curmin = c.get(Calendar.MINUTE);
 		
@@ -1467,9 +1474,9 @@ public class MainActivity extends Activity implements OnGestureListener{
 			public void onClick(View v) {
 				isPopup = false;
 				if(!timeScrolled){
-					System.out.println((curyear+1913)+" "+(curmonth+1)+" "+(curday+1)+" "+curhour+" "+curmin);
+					System.out.println((curyear+1913)+" "+curmonth+" "+curday+" "+curhour+" "+curmin);
 					//添加定闹钟逻辑，如果设定成功闹钟的颜色要有变化-------------------
-					setAlarm(curhour,curmin);
+					setAlarm(curyear+1913,curmonth,curday,curhour,curmin);
 					popupWindow.dismiss();
 				}
 		}});
@@ -1520,6 +1527,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 		// add listeners
 		addChangingListener(mins, "min");
 		addChangingListener(hours, "hour");
+		
 	
 		OnWheelChangedListener wheelListener = new OnWheelChangedListener() {
 			public void onChanged(WheelView wheel, int oldValue, int newValue) {
@@ -1528,12 +1536,14 @@ public class MainActivity extends Activity implements OnGestureListener{
 					curmin = mins.getCurrentItem();
 					curmonth = month.getCurrentItem();
 					curyear = year.getCurrentItem();
-					curday = day.getCurrentItem();
-					
+					curday = day.getCurrentItem()+1;
 					
 				}
 			}
 		};
+		year.addChangingListener(wheelListener);
+		month.addChangingListener(wheelListener);
+		day.addChangingListener(wheelListener);
 		hours.addChangingListener(wheelListener);
 		mins.addChangingListener(wheelListener);
 		
@@ -1558,7 +1568,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 				curmin = mins.getCurrentItem();
 				curmonth = month.getCurrentItem();
 				curyear = year.getCurrentItem();
-				curday = day.getCurrentItem();
+				curday = day.getCurrentItem()+1;
 			}
 		};
 		
@@ -1663,16 +1673,12 @@ public class MainActivity extends Activity implements OnGestureListener{
 	/**
 	 * 设定闹钟
 	 */
-	public void setAlarm(int hour,int min){
+	public void setAlarm(int year,int month, int day ,int hour,int min){
 		//先得到年月日时分
-		System.out.println(iMonthViewCurrentMonth);
-		System.out.println(iMonthViewCurrentYear); 
-		System.out.println(selectday - iDay);
-		
 		Calendar alarmtime = Calendar.getInstance();
-		alarmtime.set(Calendar.YEAR, iMonthViewCurrentYear);
-		alarmtime.set(Calendar.MONTH, iMonthViewCurrentMonth);
-		alarmtime.set(Calendar.DAY_OF_MONTH, selectday-iDay);
+		alarmtime.set(Calendar.YEAR, year);
+		alarmtime.set(Calendar.MONTH, month);
+		alarmtime.set(Calendar.DAY_OF_MONTH, day);
 		alarmtime.set(Calendar.HOUR_OF_DAY, hour);
 		alarmtime.set(Calendar.MINUTE, min);
 		alarmtime.set(Calendar.SECOND, 0);
@@ -1685,7 +1691,11 @@ public class MainActivity extends Activity implements OnGestureListener{
 		AlarmManager am=(AlarmManager)getSystemService(ALARM_SERVICE);
 	    am.set(AlarmManager.RTC_WAKEUP, alarmtime.getTimeInMillis(), pi);
 	    
-	    maa.getArrayList().add(iMonthViewCurrentYear+"-"+iMonthViewCurrentMonth+"-"+(selectday-iDay)
+	    /**
+	     * 删除闹钟有两种方式，一种是PendingIntent完全一样
+	     * 另外就是requestcode 和 接收器要一样,这样也可以新建一个PendingIntent然后取消
+	     */
+	    maa.getArrayList().add(year+"-"+(month+1)+"-"+day
 	    		+"-"+hour+"-"+min);
 	    maa.notifyDataSetChanged();
 	    
