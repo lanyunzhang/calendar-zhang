@@ -17,6 +17,8 @@
 package com.calendar.demo.view.widget.adapters;
 
 import android.content.Context;
+import android.graphics.Typeface;
+import android.widget.TextView;
 
 /**
  * Numeric Wheel adapter.
@@ -32,6 +34,7 @@ public class NumericWheelAdapter extends AbstractWheelTextAdapter {
     // Values
     private int minValue;
     private int maxValue;
+    
     
     // format
     private String format;
@@ -69,6 +72,7 @@ public class NumericWheelAdapter extends AbstractWheelTextAdapter {
         this.format = format;
     }
 
+    
     @Override
     public CharSequence getItemText(int index) {
         if (index >= 0 && index < getItemsCount()) {
@@ -82,4 +86,7 @@ public class NumericWheelAdapter extends AbstractWheelTextAdapter {
     public int getItemsCount() {
         return maxValue - minValue + 1;
     }    
+    
+    
+    
 }

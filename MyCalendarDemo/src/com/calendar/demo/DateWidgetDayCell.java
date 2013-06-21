@@ -189,7 +189,7 @@ public class DateWidgetDayCell extends View {
 			pt.setColor(MainActivity.unPresentMonth_FontColor);
 
 		if (bToday)
-			pt.setColor(Color.rgb(175, 53, 255));
+			pt.setColor(Color.rgb(55, 193, 0));
 			//pt.setUnderlineText(true);
 
 		final int iPosX = (int) rect.left + ((int) rect.width() >> 1)

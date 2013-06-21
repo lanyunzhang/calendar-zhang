@@ -113,6 +113,9 @@ import com.calendar.util.util;
  *   22. 有事件就显示黑色的小角，当时间都删除后，黑色的小边角消失
  *   23. 每个页面更新的显示,删除以及更新的一致性,闹钟如何显示，如何做
  *   24. 根据是备忘或者计划来更新数据，正确的显示备忘或者计划
+ *   25. 闹钟界面字体设置，修改2月有31天的问题
+ *   26. 某些机器点击日历日期，切换不正确
+ *   27. 先设置一个闹钟看一下是否正确
  *   
  */
 public class MainActivity extends Activity implements OnGestureListener{
@@ -144,8 +147,11 @@ public class MainActivity extends Activity implements OnGestureListener{
 	private int iDay = 0;
 	private int numOfDay = 0;
 	private int selectday = -1;
-	private int curtime = 0;
+	private int curhour = 0;
 	private int curmin = 0;
+	private int curyear = 0;
+	private int curmonth = 0;
+	private int curday = 0;
 	
 	private int Calendar_Width = 0;
 	private int Cell_Width = 0;
@@ -271,7 +277,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 				// TODO Auto-generated method stub
 				
 			}});*/
-		listview.setDividerHeight(0);
+		//listview.setDividerHeight(0);
 		listview.setCacheColorHint(Color.TRANSPARENT);
 		maa = new MyAlarmAdapter(MainActivity.this);
 		alarmlistview.setAdapter(maa);
@@ -1430,7 +1436,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 		isPopup = true;
 		// set current time
 	    Calendar c = Calendar.getInstance();
-		curtime = c.get(Calendar.HOUR_OF_DAY);
+		curhour = c.get(Calendar.HOUR_OF_DAY);
 		curmin = c.get(Calendar.MINUTE);
 		
 		View popupView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.pop_up_date, null);
@@ -1461,9 +1467,9 @@ public class MainActivity extends Activity implements OnGestureListener{
 			public void onClick(View v) {
 				isPopup = false;
 				if(!timeScrolled){
-					System.out.println(curtime+" "+curmin);
-					//添加定闹钟逻辑，如果设定成功闹钟的颜色要有变化
-					setAlarm(curtime,curmin);
+					System.out.println((curyear+1913)+" "+(curmonth+1)+" "+(curday+1)+" "+curhour+" "+curmin);
+					//添加定闹钟逻辑，如果设定成功闹钟的颜色要有变化-------------------
+					setAlarm(curhour,curmin);
 					popupWindow.dismiss();
 				}
 		}});
@@ -1495,20 +1501,20 @@ public class MainActivity extends Activity implements OnGestureListener{
         //day
         updateDays(year, month, day);
         day.setCurrentItem(calendar.get(Calendar.DAY_OF_MONTH) - 1);
+        
 	        
 		final WheelView hours = (WheelView) popupView.findViewById(R.id.hour);
-		NumericWheelAdapter nwa_h = new NumericWheelAdapter(this,0,23);
-		nwa_h.setTextSize(16);
+		DateNumericAdapter nwa_h = new DateNumericAdapter(this,0,23,curhour);
 		hours.setViewAdapter(nwa_h);
 		hours.setCyclic(true);
+		
 	
 		final WheelView mins = (WheelView) popupView.findViewById(R.id.mins);
-		NumericWheelAdapter nwa_m = new NumericWheelAdapter(this,0,59,"%02d");
-		nwa_m.setTextSize(16);
+		DateNumericAdapter nwa_m = new DateNumericAdapter(this,0,59,curmin);
 		mins.setViewAdapter(nwa_m);
 		mins.setCyclic(true);
 	
-	/*	hours.setCurrentItem(curtime);
+		hours.setCurrentItem(curhour);
 		mins.setCurrentItem(curmin);
 	
 		// add listeners
@@ -1518,8 +1524,13 @@ public class MainActivity extends Activity implements OnGestureListener{
 		OnWheelChangedListener wheelListener = new OnWheelChangedListener() {
 			public void onChanged(WheelView wheel, int oldValue, int newValue) {
 				if (!timeScrolled) {
-					curtime= hours.getCurrentItem();
+					curhour= hours.getCurrentItem();
 					curmin = mins.getCurrentItem();
+					curmonth = month.getCurrentItem();
+					curyear = year.getCurrentItem();
+					curday = day.getCurrentItem();
+					
+					
 				}
 			}
 		};
@@ -1533,6 +1544,9 @@ public class MainActivity extends Activity implements OnGestureListener{
         };
         hours.addClickingListener(click);
         mins.addClickingListener(click);
+        month.addClickingListener(click);
+        year.addClickingListener(click);
+        day.addClickingListener(click);
 
 		OnWheelScrollListener scrollListener = new OnWheelScrollListener() {
 			public void onScrollingStarted(WheelView wheel) {
@@ -1540,13 +1554,19 @@ public class MainActivity extends Activity implements OnGestureListener{
 			}
 			public void onScrollingFinished(WheelView wheel) {
 				timeScrolled = false;
-				curtime = hours.getCurrentItem();
+				curhour = hours.getCurrentItem();
 				curmin = mins.getCurrentItem();
+				curmonth = month.getCurrentItem();
+				curyear = year.getCurrentItem();
+				curday = day.getCurrentItem();
 			}
 		};
 		
 		hours.addScrollingListener(scrollListener);
-		mins.addScrollingListener(scrollListener);*/
+		mins.addScrollingListener(scrollListener);
+		month.addScrollingListener(scrollListener);
+		year.addScrollingListener(scrollListener);
+		day.addScrollingListener(scrollListener);
 		
 	}
 	
