@@ -196,6 +196,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 	private TextView cancel = null;
 	private LinearLayout cursorLayout = null;
 	private TextView title = null;
+	private DateWidgetDayCell prevItem = null;
 
 	// 数据源
 	ArrayList<String> Calendar_Source = null;
@@ -767,10 +768,10 @@ public class MainActivity extends Activity implements OnGestureListener{
 	// 生成日历头部
 	private View generateCalendarHeader() {
 		LinearLayout layRow = createLayout(LinearLayout.HORIZONTAL);
-		
+		layRow.setBackgroundColor(Color.rgb(255, 255, 255));
 		for (int iDay = 0; iDay < 7; iDay++) {
 			DateWidgetDayHeader day = new DateWidgetDayHeader(this, Cell_Width,
-					35);
+					 35);
 			
 			final int iWeekDay = DayStyle.getWeekDay(iDay, iFirstDayOfWeek);
 			day.setData(iWeekDay);
@@ -783,7 +784,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 	// 生成日历主体
 	private View generateCalendarMain() {
 		layContent = (LinearLayout)mainLayout.findViewById(R.id.lly);
-		layContent.setBackgroundColor(Color.argb(255, 105, 105, 103));
+		
 		layContent.addView(generateCalendarHeader());
 		days.clear();
 		
@@ -799,7 +800,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 	// 生成日历中的一行，仅画矩形
 	private View generateCalendarRow() {
 		LinearLayout layRow = createLayout(LinearLayout.HORIZONTAL);
-		
+		layRow.setBackgroundColor(Color.rgb(204, 204, 204));
 		for (int iDay = 0; iDay < 7; iDay++) {
 			DateWidgetDayCell dayCell = new DateWidgetDayCell(this, Cell_Width,
 					Cell_Width);
@@ -915,23 +916,22 @@ public class MainActivity extends Activity implements OnGestureListener{
 			dayCell.setSelected(bSelected);
 
 			// 是否有记录
-			boolean hasRecord = false;
+			/*boolean hasRecord = false;
 			
 			if (flag != null && flag[i] == true && calendar_Hashtable != null
 					&& calendar_Hashtable.containsKey(i)) {
 				hasRecord = Calendar_Source.get(calendar_Hashtable.get(i))
 						.contains(UserName);
-			}
+			}*/
 
 			if (bSelected)
 				daySelected = dayCell;
 
 			dayCell.setData(iYear, iMonth, iDay, bToday, bHoliday,
-					iMonthViewCurrentMonth, hasRecord);
+					iMonthViewCurrentMonth, false);
 
 			calCalendar.add(Calendar.DAY_OF_MONTH, 1);
 		}
-		//在重绘之前判断是否要显示几行
 		layContent.invalidate();
 		
 		return daySelected;
@@ -1036,6 +1036,11 @@ public class MainActivity extends Activity implements OnGestureListener{
 	// 点击日历，触发事件
 	private DateWidgetDayCell.OnItemClick mOnDayCellClick = new DateWidgetDayCell.OnItemClick() {
 		public void OnClick(DateWidgetDayCell item) {
+			if(prevItem != null){
+				System.out.println("prevItem");
+				prevItem.setSelected(false);
+				System.out.println("prevItem");
+			}
 			calSelected.setTimeInMillis(item.getDate().getTimeInMillis());
 			int day = GetNumFromDate(calSelected, startDate);
 			selectday = day+1;
@@ -1077,7 +1082,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 					planAdapter.notifyDataSetChanged();
 			}
 			
-			
+			prevItem = item;
 		}
 	};
 
@@ -1105,9 +1110,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 			iDay = 6;
 		}
 		this.iDay = iDay;
-		
 		cal_Now.add(Calendar.DAY_OF_WEEK, -iDay);
-		
 		return cal_Now;
 	}
 

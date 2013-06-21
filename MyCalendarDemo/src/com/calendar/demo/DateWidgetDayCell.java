@@ -8,6 +8,7 @@ import java.util.Date;
 import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -39,8 +40,8 @@ import com.calendar.util.Lunar;
  */
 public class DateWidgetDayCell extends View {
 	// 字体大小 --农历与公历的区分
-	private static final int fTextSize = 28;
-	private static final int lTextSize = 19;
+	private static final int fTextSize = 33;
+	private static final int lTextSize = 14;
 	
 	// 基本元素
 	private OnItemClick itemClick = null;
@@ -124,7 +125,7 @@ public class DateWidgetDayCell extends View {
 
 		rect.set(0, 0, this.getWidth(), this.getHeight());
 		bitmapRect.set((this.getWidth()*2)/3, 0, this.getWidth(), (this.getHeight())/3);
-		rectbackground.set(0,0,this.getWidth()/3,this.getHeight()/3);
+		rectbackground.set(0,0,this.getWidth()/5,this.getHeight()/5);
 		rect.inset(1, 1);
 
 		final boolean bFocused = IsViewFocused();
@@ -142,27 +143,27 @@ public class DateWidgetDayCell extends View {
 		if (bSelected || bFocused) {
 			LinearGradient lGradBkg = null;
 
-			if (bFocused) {
+		/*	if (bFocused) {
 				lGradBkg = new LinearGradient(rect.left, 0, rect.right, 0,
-						0xffaa5500, 0xffffddbb, Shader.TileMode.CLAMP);
-			}
+						0xffaf53ff, 0xffaf53ff, Shader.TileMode.CLAMP);
+			}*/
 			
 
-			if (bSelected) {
+			/*if (bSelected) {
 				lGradBkg = new LinearGradient(rect.left, 0, rect.right, 0,
-						0xff225599, 0xffbbddff, Shader.TileMode.CLAMP);
-			}
+						0xffaf53ff, 0xffaf53ff, Shader.TileMode.CLAMP);
+			}*/
 
-			if (lGradBkg != null) {
-				pt.setShader(lGradBkg);
+			/*if (lGradBkg != null) {
+				pt.setShader(lGradBkg);*/
+			    pt.setColor(Color.rgb(175, 53, 255));
 				canvas.drawRect(rect, pt);
-			}
-
-			pt.setShader(null);
+				pt.setShader(null);
 
 		} else {
 			pt.setColor(getColorBkg(bHoliday, bToday));
 			canvas.drawRect(rect, pt);
+			
 		}
 
 		if (hasRecord) {
@@ -188,7 +189,8 @@ public class DateWidgetDayCell extends View {
 			pt.setColor(MainActivity.unPresentMonth_FontColor);
 
 		if (bToday)
-			pt.setUnderlineText(true);
+			pt.setColor(Color.rgb(175, 53, 255));
+			//pt.setUnderlineText(true);
 
 		final int iPosX = (int) rect.left + ((int) rect.width() >> 1)
 				- ((int) pt.measureText(sDate) >> 1);
@@ -223,15 +225,20 @@ public class DateWidgetDayCell extends View {
 		//添加公历节日以及农历节日
 		String sF = Lunar.findSFestivals(iDateMonth+1 , iDateDay);
 		String lF = Lunar.findLFestivals(l.getLunarMonth(), l.getLunarDay());
-		if(sF != null)
+		pt.setColor(Color.rgb(167, 204, 174));
+		if(sF != null){
+			
 			canvas.drawText(sF, iPosXX, iPosYY, pt);
+		}
 		else if(lF != null){
 			canvas.drawText(lF, iPosXX, iPosYY, pt);
 			System.out.println(lF);
 		}
-		else
+		else{
+			pt.setColor(Color.rgb(188, 188, 188));
 			canvas.drawText(sLundarDate, iPosXX, iPosYY, pt);
-	
+			
+		}
 		
 		if((db.getPeriodRecordsByDate(1, getDates()))!=null){
 			if(db.getPeriodRecordsByDate(1, getDates()).size()>0)
@@ -265,8 +272,8 @@ public class DateWidgetDayCell extends View {
 	public static int getColorBkg(boolean bHoliday, boolean bToday) {
 		if (bToday)
 			return MainActivity.isToday_BgColor;
-		// if (bHoliday) //如需周末有特殊背景色，可去掉注释
-		// return Calendar_TestActivity.isHoliday_BgColor;
+		 if (bHoliday) //如需周末有特殊背景色，可去掉注释
+		 return MainActivity.isHoliday_BgColor;
 		return MainActivity.Calendar_DayBgColor;
 	}
 
@@ -275,7 +282,8 @@ public class DateWidgetDayCell extends View {
 	public void setSelected(boolean bEnable) {
 		if (this.bSelected != bEnable) {
 			this.bSelected = bEnable;
-			this.invalidate();
+			//this.invalidate();
+			this.postInvalidate();
 		}
 	}
 

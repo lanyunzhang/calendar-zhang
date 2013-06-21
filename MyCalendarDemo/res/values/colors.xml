@@ -47,12 +47,12 @@
     <color name="bgcolor">#ffffff</color>
     <color name="txtcolor">#000000</color>
     <color name="red">#ff0000</color>
-    <color name="Calendar_WeekBgColor">#EFE7DE</color>
+    <color name="Calendar_WeekBgColor">#FFFFFF</color>
     <color name="Calendar_WeekFontColor">#8C8A8C</color>
     <color name="Calendar_DayBgColor">#F7F7F7</color>
-    <color name="isHoliday_BgColor">#E0E0E0</color>
+    <color name="isHoliday_BgColor">#F4FAFD</color>
     <color name="unPresentMonth_FontColor">#8C8A8C</color>
-    <color name="isPresentMonth_FontColor">#000000</color>
+    <color name="isPresentMonth_FontColor">#172C36</color>
     <color name="isToday_BgColor">#EBDCC1</color>
     <color name="specialReminder">#FF0000</color>
     <color name="commonReminder">#BDBAB5</color>

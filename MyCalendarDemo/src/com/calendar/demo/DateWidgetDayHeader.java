@@ -2,6 +2,7 @@ package com.calendar.demo;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.view.View;
@@ -55,7 +56,7 @@ public class DateWidgetDayHeader extends View {
 		pt.setTextSize(fTextSize);
 		pt.setAntiAlias(true);
 		pt.setFakeBoldText(true);
-		pt.setColor(MainActivity.Calendar_WeekFontColor);
+		pt.setColor(Color.rgb(48, 58, 61));
 		
 		// draw day name
 		final String sDayName = DayStyle.getWeekDayName(iWeekDay);
