@@ -30,6 +30,10 @@
         <activity
             android:name=".SetActivity">
         </activity>
+        <activity 
+            android:name=".DilogActivity">
+            
+        </activity>
         <receiver android:name=".AlarmReceiver">
              <intent-filter>
                 <action android:name="com.calendar.demo.alarm" />

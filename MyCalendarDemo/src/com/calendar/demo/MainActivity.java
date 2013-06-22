@@ -122,8 +122,6 @@ import com.calendar.util.util;
 public class MainActivity extends Activity implements OnGestureListener{
 	
 
-
-
 	// 生成日历，外层容器
 	private LinearLayout layContent = null; //外层日历主体
 	private ArrayList<DateWidgetDayCell> days = new ArrayList<DateWidgetDayCell>();
