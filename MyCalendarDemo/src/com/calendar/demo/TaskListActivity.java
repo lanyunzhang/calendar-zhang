@@ -58,10 +58,7 @@ public class TaskListActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {  
         super.onCreate(savedInstanceState);  
         
-        requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		setContentView(R.layout.tasklistactivity);
-//		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
-//				R.layout.titlebar);  
         final ListView list = (ListView) findViewById(R.id.MyListView);  
   
         backButton = (Button)findViewById(R.id.backToMain);
