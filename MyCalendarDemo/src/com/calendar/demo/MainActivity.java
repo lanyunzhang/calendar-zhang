@@ -387,6 +387,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 		}
 		
 		setTest();
+		searchTask();
 		delMemoPlan();
 		b_alarm.setVisibility(View.GONE);
 		refreshMonthData();
@@ -1835,6 +1836,24 @@ public class MainActivity extends Activity implements OnGestureListener{
 			}
     		
     	});
+    }
+    
+    private void searchTask()
+    {
+    	Button b = (Button) findViewById(R.id.search);
+    	b.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View view) {
+				Intent i = new Intent();
+				i.setClass(MainActivity.this, TaskListActivity.class);
+				startActivity(i);
+			}
+    		
+    	});
+    	
+    	
+    	
     }
 
 	@Override

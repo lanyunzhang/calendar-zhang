@@ -27,6 +27,11 @@
             android:name=".DateActivity">
             
         </activity>
+         <activity 
+            android:name=".TaskListActivity"
+            >
+            
+        </activity>
         <activity
             android:name=".SetActivity">
         </activity>
