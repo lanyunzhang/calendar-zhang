@@ -343,7 +343,7 @@ public class Lunar {
 	 *            指定农历月份(数字)
 	 * @return 该农历年闰月的月份(数字,没闰返回0)
 	 */
-	private static int getLunarMonthDays(int lunarYear, int lunarMonth) {
+	public static int getLunarMonthDays(int lunarYear, int lunarMonth) {
 		// 数据表中,每个农历年用16bit来表示,
 		// 前12bit分别表示12个月份的大小月,最后4bit表示闰月
 		int daysInLunarMonth = ((Lunar.lunarInfo[lunarYear - 1900] & (0x10000 >> lunarMonth)) != 0) ? 30

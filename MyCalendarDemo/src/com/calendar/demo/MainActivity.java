@@ -113,10 +113,11 @@ import com.calendar.util.util;
  *   22. 有事件就显示黑色的小角，当时间都删除后，黑色的小边角消失
  *   23. 每个页面更新的显示,删除以及更新的一致性,闹钟如何显示，如何做
  *   24. 根据是备忘或者计划来更新数据，正确的显示备忘或者计划
- *   25. 闹钟界面字体设置，修改2月有31天的问题
+ *   25. 闹钟界面字体设置，修改2月有31天的问题?????????????
  *   26. 某些机器点击日历日期，切换不正确
  *   27. 先设置一个闹钟看一下是否正确
  *   28. 闹钟的取消已调研清楚，闹钟的数据也已经正常
+ *   29. 判断农历日期是否合法，以及将合法的农历日期转化到公历日期
  *   
  */
 public class MainActivity extends Activity implements OnGestureListener{
@@ -189,6 +190,7 @@ public class MainActivity extends Activity implements OnGestureListener{
     private TextView tv3;
     private TextView tv4;
     private TextView tv5;
+    private View popupView ;
     
 	private ListView listview = null;
 	private ListView alarmlistview = null;
@@ -225,6 +227,8 @@ public class MainActivity extends Activity implements OnGestureListener{
 	public static final int DELETE_LIST = 1;
 	public static final int SET_OFF = 2;
 	public static final int SET_ON = 3;
+	public static final int TO_MONTH_YEAR = 4;
+	
 	public static final int NOMEMOPLAN = 0;
 	public static final int MEMOPLAN = 1;
 	public String UserName = "";
@@ -427,6 +431,11 @@ public class MainActivity extends Activity implements OnGestureListener{
 	 		memolistview.setVisibility(View.VISIBLE);
 	 		planlistview.setVisibility(View.VISIBLE);
 	 		ivs.setVisibility(View.VISIBLE);
+		}
+		
+		if(isPopup){
+			popupWindow.dismiss();
+			isPopup =false;
 		}
 		isInCalendarActivity = true;
 	}
@@ -1444,7 +1453,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 		curhour = c.get(Calendar.HOUR_OF_DAY);
 		curmin = c.get(Calendar.MINUTE);
 		
-		View popupView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.pop_up_date, null);
+		popupView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.pop_up_date, null);
 		tv1 = (TextView) popupView.findViewById(R.id.tv1);
 		tv2 = (TextView) popupView.findViewById(R.id.tv2);
 		tv3 = (TextView) popupView.findViewById(R.id.tv3);
@@ -1732,6 +1741,9 @@ public class MainActivity extends Activity implements OnGestureListener{
 					break;
 				case SET_OFF:
 					delMemoPlan();
+					break;
+				case TO_MONTH_YEAR:
+					toMonthYear(msg.arg2,msg.what);
 					break;
 				default:
 					break;
