@@ -29,7 +29,7 @@ public class DilogActivity extends Activity {
 
 	              //这里添加点击确定后的逻辑 
 	    	  	   mp.stop();
-	               showDialog("你选择了确定");  
+	               //showDialog("你选择了确定");  
 
 	           }  
 
