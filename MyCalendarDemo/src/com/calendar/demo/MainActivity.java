@@ -1843,7 +1843,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 			@Override
 			public void onClick(View view) {
 				Intent i = new Intent();
-				i.setClass(MainActivity.this, SetActivity.class);
+				i.setClass(MainActivity.this, SettingActivity.class);
 				startActivity(i);
 			}
     		

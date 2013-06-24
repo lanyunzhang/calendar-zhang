@@ -28,8 +28,13 @@
             android:name=".DateActivity">
             
         </activity>
+         <activity 
+            android:name=".TaskListActivity"
+            >
+            
+        </activity>
         <activity
-            android:name=".SetActivity">
+            android:name=".SettingActivity">
         </activity>
         <activity 
             android:name=".DilogActivity"

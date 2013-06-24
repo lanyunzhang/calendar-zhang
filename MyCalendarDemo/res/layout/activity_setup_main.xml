@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/setup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/title"
+        android:gravity="center_vertical|center_horizontal"
+        android:text="@string/setup"
+        android:textColor="#FFFFFF"
+        android:textSize="25sp" />
+
+    <TextView
+        android:id="@+id/plan_memo"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/setup"
+        android:background="#ECE5F1"
+        android:gravity="center_vertical"
+        android:text="@string/plan_memo"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="#000000" />
+
+    <View
+        android:id="@+id/gray_line"
+        android:layout_width="wrap_content"
+        android:layout_height="1dip"
+        android:layout_below="@+id/plan_memo"
+        android:background="#ABABAB" />
+
+    <View
+        android:id="@+id/white_line"
+        android:layout_width="wrap_content"
+        android:layout_height="2dip"
+        android:layout_below="@+id/gray_line"
+        android:background="#FFFFFF" />
+
+    <TextView
+        android:id="@+id/plan_analysis"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/white_line"
+        android:background="#ECE5F1"
+        android:gravity="center_vertical"
+        android:text="@string/plan_analysis"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+     />
+
+    <View
+        android:id="@+id/gray_line_end"
+        android:layout_width="wrap_content"
+        android:layout_height="1dip"
+        android:layout_below="@+id/plan_analysis"
+        android:background="#ABABAB" />
+
+    <ImageView
+        android:id="@+id/off"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/plan_memo"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="14dp"
+        android:layout_marginRight="17dp"
+        android:contentDescription="@+id/off"
+        android:onClick="switchOnOff"
+        android:src="@drawable/off" />
+
+    <ImageView
+        android:id="@+id/return_normal"
+        android:layout_width="wrap_content"
+        android:layout_height="60dp"
+        android:layout_above="@+id/plan_memo"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="14dp"
+        android:contentDescription="@+id/return_normal"
+        android:src="@drawable/return_normal" />
+
+</RelativeLayout>

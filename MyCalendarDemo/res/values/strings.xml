@@ -18,5 +18,8 @@
     <string name="tip">提示</string>
     <string name="isDelete">确定要删除吗？</string>
     <string name="settime">请设置时间</string>
-
+    <string name="action_settings">Settings</string>
+    <string name="setup">设 置</string>
+    <string name="plan_memo">计划/备忘分类</string>
+    <string name="plan_analysis">计划完成度分析</string>
 </resources>
