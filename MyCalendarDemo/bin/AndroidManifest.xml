@@ -36,6 +36,9 @@
         <activity
             android:name=".SettingActivity">
         </activity>
+        <activity
+            android:name=".SetActivity">
+        </activity>
         <activity 
             android:name=".DilogActivity"
             android:theme="@android:style/Theme.Translucent">

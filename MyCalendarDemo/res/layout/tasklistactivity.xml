@@ -33,12 +33,10 @@
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
             android:layout_marginLeft="15dip"
-            android:background="@drawable/search__default"
+            android:background="@drawable/return_normal"
             android:textSize="18sp"
             android:textColor="#FFFFFF" />
 
-    
-       
         
         <Button
             android:id="@+id/searchDone"
@@ -47,7 +45,7 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="15dip"
-            android:background="@drawable/btn__default"
+            android:background="@drawable/search__default"
             android:textSize="18sp"
             android:textColor="#FFFFFF"
              />

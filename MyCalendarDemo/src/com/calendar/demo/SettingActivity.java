@@ -4,11 +4,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -20,6 +22,7 @@ public class SettingActivity extends Activity {
 	private Message msg = null;
 	private Handler handler = null;
 	private TextView plan_analysis = null;
+	private Button  convert = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,8 +31,14 @@ public class SettingActivity extends Activity {
         iv = (ImageView) findViewById(R.id.off);
         back = (ImageView) findViewById(R.id.return_normal);
         plan_analysis = (TextView) findViewById(R.id.plan_analysis);
+        convert = (Button) findViewById(R.id.convert); 
         
-        
+        convert.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View v) {
+				goToConvert();
+			}});
         back.setOnClickListener(new OnClickListener (){
 
 			@Override
@@ -71,6 +80,12 @@ public class SettingActivity extends Activity {
     	}
     	
     	
+    }
+    
+    private void goToConvert(){
+    	Intent i =new Intent();
+    	i.setClass(SettingActivity.this, SetActivity.class);
+    	startActivity(i);
     }
     
 }

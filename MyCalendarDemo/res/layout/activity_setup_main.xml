@@ -88,4 +88,14 @@
         android:contentDescription="@+id/return_normal"
         android:src="@drawable/return_normal" />
 
+    <Button
+        android:id="@+id/convert"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/gray_line_end"
+        android:text="日期转换"
+        android:layout_marginLeft="69dp"
+        android:layout_marginTop="52dp"
+        android:layout_toRightOf="@+id/return_normal" />
+
 </RelativeLayout>

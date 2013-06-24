@@ -941,4 +941,32 @@ public class Lunar {
 		
 		return new Lunar(localdate).getLunarDayString();
 	}
+	/**
+	 * 得到数字形式的年月表示
+	 * @param year
+	 * @param month
+	 * @param day
+	 * @return
+	 */
+	public static String getLunarDayNumberS(int year,int month , int day){
+		SimpleDateFormat myFormatter = new SimpleDateFormat( 
+				"yyyy-MM-dd");
+		Date localdate=null;
+		try {
+			String dates = year + "-" + month + "-"
+					+ day;
+			 localdate= myFormatter.parse(dates);
+
+		} catch (ParseException e) {
+			
+			e.printStackTrace();
+		}
+		
+		return new Lunar(localdate).getLunarDayNumber();
+	}
+	
+	public String getLunarDayNumber(){
+		return lunarYear+"/"+lunarMonth+"/" + lunarDay;
+		
+	}
 }
