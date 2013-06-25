@@ -1876,15 +1876,22 @@ public class MainActivity extends Activity implements OnGestureListener{
 	@Override
 	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
 			float velocityY) {
-		
-		System.out.println("onFling");
-		if(e1.getY() - e2.getY() > 0 && Math.abs(velocityX) > 3){
-				upFling();
-			
+		if(e2.getX() - e1.getX() > 300){
+			overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out); 
+			btn_pre_month.performClick();
+		}else if (e1.getX() - e2.getX() > 300){
+			System.out.println("e1.getx" + e1.getX() + e2.getX());
+			btn_next_month.performClick();
 		}
+		
 		return false;
 	}
 
+	@Override
+	public boolean dispatchTouchEvent(MotionEvent ev) {
+		gd.onTouchEvent(ev);
+		return super.dispatchTouchEvent(ev);
+	}
 	@Override
 	public void onLongPress(MotionEvent e) {
 		
@@ -1897,6 +1904,10 @@ public class MainActivity extends Activity implements OnGestureListener{
 	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
 			float distanceY) {
 		
+		System.out.println("ONSCROLL");
+		/*if(e2.getX() - e1.getX() > 300){
+			btn_pre_month.performClick();
+		}*/
 		return false;
 	}
 
@@ -1907,13 +1918,14 @@ public class MainActivity extends Activity implements OnGestureListener{
 
 	@Override
 	public boolean onSingleTapUp(MotionEvent e) {
-		return false;
+		
+		System.out.println("ONSINGLETAPUP");
+		return true;
 	}
 	/**
 	 * 当可视的条目看不到时，点击上滑，收起日历
 	 */
 	private void upFling(){
-		System.out.println("upFiling");
 		System.out.println(arr.size()-1);
 		Vposition = listview.getLastVisiblePosition();
 		System.out.println(Vposition);

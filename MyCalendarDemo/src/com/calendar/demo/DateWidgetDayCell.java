@@ -65,6 +65,7 @@ public class DateWidgetDayCell extends View {
 	private boolean bTouchedDown = false;
 	private boolean bHoliday = false;
 	private boolean hasRecord = false;
+	private boolean bMove = false;
 	
 	public static int ANIM_ALPHA_DURATION = 100;
     private DB db = null;
@@ -118,6 +119,7 @@ public class DateWidgetDayCell extends View {
 		l = new Lunar(date);
 	}
 
+	
 	// 重载绘制方法
 	@Override
 	protected void onDraw(Canvas canvas) {
@@ -300,22 +302,50 @@ public class DateWidgetDayCell extends View {
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		boolean bHandled = false;
+		float startPosx  = 0;
+		float startPosy  = 0;
+		float endPosx = 0;
+		float endPosy = 0;
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
 			bHandled = true;
-			bTouchedDown = true;
-			invalidate();
+			bTouchedDown = false;
+			startPosx = event.getX();
+			startPosy = event.getY();
+			
 			startAlphaAnimIn(DateWidgetDayCell.this);
+			System.out.println("CELL ACTION_DOWN");
 		}
 		if (event.getAction() == MotionEvent.ACTION_CANCEL) {
 			bHandled = true;
 			bTouchedDown = false;
-			invalidate();
+			System.out.println("CELL ACTION_CANCEL");
+			//invalidate();
 		}
 		if (event.getAction() == MotionEvent.ACTION_UP) {
 			bHandled = true;
-			bTouchedDown = false;
+			
 			invalidate();
-			doItemClick();
+			bTouchedDown = false;
+			
+			if(!bMove)
+				doItemClick();
+			else
+				bMove = false;
+			
+			System.out.println("CELL ACTION_UP");
+		}
+		
+		if(event.getAction() == MotionEvent.ACTION_MOVE){
+			System.out.println("CELL ACTION_MOVE");
+			//bMove = true;
+			endPosx = event.getX();
+			endPosy = event.getY();
+			
+			if(Math.abs(endPosx - startPosx)+Math.abs(endPosy-startPosy) > 100){
+				bMove = true;
+			}else{
+				bTouchedDown = true;
+			}
 		}
 		return bHandled;
 	}
