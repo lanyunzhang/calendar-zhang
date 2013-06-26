@@ -12,6 +12,7 @@ public class Preference {
 	private static Preference mPreferences;
 	private static final String FIRSTLOCK ="FIRSTLOCK";
 	private static final String ISMEMOPLAN ="ISMEMOPLAN";
+	private static final String ALARM = "ALARM";
 	
 	public  Preference(Context context){
 		mSharedPreferences = PreferenceManager
@@ -33,5 +34,14 @@ public class Preference {
 	
 	public boolean getMemoPlan(){
 		return mSharedPreferences.getBoolean(ISMEMOPLAN, false);
+	}
+	
+	public void putAlarm(int num){
+		mEditor.putInt(ALARM, num);
+		mEditor.commit();
+	}
+	
+	public int getAlarm(){
+		return mSharedPreferences.getInt(ALARM, 0);
 	}
 }

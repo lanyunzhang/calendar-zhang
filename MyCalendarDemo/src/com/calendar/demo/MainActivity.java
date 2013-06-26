@@ -40,6 +40,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
@@ -118,6 +119,7 @@ import com.calendar.util.util;
  *   27. 先设置一个闹钟看一下是否正确
  *   28. 闹钟的取消已调研清楚，闹钟的数据也已经正常
  *   29. 判断农历日期是否合法，以及将合法的农历日期转化到公历日期
+ *   30. 覆盖安装时，数据库中的数据都不会删除，所以先判断用户有没有打开计划或者备忘
  *   
  */
 public class MainActivity extends Activity implements OnGestureListener{
@@ -130,6 +132,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 	public ArrayList<Record> arr=null;
 	public ArrayList<Record> arrMemoList = null;
 	public ArrayList<Record> arrPlanList = null;
+	public ArrayList<Time> time = null;
 	private int  count = 0;
 
 	// 日期变量
@@ -380,31 +383,26 @@ public class MainActivity extends Activity implements OnGestureListener{
  		InitTextView();
  		InitViewPager();
  		
- 		//第一次进入，读取今天的数据
- 		arr.clear();
-		ArrayList<Record> record = db.getPeriodRecordsByDate(1, getDate(),Info.NOTE);
-		if(record != null){
-			for(Record records:record){
-				arr.add(records);
-			}
-			adapter.notifyDataSetChanged();
-		}
-		
 		setTest();
 		searchTask();
-		delMemoPlan();
-		b_alarm.setVisibility(View.GONE);
+	
+		if(APP.getpreferences().getMemoPlan()){
+			setMemoPlan();
+		}else{
+			delMemoPlan();
+		}
 		refreshMonthData();
+	
 		
 	}
 	/**
-	 * 触摸时间的监听
+	 * 触摸事件的监听
 	 */
-	@Override
+	/*@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		gd.onTouchEvent(event);
 		return true; 
-	}
+	}*/
 	
 	/**
 	 * 取消的设置
@@ -439,6 +437,8 @@ public class MainActivity extends Activity implements OnGestureListener{
 			isPopup =false;
 		}
 		isInCalendarActivity = true;
+	//更新闹钟列表	
+		time.clear();
 	}
 	/**
 	 * 监听back键
@@ -810,6 +810,8 @@ public class MainActivity extends Activity implements OnGestureListener{
 		}
 		
 		return layContent;
+		
+		
 	}
 
 	// 生成日历中的一行，仅画矩形
@@ -1064,6 +1066,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 			updateCalendar();
 			
 			//从数据库中读取数据，然后填充到arr中,这里区分在那个视图
+			// 这里点击同样要显示闹铃的具体时间------------------》》》》
 			if(!APP.getpreferences().getMemoPlan()){
 				arr.clear();
 				ArrayList<Record> record = db.getPeriodRecordsByDate(1, getDate());
@@ -1344,7 +1347,8 @@ public class MainActivity extends Activity implements OnGestureListener{
 				//关掉软键盘
 				InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE); 
 				imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-				
+				//添加闹钟，并且为每一个闹钟设置requestcode
+				setAlarm();
 				
 				//区分是添加还是更新，从入口区分
 				//为什么不执行datasetchange也可以呢？
@@ -1413,6 +1417,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 			
 		});
 		b_alarm = (ImageButton)findViewById(R.id.b_alarm);
+		b_alarm.setVisibility(View.GONE);
 		b_alarm.setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View view) {
@@ -1422,6 +1427,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 				InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE); 
 				imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 			}
+		
 		});
 		cancel.setOnClickListener(new OnClickListener(){
 
@@ -1483,8 +1489,9 @@ public class MainActivity extends Activity implements OnGestureListener{
 				isPopup = false;
 				if(!timeScrolled){
 					System.out.println((curyear+1913)+" "+curmonth+" "+curday+" "+curhour+" "+curmin);
-					//添加定闹钟逻辑，如果设定成功闹钟的颜色要有变化-------------------
-					setAlarm(curyear+1913,curmonth,curday,curhour,curmin);
+					//添加定闹钟逻辑，如果设定成功闹钟的颜色要有变化-----------
+					//setAlarm(curyear+1913,curmonth,curday,curhour,curmin);,将闹钟添加到一个list中，并不真的进行更新
+					addTimeList(curyear+1913,curmonth,curday,curhour,curmin);
 					popupWindow.dismiss();
 				}
 		}});
@@ -1587,6 +1594,13 @@ public class MainActivity extends Activity implements OnGestureListener{
 		day.addScrollingListener(scrollListener);
 		
 	}
+	/**
+	 * 添加时间
+	 */
+	private void addTimeList(int year,int month,int day,int hour,int minutes){
+		Time alarmtime = new Time(year,month,day,hour,minutes);
+		time.add(alarmtime);
+	}
 	
 	  /**
      * Adapter for numeric wheels. Highlights the current value.
@@ -1681,33 +1695,45 @@ public class MainActivity extends Activity implements OnGestureListener{
 	/**
 	 * 设定闹钟
 	 */
-	public void setAlarm(int year,int month, int day ,int hour,int min){
+	public void setAlarm(){
 		//先得到年月日时分
-		Calendar alarmtime = Calendar.getInstance();
-		alarmtime.set(Calendar.YEAR, year);
-		alarmtime.set(Calendar.MONTH, month);
-		alarmtime.set(Calendar.DAY_OF_MONTH, day);
-		alarmtime.set(Calendar.HOUR_OF_DAY, hour);
-		alarmtime.set(Calendar.MINUTE, min);
-		alarmtime.set(Calendar.SECOND, 0);
 		
-		 
-		Intent intent = new Intent("com.calendar.demo.alarm");
-		intent.setClass(MainActivity.this, AlarmReceiver.class);
-		PendingIntent pi=PendingIntent.getBroadcast(this, 0, intent,0);
-		
-		AlarmManager am=(AlarmManager)getSystemService(ALARM_SERVICE);
-	    am.set(AlarmManager.RTC_WAKEUP, alarmtime.getTimeInMillis(), pi);
-	    
-	    /**
-	     * 删除闹钟有两种方式，一种是PendingIntent完全一样
-	     * 另外就是requestcode 和 接收器要一样,这样也可以新建一个PendingIntent然后取消
-	     */
-	    maa.getArrayList().add(year+"-"+(month+1)+"-"+day
-	    		+"-"+hour+"-"+min);
-	    maa.notifyDataSetChanged();
-	    
-	    b_alarm.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic__alarm__on));
+		if(time.size() != 0){
+			
+			for(Time oneTime:time){
+				
+				int alarm = APP.getpreferences().getAlarm();
+				Calendar alarmtime = Calendar.getInstance();
+				alarmtime.set(Calendar.YEAR, oneTime.getYear());
+				alarmtime.set(Calendar.MONTH, oneTime.getMonth());
+				alarmtime.set(Calendar.DAY_OF_MONTH, oneTime.getDay());
+				alarmtime.set(Calendar.HOUR_OF_DAY, oneTime.getHour());
+				alarmtime.set(Calendar.MINUTE, oneTime.getMinutes());
+				alarmtime.set(Calendar.SECOND, 0);
+				 
+				Intent intent = new Intent("com.calendar.demo.alarm");
+				intent.setClass(MainActivity.this, AlarmReceiver.class);
+				PendingIntent pi=PendingIntent.getBroadcast(this, alarm, intent,0);
+				APP.getpreferences().putAlarm(alarm+1);
+				
+				AlarmManager am=(AlarmManager)getSystemService(ALARM_SERVICE);
+			    am.set(AlarmManager.RTC_WAKEUP, alarmtime.getTimeInMillis(), pi);
+			    
+			    /**
+			     * 删除闹钟有两种方式，一种是PendingIntent完全一样
+			     * 另外就是requestcode 和 接收器要一样,这样也可以新建一个PendingIntent然后取消
+			     */
+			    maa.getArrayList().add(oneTime.getYear()+"-"+(oneTime.getMonth()+1)+"-"+oneTime.getDay()
+			    		+"-"+oneTime.getHour()+"-"+oneTime.getMinutes()+"-"+(alarm+1));
+			    maa.notifyDataSetChanged();
+			    
+			    b_alarm.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic__alarm__on));
+			    
+			    //需要将闹钟保存在数据库中，未完成... ... 
+			    //在Record中更新或添加闹铃，同时还要注意把requestcode加进去
+			    
+			}
+		}
 	}
 	/**
 	 * 更新事件
@@ -1876,14 +1902,17 @@ public class MainActivity extends Activity implements OnGestureListener{
 	@Override
 	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
 			float velocityY) {
-		if(e2.getX() - e1.getX() > 300){
-			overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out); 
-			btn_pre_month.performClick();
-		}else if (e1.getX() - e2.getX() > 300){
-			System.out.println("e1.getx" + e1.getX() + e2.getX());
-			btn_next_month.performClick();
-		}
 		
+		//System.out.println("layContent"+layContent.getHeight());判断view的高度
+		if(e1.getY() <layContent.getHeight()){
+			if(e2.getX() - e1.getX() > 300){
+				overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out); 
+				btn_pre_month.performClick();
+			}else if (e1.getX() - e2.getX() > 300){
+				System.out.println("e1.getx" + e1.getX() + e2.getX());
+				btn_next_month.performClick();
+			}
+		}
 		return false;
 	}
 

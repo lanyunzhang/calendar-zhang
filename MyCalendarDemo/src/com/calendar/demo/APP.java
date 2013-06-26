@@ -17,6 +17,7 @@ public class APP extends Application {
 	private static DB db = null;
 	private static APP app= null;
 	private static Preference preference = null;
+	
 	@Override
 	public void onCreate() {
 		super.onCreate();

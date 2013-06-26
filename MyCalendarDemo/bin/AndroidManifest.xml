@@ -6,7 +6,7 @@
     >
 
     <uses-sdk android:minSdkVersion="8" />
-
+	<uses-permission android:name="android.permission.WAKE_LOCK"/>
     <application
         android:name="APP"
         android:icon="@drawable/ic_launcher"
@@ -41,7 +41,9 @@
         </activity>
         <activity 
             android:name=".DilogActivity"
-            android:theme="@android:style/Theme.Translucent">
+            android:launchMode="singleInstance"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.Wallpaper.NoTitleBar">
             
         </activity>
         <receiver android:name=".AlarmReceiver">

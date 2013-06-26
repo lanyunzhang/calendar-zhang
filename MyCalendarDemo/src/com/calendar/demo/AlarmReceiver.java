@@ -12,7 +12,6 @@ public class AlarmReceiver extends BroadcastReceiver{
 		//这里设置具体的收到广播事件
 		
 		intent.setClass(context, DilogActivity.class);
-		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		context.startActivity(intent);
 		
 	}
