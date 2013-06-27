@@ -44,6 +44,8 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
+import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
@@ -62,6 +64,7 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
 
 import com.calendar.demo.view.NoteTaking;
 import com.calendar.demo.view.widget.OnWheelChangedListener;
@@ -92,7 +95,7 @@ import com.calendar.util.util;
  * 
  *   1. 修复每个月日历的动态显示5或者6行
  *   2. 实现日历的阴历显示
- *   3. 实现日历的滑动,坡敏跟进这个问题吧
+ *   3. 实现日历的滑动,使用viewflipper来实现
  *   4. 添加记事时只显示当前周，其它周隐藏,便于去记事，不会因滑动而失去焦点
  *   5. 动态的添加记事功能
  *   6. 记事分别添加在每天的下面，点击日历表格切换
@@ -127,8 +130,11 @@ public class MainActivity extends Activity implements OnGestureListener{
 
 	// 生成日历，外层容器
 	private LinearLayout layContent = null; //外层日历主体
+	private LinearLayout llylayContent = null; //外层日历主体覆盖面
 	private ArrayList<DateWidgetDayCell> days = new ArrayList<DateWidgetDayCell>();
+	private ArrayList<DateWidgetDayCell> llydays = new ArrayList<DateWidgetDayCell>();
 	private ArrayList<View> layrow = new ArrayList<View>();
+	private ArrayList<View> llylayrow = new ArrayList<View>();
 	public ArrayList<Record> arr=null;
 	public ArrayList<Record> arrMemoList = null;
 	public ArrayList<Record> arrPlanList = null;
@@ -155,10 +161,12 @@ public class MainActivity extends Activity implements OnGestureListener{
 	private int curyear = 0;
 	private int curmonth = 0;
 	private int curday = 0;
+	private int currentpage = 0;
 	
 	private int Calendar_Width = 0;
 	private int Cell_Width = 0;
 	private int Vposition = 0;
+	private float startX = 0;
 	private boolean isFiveRowExist = false;
 	private boolean isOff = true;
 	private boolean isPopup = false;
@@ -207,6 +215,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 	private LinearLayout cursorLayout = null;
 	private TextView title = null;
 	private DateWidgetDayCell prevItem = null;
+	private ViewFlipper viewflipper = null;
 
 	// 数据源
 	ArrayList<String> Calendar_Source = null;
@@ -259,6 +268,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 		// 制定布局文件，并设置属性
 		mainLayout = (RelativeLayout) getLayoutInflater().inflate(
 				R.layout.calendar_main, null);
+		viewflipper = (ViewFlipper) mainLayout.findViewById(R.id.viewflipper);
 		gd = new GestureDetector(this);
 		setContentView(mainLayout);
 		listview = (ListView)mainLayout.findViewById(R.id.listview);
@@ -398,11 +408,31 @@ public class MainActivity extends Activity implements OnGestureListener{
 	/**
 	 * 触摸事件的监听
 	 */
-	/*@Override
+	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		gd.onTouchEvent(event);
-		return true; 
-	}*/
+	
+		System.out.println("ONTOUCH");
+		switch(event.getAction()){
+		case MotionEvent.ACTION_DOWN:
+			startX = event.getX();
+			break;
+		case MotionEvent.ACTION_UP:
+			
+			if(event.getX() > startX){
+				currentpage = 1;
+				viewflipper.setInAnimation(this,R.anim.in_leftright);
+				viewflipper.setOutAnimation(this, R.anim.out_leftright);
+				viewflipper.showNext();
+			}else if (event.getX() < startX){
+				viewflipper.setInAnimation(this,R.anim.in_rightleft);
+				viewflipper.setInAnimation(this,R.anim.out_rightleft);
+				viewflipper.showPrevious();
+			}
+			break;
+			
+		}
+		return gd.onTouchEvent(event);
+	}
 	
 	/**
 	 * 取消的设置
@@ -796,26 +826,33 @@ public class MainActivity extends Activity implements OnGestureListener{
 		return layRow;
 	}
 
-	// 生成日历主体
-	private View generateCalendarMain() {
+	// 生成日历主体,生成了两个日历主题，在viewflipper中切换
+	private void generateCalendarMain() {
 		layContent = (LinearLayout)mainLayout.findViewById(R.id.lly);
-		
+		llylayContent = (LinearLayout) mainLayout.findViewById(R.id.llynext);
 		layContent.addView(generateCalendarHeader());
+		llylayContent.addView(generateCalendarHeader());
+		
 		days.clear();
+		llydays.clear();
 		
 		for (int iRow = 0; iRow < 6; iRow++) {
-			View view = generateCalendarRow();
+			View view = generateCalendarRow(days);
 			layContent.addView(view);
+			
+			View llyview =generateCalendarRow(llydays);
+			llylayContent.addView(llyview);
+			
 			layrow.add(view);
+			llylayrow.add(llyview);
+			
 		}
-		
-		return layContent;
 		
 		
 	}
 
 	// 生成日历中的一行，仅画矩形
-	private View generateCalendarRow() {
+	private View generateCalendarRow(ArrayList<DateWidgetDayCell> days) {
 		LinearLayout layRow = createLayout(LinearLayout.HORIZONTAL);
 		layRow.setBackgroundColor(Color.rgb(204, 204, 204));
 		for (int iDay = 0; iDay < 7; iDay++) {
@@ -887,6 +924,14 @@ public class MainActivity extends Activity implements OnGestureListener{
 
 	// 更新日历,点击也要更新日历？
 	private DateWidgetDayCell updateCalendar() {
+		
+		if(currentpage == 0){
+			
+		}else{
+			layContent = this.llylayContent;
+			days = this.llydays;
+		}
+		
 		DateWidgetDayCell daySelected = null;
 		boolean bSelected = false;
 		final boolean bIsSelection = (calSelected.getTimeInMillis() != 0);
@@ -949,8 +994,14 @@ public class MainActivity extends Activity implements OnGestureListener{
 
 			calCalendar.add(Calendar.DAY_OF_MONTH, 1);
 		}
-		layContent.invalidate();
-		
+		//这里控制重绘的界面
+		if(currentpage == 0)
+			layContent.invalidate();
+		else{
+			System.out.println("llylaycontent prev");
+			llylayContent.invalidate();
+			System.out.println("llylaycontent next");
+		}
 		return daySelected;
 	}
 
@@ -1890,8 +1941,6 @@ public class MainActivity extends Activity implements OnGestureListener{
     		
     	});
     	
-    	
-    	
     }
 
 	@Override
@@ -1906,13 +1955,24 @@ public class MainActivity extends Activity implements OnGestureListener{
 		//System.out.println("layContent"+layContent.getHeight());判断view的高度
 		if(e1.getY() <layContent.getHeight()){
 			if(e2.getX() - e1.getX() > 300){
-				overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out); 
+				
+				currentpage = 1;
 				btn_pre_month.performClick();
+				viewflipper.setInAnimation(this,R.anim.in_leftright);
+				viewflipper.setOutAnimation(this, R.anim.out_leftright);
+				viewflipper.showNext();
+				
+				
 			}else if (e1.getX() - e2.getX() > 300){
-				System.out.println("e1.getx" + e1.getX() + e2.getX());
+				currentpage = 0 ;
 				btn_next_month.performClick();
+				viewflipper.setInAnimation(this,R.anim.in_rightleft);
+				viewflipper.setOutAnimation(this, R.anim.out_rightleft);
+				viewflipper.showPrevious();
 			}
 		}
+		
+		
 		return false;
 	}
 
