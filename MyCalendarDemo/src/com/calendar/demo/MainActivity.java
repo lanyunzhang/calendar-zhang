@@ -925,8 +925,11 @@ public class MainActivity extends Activity implements OnGestureListener{
 	// 更新日历,点击也要更新日历？
 	private DateWidgetDayCell updateCalendar() {
 		
+		LinearLayout layContent;
+		ArrayList<DateWidgetDayCell> days;
 		if(currentpage == 0){
-			
+			layContent = this.layContent;
+			days = this.days;
 		}else{
 			layContent = this.llylayContent;
 			days = this.llydays;
@@ -995,9 +998,11 @@ public class MainActivity extends Activity implements OnGestureListener{
 			calCalendar.add(Calendar.DAY_OF_MONTH, 1);
 		}
 		//这里控制重绘的界面
-		if(currentpage == 0)
+		if(currentpage == 0){
+			System.out.println("laycontent prev");
 			layContent.invalidate();
-		else{
+			System.out.println("laycontent next");
+		}else{
 			System.out.println("llylaycontent prev");
 			llylayContent.invalidate();
 			System.out.println("llylaycontent next");
@@ -1948,27 +1953,42 @@ public class MainActivity extends Activity implements OnGestureListener{
 		return false;
 	}
 
+	private Runnable task = new Runnable(){
+
+		@Override
+		public void run() {
+			updateCalendar();
+		}
+		
+	};
 	@Override
 	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
 			float velocityY) {
 		
 		//System.out.println("layContent"+layContent.getHeight());判断view的高度
 		if(e1.getY() <layContent.getHeight()){
-			if(e2.getX() - e1.getX() > 300){
+			if(e2.getX() - e1.getX() > 200 || velocityX > 50 ){
 				
-				currentpage = 1;
+				System.out.println("you hua");
+				currentpage = 1-currentpage;
 				btn_pre_month.performClick();
 				viewflipper.setInAnimation(this,R.anim.in_leftright);
 				viewflipper.setOutAnimation(this, R.anim.out_leftright);
 				viewflipper.showNext();
+				currentpage = 1-currentpage;
+				APP.getHandler().postDelayed(task, 1500);
+				currentpage = 1-currentpage;
 				
-				
-			}else if (e1.getX() - e2.getX() > 300){
-				currentpage = 0 ;
+			}else if (e1.getX() - e2.getX() > 200 || velocityX < -50){
+				System.out.println("zuo hua");
+				currentpage = 1-currentpage ;
 				btn_next_month.performClick();
 				viewflipper.setInAnimation(this,R.anim.in_rightleft);
 				viewflipper.setOutAnimation(this, R.anim.out_rightleft);
 				viewflipper.showPrevious();
+				currentpage = 1- currentpage;
+				APP.getHandler().postDelayed(task, 1500);
+				currentpage = 1- currentpage;
 			}
 		}
 		
