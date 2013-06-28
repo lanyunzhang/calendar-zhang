@@ -1296,7 +1296,11 @@ public class MainActivity extends Activity implements OnGestureListener{
 		public void onClick(View v) {
 			//添加相应事件
 			isAddOrUpdate = true;
-			clickText(null,0);
+			//clickText(null,0);
+			Intent intent = new Intent();
+			intent.setClass(MainActivity.this, AddActivity.class);
+			startActivity(intent);
+			
 		}
 		
 	}

@@ -22,4 +22,6 @@
     <string name="setup">设 置</string>
     <string name="plan_memo">计划/备忘分类</string>
     <string name="plan_analysis">计划完成度分析</string>
+    <string name="add">添加事件</string>
+    <string name="date">2013-6-28  周五</string>
 </resources>
