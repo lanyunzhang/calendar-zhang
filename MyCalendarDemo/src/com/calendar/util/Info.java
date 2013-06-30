@@ -26,6 +26,7 @@ public class Info {
 	public static final String ALARMTYPE = "alarmType";
 	public static final String ALARMCYCLE = "alarmCycle";
 	public static final String ALARMTIME = "alarmTime";
+	public static final String ALARMTIMES = "alarmTimes";
 	
 	public static final String LASTSYNTIME = "lastSynTime";
 	public static final String TOKEN = "token";

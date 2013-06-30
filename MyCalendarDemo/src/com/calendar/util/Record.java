@@ -27,6 +27,7 @@ public class Record implements Serializable {
 	private int alarmType; // 未使用
 	private int alarmCycle; // 未使用
 	private long alarmTime;
+	private String alarmTimes = "";
 	
 	
 	public Record(){}
@@ -37,7 +38,7 @@ public class Record implements Serializable {
 			String taskDetail, long taskCreateTime, long taskStartTime,
 			long taskEndTime, long taskEditTime, int taskImportant,
 			int taskComplete, int taskStatus, int taskType, int alarm,
-			int alarmType, int alarmCycle, long alarmTime) {
+			int alarmType, int alarmCycle, long alarmTime, String alarmTimes) {
 		super();
 		this.id = id;
 		this.taskId = taskId;
@@ -60,6 +61,7 @@ public class Record implements Serializable {
 		this.alarmType = alarmType;
 		this.alarmCycle = alarmCycle;
 		this.alarmTime = alarmTime;
+		this.alarmTimes = alarmTimes;
 	}
 
 
@@ -272,6 +274,15 @@ public class Record implements Serializable {
 		this.alarmTime = alarmTime;
 	}
 	
+	
+	public String getAlarmTimes() {
+		return alarmTimes;
+	}
+
+
+	public void setAlarmTimes(String alarmTimes) {
+		this.alarmTimes = alarmTimes;
+	}
 	
 	
 }
