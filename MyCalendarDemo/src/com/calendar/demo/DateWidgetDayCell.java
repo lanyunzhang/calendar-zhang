@@ -324,6 +324,7 @@ public class DateWidgetDayCell extends View {
 		if (event.getAction() == MotionEvent.ACTION_UP) {
 			bHandled = true;
 			
+			System.out.println("UPUPUPUP");
 			invalidate();
 			bTouchedDown = false;
 			

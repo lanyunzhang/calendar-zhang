@@ -181,12 +181,12 @@ public class MainActivity extends Activity implements OnGestureListener{
 	private RelativeLayout mainLayout = null;
 	private LinearLayout arrange_layout = null;
 	private NoteTaking nt = null;
-	private EditText addeventcontent = null;
-	private TextView save = null;
+	//private EditText addeventcontent = null;
+	//private TextView save = null;
 	private ImageView iv = null;
 	private ImageView ivs = null;
-	private ImageButton b_date = null;
-	private ImageButton b_alarm = null;
+	//private ImageButton b_date = null;
+	//private ImageButton b_alarm = null;
 	private DatePickerDialog mDialog = null;
 	private ViewPager mPager;//页卡内容
     private List<View> listViews; // Tab页面列表
@@ -211,7 +211,6 @@ public class MainActivity extends Activity implements OnGestureListener{
 	private MyAdapter memoAdapter = null;
 	private MyAdapter planAdapter = null;
 	private MyAlarmAdapter maa = null;
-	private TextView cancel = null;
 	private LinearLayout cursorLayout = null;
 	private TextView title = null;
 	private DateWidgetDayCell prevItem = null;
@@ -273,7 +272,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 		setContentView(mainLayout);
 		listview = (ListView)mainLayout.findViewById(R.id.listview);
 		//listview.setEnabled(false);
-		alarmlistview= (ListView)mainLayout.findViewById(R.id.alarmlist);
+		//alarmlistview= (ListView)mainLayout.findViewById(R.id.alarmlist);
 		adapter = new MyAdapter(MainActivity.this);
 		memoAdapter = new MyAdapter(MainActivity.this);
 		planAdapter = new MyAdapter(MainActivity.this);
@@ -296,8 +295,8 @@ public class MainActivity extends Activity implements OnGestureListener{
 		//listview.setDividerHeight(0);
 		listview.setCacheColorHint(Color.TRANSPARENT);
 		maa = new MyAlarmAdapter(MainActivity.this);
-		alarmlistview.setAdapter(maa);
-		alarmlistview.setCacheColorHint(Color.TRANSPARENT);
+		//alarmlistview.setAdapter(maa);
+		//alarmlistview.setCacheColorHint(Color.TRANSPARENT);
 		// 声明控件，并绑定事件
 		Top_Date = (TextView) findViewById(R.id.Top_Date);
 		btn_pre_month = (Button) findViewById(R.id.btn_pre_month);
@@ -373,7 +372,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 		
 		iv = (ImageView)findViewById(R.id.iv);
 		iv.setOnClickListener(new tvClicklistener());
-		initAddView();
+		//initAddView();
 		//选择月份的监听
 		Top_Date.setOnClickListener(new OnClickListener(){
 
@@ -412,7 +411,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 	public boolean onTouchEvent(MotionEvent event) {
 	
 		System.out.println("ONTOUCH");
-		switch(event.getAction()){
+		/*switch(event.getAction()){
 		case MotionEvent.ACTION_DOWN:
 			startX = event.getX();
 			break;
@@ -430,20 +429,20 @@ public class MainActivity extends Activity implements OnGestureListener{
 			}
 			break;
 			
-		}
+		}*/
 		return gd.onTouchEvent(event);
 	}
 	
 	/**
 	 * 取消的设置
 	 */
-	private void cancelSetVisibility(){
+	/*private void cancelSetVisibility(){
 		addeventcontent.setVisibility(View.GONE);
 		save.setVisibility(View.GONE);
 		cancel.setVisibility(View.GONE);
 		b_date.setVisibility(View.GONE);
 		b_alarm.setVisibility(View.GONE);
-		alarmlistview.setVisibility(View.GONE);
+		//alarmlistview.setVisibility(View.GONE);
 		setViewVisble();
 		if(!APP.getpreferences().getMemoPlan()){
 			listview.setVisibility(View.VISIBLE);
@@ -469,7 +468,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 		isInCalendarActivity = true;
 	//更新闹钟列表	
 		time.clear();
-	}
+	}*/
 	/**
 	 * 监听back键
 	 */
@@ -477,7 +476,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		
 		if(keyCode == KeyEvent.KEYCODE_BACK && !isInCalendarActivity ){
-			cancelSetVisibility();
+			//cancelSetVisibility();
 			return false;
 		}
 		return super.onKeyDown(keyCode, event);
@@ -911,13 +910,25 @@ public class MainActivity extends Activity implements OnGestureListener{
 		calStartDate.add(Calendar.DAY_OF_WEEK, -iDay);
 		
 		int currow = rowOfMonth(calStartDate);
-		if (currow == 5){
-			layrow.get(5).setVisibility(View.GONE);
-			isFiveRowExist = false;
-		}
-		else if (currow == 6){
-			layrow.get(5).setVisibility(View.VISIBLE);
-			isFiveRowExist = true;
+		
+		if(currentpage == 0){
+			if (currow == 5){
+				layrow.get(5).setVisibility(View.GONE);
+				isFiveRowExist = false;
+			}
+			else if (currow == 6){
+				layrow.get(5).setVisibility(View.VISIBLE);
+				isFiveRowExist = true;
+			}
+		}else if (currentpage == 1){
+			
+			if(currow == 5){
+				llylayrow.get(5).setVisibility(View.GONE);
+				isFiveRowExist = false;
+			}else if (currow == 6){
+				llylayrow.get(5).setVisibility(View.VISIBLE);
+				isFiveRowExist = true;
+			}
 		}
 		
 	}
@@ -1230,7 +1241,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 	public void clickText(Record record,int arg){
 		
 		if(arg == NOMEMOPLAN){
-			b_alarm.setVisibility(View.VISIBLE);
+			//b_alarm.setVisibility(View.VISIBLE);
 		}else if(arg == MEMOPLAN){
 			
 	    	mPager.setVisibility(View.GONE);
@@ -1242,14 +1253,14 @@ public class MainActivity extends Activity implements OnGestureListener{
 	 		cursorLayout.setVisibility(View.GONE);
 	 		
 	 		if(currIndex == 0){
-	 			b_alarm.setVisibility(View.GONE);
+	 			/*b_alarm.setVisibility(View.GONE);
 	 			b_date.setVisibility(View.VISIBLE);
-	 			b_date.setBackgroundDrawable(getResources().getDrawable(R.drawable.setting_switch_default_off));
+	 			b_date.setBackgroundDrawable(getResources().getDrawable(R.drawable.setting_switch_default_off));*/
 				isOff = true;
 	 		}else{
-	 			b_alarm.setVisibility(View.VISIBLE);
+	 			/*b_alarm.setVisibility(View.VISIBLE);
 	 			b_date.setVisibility(View.VISIBLE);
-	 			b_date.setBackgroundDrawable(getResources().getDrawable(R.drawable.setting_switch_default_on));
+	 			b_date.setBackgroundDrawable(getResources().getDrawable(R.drawable.setting_switch_default_on));*/
 				isOff = false;
 	 		}
 		}
@@ -1260,19 +1271,19 @@ public class MainActivity extends Activity implements OnGestureListener{
 		addNote();
 		setViewGone();
 		this.record = record;
-		addeventcontent.setVisibility(View.VISIBLE);
-		addeventcontent.requestFocus();
-		if(record != null)
-			addeventcontent.setText(record.getTaskDetail());
+		/*addeventcontent.setVisibility(View.VISIBLE);
+		addeventcontent.requestFocus();*/
+		/*if(record != null)
+			//addeventcontent.setText(record.getTaskDetail());
 		else
-			addeventcontent.setText(null);
+			addeventcontent.setText(null);*/
 		
-		cancel.setVisibility(View.VISIBLE);
-		save.setVisibility(View.VISIBLE);
+		/*cancel.setVisibility(View.VISIBLE);
+		save.setVisibility(View.VISIBLE);*/
 		//b_date.setVisibility(View.VISIBLE);
 		//b_date.setBackgroundDrawable(getResources().getDrawable(R.drawable.setting_switch_default_off));
 		isOff = true;
-		alarmlistview.setVisibility(View.VISIBLE);
+		//alarmlistview.setVisibility(View.VISIBLE);
 		
 		
 		//自动弹出软键盘
@@ -1284,7 +1295,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 	
 	public void addNote(){
 		//处理添加事件
-		save.setOnClickListener(new addnoteclicklistener());
+		//save.setOnClickListener(new addnoteclicklistener());
 	}
 	/**
 	 * 普通添加监听
@@ -1317,7 +1328,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 		
 	}
 	
-	public class addnoteclicklistener implements View.OnClickListener{
+	/*public class addnoteclicklistener implements View.OnClickListener{
 
 		@Override
 		public void onClick(View v) {
@@ -1334,7 +1345,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 				cancel.setVisibility(View.GONE);
 				b_date.setVisibility(View.GONE);
 				b_alarm.setVisibility(View.GONE);
-				alarmlistview.setVisibility(View.GONE);
+				//alarmlistview.setVisibility(View.GONE);
 				
 				setViewVisble();
 				String text = content.trim();
@@ -1420,7 +1431,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 		
 		}
 		
-	}
+	}*/
 	/**
 	 * 得到日期对象
 	 */
@@ -1445,7 +1456,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 	/**
 	 * 这是对添加事件的一些控件进行初始化
 	 */
-	public void initAddView(){
+	/*public void initAddView(){
 		addeventcontent = (EditText)findViewById(R.id.add_event_content);
 		save = (TextView)findViewById(R.id.save);
 		cancel = (TextView)findViewById(R.id.cancel);
@@ -1508,7 +1519,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 		b_date.setVisibility(View.GONE);
 		b_alarm.setVisibility(View.GONE);
 		
-	}
+	}*/
     //处理闹钟的弹出菜单	
 	private void initPopUpWindow(){
 		isPopup = true;
@@ -1787,7 +1798,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 			    		+"-"+oneTime.getHour()+"-"+oneTime.getMinutes()+"-"+(alarm+1));
 			    maa.notifyDataSetChanged();
 			    
-			    b_alarm.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic__alarm__on));
+			    //b_alarm.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic__alarm__on));
 			    
 			    //需要将闹钟保存在数据库中，未完成... ... 
 			    //在Record中更新或添加闹铃，同时还要注意把requestcode加进去
@@ -1971,9 +1982,10 @@ public class MainActivity extends Activity implements OnGestureListener{
 		
 		//System.out.println("layContent"+layContent.getHeight());判断view的高度
 		if(e1.getY() <layContent.getHeight()){
-			if(e2.getX() - e1.getX() > 200 || velocityX > 50 ){
+			if(e2.getX() - e1.getX() > 200 ){
 				
 				System.out.println("you hua");
+				System.out.println(e1.getX() +" " + e2.getX() + " " + velocityX);
 				currentpage = 1-currentpage;
 				btn_pre_month.performClick();
 				viewflipper.setInAnimation(this,R.anim.in_leftright);
@@ -1983,8 +1995,9 @@ public class MainActivity extends Activity implements OnGestureListener{
 				APP.getHandler().postDelayed(task, 1500);
 				currentpage = 1-currentpage;
 				
-			}else if (e1.getX() - e2.getX() > 200 || velocityX < -50){
+			}else if (e1.getX() - e2.getX() > 200 ){
 				System.out.println("zuo hua");
+				System.out.println(e1.getX() +" " + e2.getX() + " " + velocityX);
 				currentpage = 1-currentpage ;
 				btn_next_month.performClick();
 				viewflipper.setInAnimation(this,R.anim.in_rightleft);

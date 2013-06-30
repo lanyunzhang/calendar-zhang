@@ -33,7 +33,6 @@ import com.calendar.demo.DateWidgetDayHeader;
 import com.calendar.demo.DayStyle;
 import com.calendar.demo.MainActivity;
 import com.calendar.demo.R;
-import com.calendar.demo.MainActivity.addnoteclicklistener;
 import com.calendar.demo.MainActivity.tvClicklistener;
 import com.calendar.demo.view.NoteTaking;
 /**

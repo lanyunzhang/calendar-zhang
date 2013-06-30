@@ -55,6 +55,13 @@
         android:paddingLeft="9.0dip"
         android:paddingTop="6.0dip" 
         android:layout_weight="1.0"/>
+    
+     <ListView 
+        android:id="@+id/alarmlist"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+        
+    </ListView>
 
     <RelativeLayout 
         android:layout_width="fill_parent"
@@ -110,11 +117,6 @@
    
     </RelativeLayout>
     
-     <ListView 
-        android:id="@+id/alarmlist"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
-        
-    </ListView>
+    
     
    </LinearLayout>

@@ -26,7 +26,7 @@ public class MyAlarmAdapter extends BaseAdapter {
         arr = new ArrayList<String>();  
     }  
     
-    public ArrayList getArrayList(){
+    public ArrayList<String> getArrayList(){
     	return arr;
     }
     
