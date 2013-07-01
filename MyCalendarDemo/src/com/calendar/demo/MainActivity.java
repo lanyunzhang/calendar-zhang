@@ -239,6 +239,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 	public static final int SET_OFF = 2;
 	public static final int SET_ON = 3;
 	public static final int TO_MONTH_YEAR = 4;
+	public static final int ADD_LIST = 5;
 	
 	public static final int NOMEMOPLAN = 0;
 	public static final int MEMOPLAN = 1;
@@ -268,6 +269,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 		mainLayout = (RelativeLayout) getLayoutInflater().inflate(
 				R.layout.calendar_main, null);
 		viewflipper = (ViewFlipper) mainLayout.findViewById(R.id.viewflipper);
+		
 		gd = new GestureDetector(this);
 		setContentView(mainLayout);
 		listview = (ListView)mainLayout.findViewById(R.id.listview);
@@ -304,7 +306,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 		btn_pre_month.setOnClickListener(new Pre_MonthOnClickListener());
 		btn_next_month.setOnClickListener(new Next_MonthOnClickListener());
 		ivs = (ImageView)findViewById(R.id.ivs);
-		ivs.setOnClickListener(new ivsClicklistener());
+		//ivs.setOnClickListener(new ivsClicklistener());
 		
 		// 计算本月日历中的第一天(一般是上月的某天)，并更新日历
 		generateCalendarMain();
@@ -402,7 +404,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 		}
 		refreshMonthData();
 	
-		
+		//viewflipper.setMinimumHeight(layrow.get(4).getHeight());
 	}
 	/**
 	 * 触摸事件的监听
@@ -914,6 +916,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 		if(currentpage == 0){
 			if (currow == 5){
 				layrow.get(5).setVisibility(View.GONE);
+				
 				isFiveRowExist = false;
 			}
 			else if (currow == 6){
@@ -1309,6 +1312,11 @@ public class MainActivity extends Activity implements OnGestureListener{
 			isAddOrUpdate = true;
 			//clickText(null,0);
 			Intent intent = new Intent();
+			Bundle bundle = new Bundle();
+			bundle.putBoolean("ADD", true);
+			bundle.putInt("INDEX", currIndex);
+			bundle.putSerializable("DATE", getDate());
+			intent.putExtras(bundle);
 			intent.setClass(MainActivity.this, AddActivity.class);
 			startActivity(intent);
 			
@@ -1323,7 +1331,16 @@ public class MainActivity extends Activity implements OnGestureListener{
 
 		@Override
 		public void onClick(View v) {
-			clickText(null,1);
+			//clickText(null,1);
+			Intent intent = new Intent();
+			Bundle bundle = new Bundle();
+			bundle.putBoolean("ADD", false);
+			bundle.putInt("INDEX", currIndex);
+			bundle.putSerializable("DATE", getDate());
+			intent.putExtras(bundle);
+			intent.setClass(MainActivity.this, AddActivity.class);
+			startActivity(intent);
+			
 		}
 		
 	}
@@ -1441,6 +1458,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 		Calendar c = Calendar.getInstance();
 		Date date = null;
 		try {
+			
 			date = sdf.parse(iMonthViewCurrentYear +"-"+(iMonthViewCurrentMonth+1)+"-"+(selectday-iDay));
 			date.setHours(c.get(Calendar.HOUR_OF_DAY));
 			date.setMinutes(c.get(Calendar.MINUTE));
@@ -1843,11 +1861,18 @@ public class MainActivity extends Activity implements OnGestureListener{
 				case TO_MONTH_YEAR:
 					toMonthYear(msg.arg2,msg.what);
 					break;
+				case ADD_LIST:
+					Add((Record)msg.obj);
+					break;
 				default:
 					break;
 			}
 		}
 
+	}
+	private void Add(Record record){
+		arr.add(record);
+		adapter.notifyDataSetChanged();
 	}
 	//日期选择对话框
 	private DatePickerDialog.OnDateSetListener listener = new DatePickerDialog.OnDateSetListener(){  //

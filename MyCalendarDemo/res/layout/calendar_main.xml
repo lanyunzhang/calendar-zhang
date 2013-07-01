@@ -70,6 +70,7 @@
         android:id="@+id/viewflipper"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:measureAllChildren="false"
         android:layout_below="@id/relativeLayout1">
 	        
 	    <LinearLayout
@@ -86,7 +87,9 @@
 	        android:layout_height="wrap_content"
 	        android:orientation="vertical">
 	        
-	    </LinearLayout>	    
+	    </LinearLayout>	  
+	    
+	    
 	    
     </ViewFlipper>
 
@@ -95,9 +98,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/viewflipper"
-        >
+    />
         
-    </ListView>
     
      <ImageView 
         android:id="@+id/iv"

@@ -1,7 +1,10 @@
 package com.calendar.demo;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 
 import com.calendar.demo.view.widget.OnWheelChangedListener;
 import com.calendar.demo.view.widget.OnWheelClickedListener;
@@ -9,13 +12,19 @@ import com.calendar.demo.view.widget.OnWheelScrollListener;
 import com.calendar.demo.view.widget.WheelView;
 import com.calendar.demo.view.widget.adapters.ArrayWheelAdapter;
 import com.calendar.demo.view.widget.adapters.NumericWheelAdapter;
+import com.calendar.util.DB;
+import com.calendar.util.Record;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Message;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,15 +64,20 @@ public class AddActivity extends Activity  implements OnClickListener{
 	private ArrayList<Time> time = null;
 	private ListView alarmlist = null;
 	private MyAlarmAdapter maa = null;
+	private Date date = null;
+	private DB db = null;
 	
 	private boolean isPopup = false;
 	private boolean timeScrolled = false;
+	private boolean isAddOrUpdate = false;
 	
 	private int curyear = 0;
 	private int curmonth = 0;
 	private int curday = 0;
 	private int curhour = 0;
 	private int curmin = 0;
+	private int currIndex = 0;
+	private int currentyear = 0;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +86,7 @@ public class AddActivity extends Activity  implements OnClickListener{
 		
 		initLayout();
 		initListener();
-		
+		getData();
 		
 	}
 	
@@ -101,6 +115,14 @@ public class AddActivity extends Activity  implements OnClickListener{
 		b_mp.setOnClickListener(this);
 	}
 
+	private void getData(){
+		Bundle bundle = getIntent().getExtras();
+		isAddOrUpdate = bundle.getBoolean("ADD");
+		currIndex = bundle.getInt("INDEX");
+		date = (Date) bundle.getSerializable("DATE");
+		db = APP.getDatabase();
+	}
+	
 	@Override
 	public void onClick(View view) {
 		if(view == cancel || view == back){
@@ -124,51 +146,45 @@ public class AddActivity extends Activity  implements OnClickListener{
 					Toast.LENGTH_SHORT).show();
 		}else{
 			//不为空的话，保存字符串，并且日历显示，随手记显示，listview添加相应的内容
-			/*addEventContent.setVisibility(View.GONE);
-			save.setVisibility(View.GONE);
-			cancel.setVisibility(View.GONE);
-			b_date.setVisibility(View.GONE);
-			b_alarm.setVisibility(View.GONE);
-			//alarmlistview.setVisibility(View.GONE);
 			
-			setViewVisble();*/
 			String text = content.trim();
 			//普通模式
 			if(!APP.getpreferences().getMemoPlan()){
-				/*listview.setVisibility(View.VISIBLE);
-				iv.setVisibility(View.VISIBLE);*/
 				
 				if(isAddOrUpdate){
-					
-					Date date = getDate();
 					Record record = new Record();
 					record.setTaskDetail(text);
 					record.setUid(1);
 					record.setAlarmTime(date.getTime());
-					if(!isOff){
-						record.setAlarm(1);
-					}
+					String alarmcode = setAlarm(record);
+					record.setAlarmTimes(alarmcode);
 					record.setId(db.add(record));
-					arr.add(record);
-					adapter.notifyDataSetChanged();
+					
+					
+					Message msg = new Message();
+					msg.arg1 = MainActivity.ADD_LIST; 
+					msg.obj = record;
+					APP.getHandler().sendMessage(msg);
+				/*	arr.add(record);
+					adapter.notifyDataSetChanged();*/
 					
 				}else{
-					record.setTaskDetail(text);
-					db.update(record);
+					/*record.setTaskDetail(text);
+					db.update(record);*/
 				}
 				
 			}else{ // 计划和备忘的插入和更新
-				ivs.setVisibility(View.VISIBLE);
+				/*ivs.setVisibility(View.VISIBLE);
 				mPager.setVisibility(View.VISIBLE);
 		 		memoView.setVisibility(View.VISIBLE);
 		 		planView.setVisibility(View.VISIBLE);
 		 		t1.setVisibility(View.VISIBLE);
 		 		t2.setVisibility(View.VISIBLE);
 		 		cursor.setVisibility(View.VISIBLE);
-		 		cursorLayout.setVisibility(View.VISIBLE);
+		 		cursorLayout.setVisibility(View.VISIBLE);*/
 		 		
 		 		if(currIndex == 0){ //备忘
-			 		if(isAddOrUpdate){
+			 	/*	if(isAddOrUpdate){
 			 			Date date = getDate();
 			 			Record record = new Record();
 			 			record.setTaskDetail(text);
@@ -181,9 +197,11 @@ public class AddActivity extends Activity  implements OnClickListener{
 			 		}else{
 			 			record.setTaskDetail(text);
 			 			db.update(record);
-			 		}
+			 		}*/
+		 			System.out.println(currIndex);
 		 		}else if (currIndex == 1){ //计划
-		 			if(isAddOrUpdate){
+		 			System.out.println(currIndex);
+		 			/*if(isAddOrUpdate){
 		 				Date date = getDate();
 			 			Record record = new Record();
 			 			record.setTaskDetail(text);
@@ -195,19 +213,23 @@ public class AddActivity extends Activity  implements OnClickListener{
 		 			}else{
 		 				record.setTaskDetail(text);
 		 				db.update(record);
-		 			}
+		 			}*/
 		 		}
 			}
 			
 			//关掉软键盘
 			InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE); 
-			imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+			imm.hideSoftInputFromWindow(save.getWindowToken(), 0);
 			//添加闹钟，并且为每一个闹钟设置requestcode
-			setAlarm();
 			
 			//区分是添加还是更新，从入口区分
 			//为什么不执行datasetchange也可以呢？
+			finish();
+		}
+		
 	}
+
+
 	private void clickAlarm(){
 		if(!isPopup){
 			initPopUpWindow();
@@ -222,6 +244,7 @@ public class AddActivity extends Activity  implements OnClickListener{
 		// set current time
 	    Calendar c = Calendar.getInstance();
 	    curyear = 100;
+	    currentyear = c.get(Calendar.YEAR);
 	    curmonth = c.get(Calendar.MONTH);
 	    curday = c.get(Calendar.DAY_OF_MONTH);
 		curhour = c.get(Calendar.HOUR_OF_DAY);
@@ -256,10 +279,10 @@ public class AddActivity extends Activity  implements OnClickListener{
 			public void onClick(View v) {
 				isPopup = false;
 				if(!timeScrolled){
-					System.out.println((curyear+1913)+" "+curmonth+" "+curday+" "+curhour+" "+curmin);
+					System.out.println(curyear+" "+curmonth+" "+curday+" "+curhour+" "+curmin);
 					//添加定闹钟逻辑，如果设定成功闹钟的颜色要有变化-----------
 					//setAlarm(curyear+1913,curmonth,curday,curhour,curmin);,将闹钟添加到一个list中，并不真的进行更新
-					addTimeList(curyear+1913,curmonth,curday,curhour,curmin);
+					addTimeList(curyear + currentyear-100,curmonth,curday,curhour,curmin);
 					popupWindow.dismiss();
 				}
 		}});
@@ -284,7 +307,7 @@ public class AddActivity extends Activity  implements OnClickListener{
     
         // year
         int curYear = calendar.get(Calendar.YEAR);
-        year.setViewAdapter(new DateNumericAdapter(this, curYear-100, curYear + 100, 100));
+        year.setViewAdapter(new DateNumericAdapter(this, currentyear-100, currentyear + 100, 100));
         year.setCurrentItem(100);
         year.addChangingListener(listener);
         
@@ -463,5 +486,50 @@ public class AddActivity extends Activity  implements OnClickListener{
 		maa.notifyDataSetChanged();
 	}
 	
+
+	public String setAlarm(Record record){
+		//先得到年月日时分
+		String alarmcode ="|";
+		if(time.size() != 0){ //有一个或者多个闹铃
+			
+			record.setAlarm(1);
+			for(Time oneTime:time){
+				
+				int alarm = APP.getpreferences().getAlarm();//设置唯一闹铃的requestcode
+				Calendar alarmtime = Calendar.getInstance();
+				alarmtime.set(Calendar.YEAR, oneTime.getYear());
+				alarmtime.set(Calendar.MONTH, oneTime.getMonth());
+				alarmtime.set(Calendar.DAY_OF_MONTH, oneTime.getDay());
+				alarmtime.set(Calendar.HOUR_OF_DAY, oneTime.getHour());
+				alarmtime.set(Calendar.MINUTE, oneTime.getMinutes());
+				alarmtime.set(Calendar.SECOND, 0);
+				 
+				Intent intent = new Intent("com.calendar.demo.alarm");
+				intent.setClass(AddActivity.this, AlarmReceiver.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				intent.putExtra("ALARM", record.getTaskDetail());
+				PendingIntent pi=PendingIntent.getBroadcast(this, alarm, intent,0);
+				APP.getpreferences().putAlarm(alarm+1);
+				
+				alarmcode  = alarmcode + alarmtime.getTimeInMillis(); 
+				alarmcode  = alarmcode + "#" + alarm;
+				alarmcode  = alarmcode + "|";
+				
+				AlarmManager am=(AlarmManager)getSystemService(ALARM_SERVICE);
+			    am.set(AlarmManager.RTC_WAKEUP, alarmtime.getTimeInMillis(), pi);
+			    
+			    /**
+			     * 删除闹钟有两种方式，一种是PendingIntent完全一样
+			     * 另外就是requestcode 和 接收器要一样,这样也可以新建一个PendingIntent然后取消
+			     */
+			    //在Record中更新或添加闹铃，同时还要注意把requestcode加进去
+			  
+			}
+		}else{
+			//没有闹铃
+			record.setAlarm(0);
+		}
+		return alarmcode;
+	}
 
 }
