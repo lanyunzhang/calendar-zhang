@@ -56,15 +56,15 @@
         android:paddingTop="6.0dip" 
         android:layout_weight="1.0"/>
     
-     <ListView 
+     
+<ListView 
         android:id="@+id/alarmlist"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content">
         
     </ListView>
-
     <RelativeLayout 
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="3.0dip"
         >
@@ -76,20 +76,6 @@
             android:contentDescription="date"
             android:src="@drawable/ic__alarm" />
         
-        <TextView
-            android:id="@+id/cancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/b_alarm"
-            android:layout_toLeftOf="@id/save"
-            android:background="@drawable/cancel_btn__default"
-            android:gravity="center"
-            android:paddingLeft="5.0dip"
-            android:paddingRight="5.0dip"
-            android:text="@string/Cancel"
-            android:textColor="#000000"
-            android:textSize="18.0sp" />
-		
         <TextView
             android:id="@+id/save"
             android:layout_width="wrap_content"
@@ -104,13 +90,26 @@
             android:text="@string/activity_add_event_save"
             android:textColor="#000000"
             android:textSize="18.0sp" />
-
-        <ImageButton
-            android:id="@+id/b_mp"
+        
+          <TextView
+            android:id="@+id/cancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/b_alarm"
-            android:layout_alignTop="@+id/b_alarm"
+            android:layout_toLeftOf="@id/save"
+            android:background="@drawable/cancel_btn__default"
+            android:gravity="center"
+            android:paddingLeft="5.0dip"
+            android:paddingRight="5.0dip"
+            android:text="@string/Cancel"
+            android:textColor="#000000"
+            android:textSize="18.0sp" />
+
+        <ImageView
+            android:id="@+id/b_mp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
             android:layout_toRightOf="@+id/b_alarm"
             android:background="@drawable/setting_switch_default_off"
             android:contentDescription="alarm" />

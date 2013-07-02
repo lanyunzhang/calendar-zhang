@@ -8,6 +8,14 @@ public class AlarmToString  {
 	private ArrayList<AlarmTime> alarmTimes = new ArrayList<AlarmTime>();
 	private String alarmTimeString = new String();
 
+	public AlarmToString(){
+		
+	}
+	
+	public AlarmToString(String alarmcode){
+		alarmTimeString = alarmcode;
+	}
+	
 	public ArrayList<AlarmTime> getAlarmTimes() {
 		return alarmTimes;
 
@@ -42,8 +50,11 @@ public class AlarmToString  {
 	
 	public void StringToAlarms() {
 		if (alarmTimeString.length() != 0) {
-			String a[] = alarmTimeString.split("\\|");
-			for (int i = 1; i < a.length; i++) {
+			int size = alarmTimeString.length();
+			String alarmTimeStrings = alarmTimeString.substring(1, size -1 );
+			String a[] = alarmTimeStrings.split("\\|");
+			System.out.println(a.length + "a.length");
+			for (int i = 0; i < a.length; i++) { // 坡敏啊，你怎么能这样呢。。。
 				String b[] = a[i].split("#");
 				
 				AlarmTime time = new AlarmTime(Long.valueOf(b[0]),Integer.parseInt(b[1]));

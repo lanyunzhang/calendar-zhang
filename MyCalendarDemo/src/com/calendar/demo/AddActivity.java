@@ -12,6 +12,8 @@ import com.calendar.demo.view.widget.OnWheelScrollListener;
 import com.calendar.demo.view.widget.WheelView;
 import com.calendar.demo.view.widget.adapters.ArrayWheelAdapter;
 import com.calendar.demo.view.widget.adapters.NumericWheelAdapter;
+import com.calendar.util.AlarmTime;
+import com.calendar.util.AlarmToString;
 import com.calendar.util.DB;
 import com.calendar.util.Record;
 
@@ -53,7 +55,7 @@ public class AddActivity extends Activity  implements OnClickListener{
 	private EditText   addEventContent = null;
 	private TextView   save = null;
 	private ImageButton b_alarm = null;
-	private ImageButton b_mp = null;
+	private ImageView b_mp = null;
 	private View popupView = null;
 	private TextView tv1 = null;
 	private TextView tv2 = null;
@@ -66,18 +68,22 @@ public class AddActivity extends Activity  implements OnClickListener{
 	private MyAlarmAdapter maa = null;
 	private Date date = null;
 	private DB db = null;
+	private Record recordintent = null;
 	
 	private boolean isPopup = false;
 	private boolean timeScrolled = false;
 	private boolean isAddOrUpdate = false;
+	private boolean isOff = true;
 	
 	private int curyear = 0;
 	private int curmonth = 0;
 	private int curday = 0;
 	private int curhour = 0;
 	private int curmin = 0;
-	private int currIndex = 0;
+	private int currIndex = -1;
 	private int currentyear = 0;
+	
+	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +93,33 @@ public class AddActivity extends Activity  implements OnClickListener{
 		initLayout();
 		initListener();
 		getData();
+		setData();
+	}
+	
+	private void setData(){
+		if(!isAddOrUpdate){
+			addEventContent.setText(recordintent.getTaskDetail());
+			//同时查询相应的闹钟，添加闹钟
+			String alarmcode = recordintent.getAlarmTimes();
+			System.out.println("alarmcode"+alarmcode);
+			if(alarmcode.length() > 1){
+				AlarmToString alarmtostring = new AlarmToString(alarmcode);
+				alarmtostring.StringToAlarms();
+				ArrayList<AlarmTime> alarmtime = alarmtostring.getAlarmTimes();
+				Date date = new Date();
+				maa.getArrayList().clear();
+				for(AlarmTime alarm :alarmtime){
+					date.setTime( alarm.getTime());
+					Time timeo = new Time(date.getYear(),date.getMonth(),date.getDate(),
+							                            date.getHours(),date.getMinutes());
+					time.add(timeo);
+					maa.getArrayList().add(date.getYear() + 1900 +"-" +date.getMonth() +"-" + date.getDate() +"-"+
+							date.getHours() +"-" +date.getMinutes());
+					
+				}
+			}
+			maa.notifyDataSetChanged();
+		}
 		
 	}
 	
@@ -96,13 +129,14 @@ public class AddActivity extends Activity  implements OnClickListener{
 		addEventContent = (EditText) findViewById(R.id.add_event_content);
 		save = (TextView) findViewById(R.id.save);
 		b_alarm = (ImageButton) findViewById(R.id.b_alarm);
-		b_mp = (ImageButton) findViewById(R.id.b_mp);
+		b_mp = (ImageView) findViewById(R.id.b_mp);
 		alarmlist = (ListView) findViewById(R.id.alarmlist);
 		
 		time = new ArrayList<Time>();
 		maa = new MyAlarmAdapter(AddActivity.this);
 		alarmlist.setAdapter(maa);
 		alarmlist.setCacheColorHint(Color.TRANSPARENT);
+		b_mp.setVisibility(View.GONE);
 		
 	}
 	
@@ -120,7 +154,20 @@ public class AddActivity extends Activity  implements OnClickListener{
 		isAddOrUpdate = bundle.getBoolean("ADD");
 		currIndex = bundle.getInt("INDEX");
 		date = (Date) bundle.getSerializable("DATE");
+		recordintent = (Record) bundle.getSerializable("UPDATE");
 		db = APP.getDatabase();
+		
+		if(currIndex == 1){
+			b_mp.setVisibility(View.VISIBLE);
+			b_alarm.setVisibility(View.VISIBLE);
+			isOff = false;
+			b_mp.setBackgroundDrawable(getResources().getDrawable(R.drawable.setting_switch_default_on));
+		}else if (currIndex == 0){
+			b_alarm.setVisibility(View.GONE);
+			b_mp.setVisibility(View.VISIBLE);
+			
+		}
+		
 	}
 	
 	@Override
@@ -133,8 +180,24 @@ public class AddActivity extends Activity  implements OnClickListener{
 			clickAlarm();
 		}
 		
-		if(view == save){
+		if(view == save)
 			saveNote();
+		
+		if(view == b_mp){
+			switchmemoplan();
+		}
+	}
+	
+	private void switchmemoplan(){
+		
+		if(isOff){
+			isOff = false;
+			b_mp.setBackgroundDrawable(getResources().getDrawable(R.drawable.setting_switch_default_on));
+			b_alarm.setVisibility(View.VISIBLE);
+		}else{
+			isOff = true;
+			b_mp.setBackgroundDrawable(getResources().getDrawable(R.drawable.setting_switch_default_off));
+			b_alarm.setVisibility(View.GONE);
 		}
 	}
 	
@@ -148,72 +211,41 @@ public class AddActivity extends Activity  implements OnClickListener{
 			//不为空的话，保存字符串，并且日历显示，随手记显示，listview添加相应的内容
 			
 			String text = content.trim();
+			Message msg = new Message();
+			Record record = new Record();
+			if(isAddOrUpdate){
+				
+				record.setTaskDetail(text);
+				record.setUid(1);
+				record.setAlarmTime(date.getTime());
+				String alarmcode = setAlarm(record);
+				record.setAlarmTimes(alarmcode);
+				record.setId(db.add(record));
+				
+			
+				msg.arg1 = MainActivity.ADD_LIST; 
+				msg.obj = record;
+				APP.getHandler().sendMessage(msg);
+				
+			}else{
+				recordintent.setTaskDetail(text);
+				db.update(recordintent);
+				msg.arg1 = MainActivity.UPDATE;
+				msg.obj = recordintent;
+				APP.getHandler().sendMessage(msg);
+			}
+			
 			//普通模式
 			if(!APP.getpreferences().getMemoPlan()){
-				
-				if(isAddOrUpdate){
-					Record record = new Record();
-					record.setTaskDetail(text);
-					record.setUid(1);
-					record.setAlarmTime(date.getTime());
-					String alarmcode = setAlarm(record);
-					record.setAlarmTimes(alarmcode);
-					record.setId(db.add(record));
-					
-					
-					Message msg = new Message();
-					msg.arg1 = MainActivity.ADD_LIST; 
-					msg.obj = record;
-					APP.getHandler().sendMessage(msg);
-				/*	arr.add(record);
-					adapter.notifyDataSetChanged();*/
-					
-				}else{
-					/*record.setTaskDetail(text);
-					db.update(record);*/
-				}
-				
+				msg.arg2 = MainActivity.NOMEMOPLAN;
 			}else{ // 计划和备忘的插入和更新
-				/*ivs.setVisibility(View.VISIBLE);
-				mPager.setVisibility(View.VISIBLE);
-		 		memoView.setVisibility(View.VISIBLE);
-		 		planView.setVisibility(View.VISIBLE);
-		 		t1.setVisibility(View.VISIBLE);
-		 		t2.setVisibility(View.VISIBLE);
-		 		cursor.setVisibility(View.VISIBLE);
-		 		cursorLayout.setVisibility(View.VISIBLE);*/
 		 		
 		 		if(currIndex == 0){ //备忘
-			 	/*	if(isAddOrUpdate){
-			 			Date date = getDate();
-			 			Record record = new Record();
-			 			record.setTaskDetail(text);
-			 			record.setUid(1);
-			 			record.setAlarm(0);
-			 			record.setAlarmTime(date.getTime());
-			 			record.setId(db.add(record));
-			 			arrMemoList.add(record);
-			 			
-			 		}else{
-			 			record.setTaskDetail(text);
-			 			db.update(record);
-			 		}*/
-		 			System.out.println(currIndex);
+		 			msg.arg2 = MainActivity.MEMO;
 		 		}else if (currIndex == 1){ //计划
-		 			System.out.println(currIndex);
-		 			/*if(isAddOrUpdate){
-		 				Date date = getDate();
-			 			Record record = new Record();
-			 			record.setTaskDetail(text);
-			 			record.setUid(1);
-			 			record.setAlarm(1);
-			 			record.setAlarmTime(date.getTime());
-			 			record.setId(db.add(record));
-			 			arrPlanList.add(record);
-		 			}else{
-		 				record.setTaskDetail(text);
-		 				db.update(record);
-		 			}*/
+		 			
+		 			msg.arg2 = MainActivity.PLAN;
+		 			record.setAlarm(1); //设置默认闹铃
 		 		}
 			}
 			
@@ -221,7 +253,6 @@ public class AddActivity extends Activity  implements OnClickListener{
 			InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE); 
 			imm.hideSoftInputFromWindow(save.getWindowToken(), 0);
 			//添加闹钟，并且为每一个闹钟设置requestcode
-			
 			//区分是添加还是更新，从入口区分
 			//为什么不执行datasetchange也可以呢？
 			finish();

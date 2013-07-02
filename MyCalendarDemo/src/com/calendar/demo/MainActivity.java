@@ -73,6 +73,8 @@ import com.calendar.demo.view.widget.OnWheelScrollListener;
 import com.calendar.demo.view.widget.WheelView;
 import com.calendar.demo.view.widget.adapters.ArrayWheelAdapter;
 import com.calendar.demo.view.widget.adapters.NumericWheelAdapter;
+import com.calendar.util.AlarmTime;
+import com.calendar.util.AlarmToString;
 import com.calendar.util.DB;
 import com.calendar.util.Info;
 import com.calendar.util.NumMonthOfYear;
@@ -240,9 +242,12 @@ public class MainActivity extends Activity implements OnGestureListener{
 	public static final int SET_ON = 3;
 	public static final int TO_MONTH_YEAR = 4;
 	public static final int ADD_LIST = 5;
+	public static final int UPDATE = 6;
 	
 	public static final int NOMEMOPLAN = 0;
 	public static final int MEMOPLAN = 1;
+	public static final int MEMO = 1;
+	public static final int PLAN = 2;
 	public String UserName = "";
     private int offset = 0;// 动画图片偏移量
     private int currIndex = 0;// 当前页卡编号
@@ -306,7 +311,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 		btn_pre_month.setOnClickListener(new Pre_MonthOnClickListener());
 		btn_next_month.setOnClickListener(new Next_MonthOnClickListener());
 		ivs = (ImageView)findViewById(R.id.ivs);
-		//ivs.setOnClickListener(new ivsClicklistener());
+		ivs.setOnClickListener(new tvClicklistener());
 		
 		// 计算本月日历中的第一天(一般是上月的某天)，并更新日历
 		generateCalendarMain();
@@ -412,7 +417,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 	
-		System.out.println("ONTOUCH");
+		//System.out.println("ONTOUCH");
 		/*switch(event.getAction()){
 		case MotionEvent.ACTION_DOWN:
 			startX = event.getX();
@@ -594,13 +599,13 @@ public class MainActivity extends Activity implements OnGestureListener{
 
 		@Override
 		public void onPageScrolled(int arg0, float arg1, int arg2) {
-			System.out.println("scrolled"+arg0+" "+arg1+" "+arg2);
+			//System.out.println("scrolled"+arg0+" "+arg1+" "+arg2);
 		}
 		
 
 		@Override
 		public void onPageScrollStateChanged(int arg0) {
-			System.out.println("changed"+arg0);
+			//System.out.println("changed"+arg0);
 		}
 	}
 /**
@@ -733,12 +738,18 @@ public class MainActivity extends Activity implements OnGestureListener{
     	if(!APP.getpreferences().getMemoPlan()){
     		System.out.println("notmemoplan");
 			arr.clear();
-			ArrayList<Record> record = db.getPeriodRecordsByDate(1, getDate());
+			ArrayList<Record> record = db.getPeriodRecordsByDate(1, getDate(),0);
 			if(record != null){
 				for(Record records:record){
 					arr.add(records);
 				}
-				adapter.notifyDataSetChanged();
+			record = db.getPeriodRecordsByDate(1, getDate(),1);
+			if(record != null){
+				for(Record records:record){
+					arr.add(records);
+				}
+			}
+			adapter.notifyDataSetChanged();
 			}else{
 				//还没有记事，添加记事的背景图片
 				System.out.println("null");
@@ -755,7 +766,9 @@ public class MainActivity extends Activity implements OnGestureListener{
 				}
 				memoAdapter.notifyDataSetChanged();
 				arrPlanList.clear();
+				System.out.println("first");
 				record = db.getPeriodRecordsByDate(1, getDate(), 1);
+				System.out.println("second");
 				if(record != null){
 					for(Record records : record){
 						arrPlanList.add(records);
@@ -1139,11 +1152,17 @@ public class MainActivity extends Activity implements OnGestureListener{
 			// 这里点击同样要显示闹铃的具体时间------------------》》》》
 			if(!APP.getpreferences().getMemoPlan()){
 				arr.clear();
-				ArrayList<Record> record = db.getPeriodRecordsByDate(1, getDate());
+				ArrayList<Record> record = db.getPeriodRecordsByDate(1, getDate(),0);//显示这天的备忘
 				if(record != null){
 					for(Record records:record){
 						arr.add(records);
 					}
+				record = db.getPeriodRecordsByDate(1, getDate(), 1); //显示这天的计划
+				if(record != null){
+					for(Record records:record){
+						arr.add(records);
+					}
+				}
 					adapter.notifyDataSetChanged();
 				}else{
 					//还没有记事，添加记事的背景图片
@@ -1158,6 +1177,8 @@ public class MainActivity extends Activity implements OnGestureListener{
 						for(Record records : record){
 							arrMemoList.add(records);
 						}
+					}else{
+						System.out.println("RECORD IS NULL");
 					}
 					memoAdapter.notifyDataSetChanged();
 					arrPlanList.clear();
@@ -1829,12 +1850,21 @@ public class MainActivity extends Activity implements OnGestureListener{
 	 */
 	private void updateNote(Record record){
 		
-		if(APP.getpreferences().getMemoPlan()){
-			clickText(record,MEMOPLAN);
-		}else{
-			clickText(record,NOMEMOPLAN);
-		}
+		Intent intent = new Intent();
+		intent.setClass(MainActivity.this, AddActivity.class);
+		Bundle bundle = new Bundle();
+		bundle.putSerializable("UPDATE", record);
+		bundle.putBoolean("ADD", false);
+		bundle.putInt("INDEX", currIndex);
+		intent.putExtras(bundle);
 		
+		if(APP.getpreferences().getMemoPlan()){
+			//clickText(record,MEMOPLAN);
+		}else{
+			//clickText(record,NOMEMOPLAN);
+			
+		}
+		startActivity(intent);
 		isAddOrUpdate = false;
 	}
 	/**
@@ -1862,7 +1892,10 @@ public class MainActivity extends Activity implements OnGestureListener{
 					toMonthYear(msg.arg2,msg.what);
 					break;
 				case ADD_LIST:
-					Add((Record)msg.obj);
+					Add((Record)msg.obj,msg.arg2);
+					break;
+				case UPDATE:
+					refresh((Record)msg.obj,msg.arg2);
 					break;
 				default:
 					break;
@@ -1870,9 +1903,33 @@ public class MainActivity extends Activity implements OnGestureListener{
 		}
 
 	}
-	private void Add(Record record){
-		arr.add(record);
-		adapter.notifyDataSetChanged();
+	private void refresh(Record obj,int arg2){
+		
+		if(arg2 == MainActivity.NOMEMOPLAN){
+			for(Record records:arr){
+				if(records.getId() == obj.getId())
+					records.setTaskDetail(obj.getTaskDetail());
+			}
+			adapter.notifyDataSetChanged();
+		}
+	}
+	
+	private void Add(Record record,int arg2){
+		
+	/*	if(arg2 == MainActivity.MEMO){
+			arrMemoList.add(record);
+			memoAdapter.notifyDataSetChanged();
+			
+		}else if ( arg2 == MainActivity.PLAN){
+			arrPlanList.add(record);
+			planAdapter.notifyDataSetChanged();
+		}
+		if(record.getAlarm() == 0)
+			arr.add(record);
+		adapter.notifyDataSetChanged();*/
+		
+		refreshMonthData();
+		
 	}
 	//日期选择对话框
 	private DatePickerDialog.OnDateSetListener listener = new DatePickerDialog.OnDateSetListener(){  //
@@ -1882,9 +1939,21 @@ public class MainActivity extends Activity implements OnGestureListener{
 		}
 	};
 	
-	//删除对话框
+	private int hasAlarmNum(String alarmcode){
+		int num = 0;
+		for(int i =0 ;i<alarmcode.length();i++){
+			if(alarmcode.charAt(i) == '#')
+				num = num + 1;
+		}
+		return num;
+	}
+	
+	//删除对话框,不能是级联删除，删除时判断是否是计划，是否多闹铃，不是只删除闹铃就ok，如果不是，执行原来逻辑
     protected void dialog(Record record, final int position) {
       final long id = record.getId();
+      final int alarm = record.getAlarm();
+      String alarmcode = record.getAlarmTimes();
+      final int num = hasAlarmNum(alarmcode);
   	  AlertDialog.Builder builder = new Builder(MainActivity.this);
   	  builder.setMessage(getString(R.string.isDelete));
   	  builder.setTitle(getString(R.string.tip));
@@ -1892,7 +1961,14 @@ public class MainActivity extends Activity implements OnGestureListener{
 		@Override
 		public void onClick(DialogInterface dialog, int which) {
 			//删除之后，更新arr
-			db.delete(id);
+			if(alarm == 0 || num <= 1){ // 没有闹铃，或者闹铃的个数小于1，可以删除
+				db.delete(id);
+				
+			}else if(num > 1){//多于一个闹铃
+				reBuildAlarmCode(position,getDate(),id);
+		
+				
+			}
 			if( db.getPeriodRecordsByDate(1, getDate()) == null){
 				updateCalendar();
 				System.out.println("update calendar!");
@@ -1919,7 +1995,48 @@ public class MainActivity extends Activity implements OnGestureListener{
 
   	  builder.create().show();
   	 }
-    
+    /**
+     * 重新组合闹铃字符串
+     * @param position
+     * @param date
+     * @param id
+     * @return
+     */
+    private String reBuildAlarmCode(int position,Date date,long id){
+    	
+    	long start;
+		long end;
+		date.setHours(0);
+		date.setMinutes(0);
+		date.setSeconds(0);
+		start = date.getTime();
+		date.setHours(23);
+		date.setMinutes(59);
+		date.setSeconds(59);
+		end = date.getTime();
+		
+    	Record record = db.getRecord(id); 
+    	String alarmcode = record.getAlarmTimes();
+    	System.out.println(alarmcode + "before delete");
+    	AlarmToString alarmtostring = new AlarmToString();
+    	alarmtostring.setAlarmTimeString(alarmcode);
+    	alarmtostring.StringToAlarms();
+    	
+    	ArrayList<AlarmTime> alarmtime = alarmtostring.getAlarmTimes();
+    	String realarmcode = "|";
+    	for(AlarmTime alarmtimes : alarmtime){
+    		if(alarmtimes.getTime() >= start && alarmtimes.getTime() <= end){
+    			
+    		}else{
+    			realarmcode = realarmcode + alarmtimes.getTime();
+    			realarmcode = realarmcode + '#' + alarmtimes.getTag()+'|';
+    		}
+    	}
+    	System.out.println(realarmcode + "after delete");
+    	record.setAlarmTimes(realarmcode);
+    	db.update(record);
+    	return realarmcode;
+    }
     /**
      * 计划备忘切换视图
      */
@@ -2055,7 +2172,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
 			float distanceY) {
 		
-		System.out.println("ONSCROLL");
+		//System.out.println("ONSCROLL");
 		/*if(e2.getX() - e1.getX() > 300){
 			btn_pre_month.performClick();
 		}*/
@@ -2070,7 +2187,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 	@Override
 	public boolean onSingleTapUp(MotionEvent e) {
 		
-		System.out.println("ONSINGLETAPUP");
+		//System.out.println("ONSINGLETAPUP");
 		return true;
 	}
 	/**

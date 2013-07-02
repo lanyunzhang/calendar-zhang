@@ -7,6 +7,7 @@ import com.calendar.util.Record;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -61,6 +62,7 @@ public class MyAdapter extends BaseAdapter {
 					msg.arg1 = MainActivity.UPDATE_LIST;
 					APP.getHandler().sendMessage(msg);
 				}
+				
 			}
 		});
         tv.setOnLongClickListener(new OnLongClickListener(){

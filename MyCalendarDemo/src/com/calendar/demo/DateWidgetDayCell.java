@@ -66,6 +66,7 @@ public class DateWidgetDayCell extends View {
 	private boolean bHoliday = false;
 	private boolean hasRecord = false;
 	private boolean bMove = false;
+	private boolean blackpoint = false;
 	
 	public static int ANIM_ALPHA_DURATION = 100;
     private DB db = null;
@@ -242,11 +243,22 @@ public class DateWidgetDayCell extends View {
 			
 		}
 		
-		if((db.getPeriodRecordsByDate(1, getDates()))!=null){
-			if(db.getPeriodRecordsByDate(1, getDates()).size()>0)
-				canvas.drawBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.noteflag),
-					null, rectbackground, null);
+		blackpoint = false;
+		
+		if((db.getPeriodRecordsByDate(1, getDates(),0))!=null){
+			if(db.getPeriodRecordsByDate(1, getDates(),0).size()>0)
+				blackpoint = true;
+			
 		}
+		
+		if((db.getPeriodRecordsByDate(1, getDates(),1))!=null){
+			if(db.getPeriodRecordsByDate(1, getDates(),1).size()>0 )
+				blackpoint = true;
+		}
+		if(blackpoint)
+			canvas.drawBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.noteflag),
+				null, rectbackground, null);
+		
 	}
 
 	private Date getDates(){

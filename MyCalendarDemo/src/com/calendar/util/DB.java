@@ -115,6 +115,7 @@ public class DB {
 		cv.put(Info.ALARMTYPE, r.getAlarmType());
 		cv.put(Info.ALARMCYCLE, r.getAlarmCycle());
 		cv.put(Info.ALARMTIME, r.getAlarmTime());
+		cv.put(Info.ALARMTIMES, r.getAlarmTimes());
 		
 		return db.update(Info.TABLE, cv, Info.ID + "=?", new String[]{String.valueOf(r.getId())});
 	}
@@ -344,13 +345,23 @@ public class DB {
 						cursor.getInt(cursor.getColumnIndex(Info.ALARMCYCLE)),
 						cursor.getLong(cursor.getColumnIndex(Info.ALARMTIME)),
 						cursor.getString(cursor.getColumnIndex(Info.ALARMTIMES)));
-				if (isTimeInPeriord(cursor.getString(cursor
-						.getColumnIndex(Info.ALARMTIMES)), start, end)) {
+				
+				if(planOrNote == 1){
+					if (isTimeInPeriord(cursor.getString(cursor
+							.getColumnIndex(Info.ALARMTIMES)), start, end)) {
+						if (records == null) {
+							records = new ArrayList<Record>();
+						}
+						records.add(r);
+	
+					}
+				}else if (planOrNote == 0){
 					if (records == null) {
 						records = new ArrayList<Record>();
 					}
-					records.add(r);
-
+					if(r.getAlarmTime() >= start && r.getAlarmTime() <= end)
+						records.add(r);
+					
 				}
 
 			}
@@ -361,12 +372,11 @@ public class DB {
 
 	private boolean isTimeInPeriord(String alarmTimes, long start, long end) {
 		boolean flag = false;
-
 		AlarmToString alarmToString = new AlarmToString();
 		alarmToString.setAlarmTimeString(alarmTimes);
-		alarmToString.AlarmsToString();
+		//alarmToString.AlarmsToString();
+		alarmToString.StringToAlarms();
 		ArrayList<AlarmTime> alist = alarmToString.getAlarmTimes();
-
 		for (int i = 0; i < alist.size(); i++) {
 			if (alist.get(i).getTime() >= start
 					&& alist.get(i).getTime() <= end) {
@@ -553,6 +563,41 @@ public class DB {
 	public synchronized Record getRecord(String idType, long id) {
 		String sql = "SELECT * FROM " + Info.TABLE + " WHERE " + idType + " =?";
 		Cursor cursor = db.rawQuery(sql, new String[]{String.valueOf(id)});
+		
+		Record r = null;
+		if(cursor.moveToNext()) {
+			r = new Record(
+					cursor.getLong(cursor.getColumnIndex(Info.ID)),
+					cursor.getLong(cursor.getColumnIndex(Info.TASKID)),
+					cursor.getInt(cursor.getColumnIndex(Info.UID)),
+					cursor.getInt(cursor.getColumnIndex(Info.OPTYPE)),
+					cursor.getInt(cursor.getColumnIndex(Info.SYN)),
+					cursor.getString(cursor.getColumnIndex(Info.NICKNAME)),
+					cursor.getString(cursor.getColumnIndex(Info.TASKNAME)),
+					cursor.getString(cursor.getColumnIndex(Info.TASKTAG)),
+					cursor.getString(cursor.getColumnIndex(Info.TASKDETAIL)),
+					cursor.getLong(cursor.getColumnIndex(Info.TASKCREATETIME)),
+					cursor.getLong(cursor.getColumnIndex(Info.TASKSTARTTIME)),
+					cursor.getLong(cursor.getColumnIndex(Info.TASKENDTIME)),
+					cursor.getLong(cursor.getColumnIndex(Info.TASKEDITTIME)),
+					cursor.getInt(cursor.getColumnIndex(Info.TASKIMPORTANT)),
+					cursor.getInt(cursor.getColumnIndex(Info.TASKCOMPLETE)),
+					cursor.getInt(cursor.getColumnIndex(Info.TASKSTATUS)),
+					cursor.getInt(cursor.getColumnIndex(Info.TASKTYPE)),
+					cursor.getInt(cursor.getColumnIndex(Info.ALARM)),
+					cursor.getInt(cursor.getColumnIndex(Info.ALARMTYPE)),
+					cursor.getInt(cursor.getColumnIndex(Info.ALARMCYCLE)),
+					cursor.getLong(cursor.getColumnIndex(Info.ALARMTIME)),
+					cursor.getString(cursor.getColumnIndex(Info.ALARMTIMES))
+					);
+		}
+		cursor.close();
+		return r;
+	}
+	
+	public synchronized Record getRecord(long id) {
+		String sql = "SELECT * FROM " + Info.TABLE + " WHERE " + Info.ID + " =?";
+		Cursor cursor = db.rawQuery(sql, new String[] {String.valueOf(id)});
 		
 		Record r = null;
 		if(cursor.moveToNext()) {
