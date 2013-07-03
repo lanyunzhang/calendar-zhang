@@ -1,9 +1,18 @@
 package com.calendar.demo;
 
 import java.util.ArrayList;
+
+import android.app.AlarmManager;
+import android.app.AlertDialog;
+import android.app.PendingIntent;
+import android.app.AlertDialog.Builder;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.BaseAdapter;
@@ -18,16 +27,23 @@ public class MyAlarmAdapter extends BaseAdapter {
     private Context context;  
     private LayoutInflater inflater;  
     private ArrayList<String> arr;
+    private ArrayList<Integer> alarmRequestCode;
     
     public MyAlarmAdapter(Context context) {  
         super();  
         this.context = context;  
         inflater = LayoutInflater.from(context);  
         arr = new ArrayList<String>();  
+        alarmRequestCode = new ArrayList<Integer>();
+        
     }  
     
     public ArrayList<String> getArrayList(){
     	return arr;
+    }
+    
+    public ArrayList<Integer> getAlarmRequestCode(){
+    	return alarmRequestCode;
     }
     
     @Override  
@@ -62,7 +78,17 @@ public class MyAlarmAdapter extends BaseAdapter {
 				System.out.println("textview clicked!");
 			}
 		});
+        
+        tv.setOnLongClickListener(new OnLongClickListener(){
+
+			@Override
+			public boolean onLongClick(View view) {
+				((AddActivity)context).dialogAlarm(position);
+				return false;
+			}});
         return view;  
-    }  
+    }
+    
+    
     
 }

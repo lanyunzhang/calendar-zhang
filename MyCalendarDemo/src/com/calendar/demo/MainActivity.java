@@ -245,6 +245,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 	public static final int TO_MONTH_YEAR = 4;
 	public static final int ADD_LIST = 5;
 	public static final int UPDATE = 6;
+	public static final int DELETE_ALARM = 7;
 	
 	public static final int NOMEMOPLAN = 0;
 	public static final int MEMOPLAN = 1;
@@ -721,6 +722,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 				for(Record records:record){
 					arr.add(records);
 				}
+			}
 			record = db.getPeriodRecordsByDate(1, getDate(),1);
 			if(record != null){
 				for(Record records:record){
@@ -728,12 +730,13 @@ public class MainActivity extends Activity implements OnGestureListener{
 				}
 			}
 			adapter.notifyDataSetChanged();
-			}else{
+			if(arr == null || arr.size() == 0){
 				//还没有记事，添加记事的背景图片
 				System.out.println("null");
 				arr.clear();
 				adapter.notifyDataSetChanged();
 			}
+			
 		}else{ // 在计划备忘界面
 				arrMemoList.clear();
 				ArrayList<Record> record = db.getPeriodRecordsByDate(1, getDate(), 0);
@@ -1135,19 +1138,22 @@ public class MainActivity extends Activity implements OnGestureListener{
 					for(Record records:record){
 						arr.add(records);
 					}
+				}
 				record = db.getPeriodRecordsByDate(1, getDate(), 1); //显示这天的计划
 				if(record != null){
 					for(Record records:record){
 						arr.add(records);
 					}
 				}
-					adapter.notifyDataSetChanged();
-				}else{
+				adapter.notifyDataSetChanged();
+				
+				if(arr==null && arr.size()==0){
 					//还没有记事，添加记事的背景图片
 					System.out.println("null");
 					arr.clear();
 					adapter.notifyDataSetChanged();
 				}
+				
 			}else{ // 在计划备忘界面
 					arrMemoList.clear();
 					ArrayList<Record> record = db.getPeriodRecordsByDate(1, getDate(), 0);
@@ -1876,11 +1882,44 @@ public class MainActivity extends Activity implements OnGestureListener{
 				case UPDATE:
 					refresh((Record)msg.obj,msg.arg2);
 					break;
+				case DELETE_ALARM:
+					dialogAlarm(msg.arg2);
+					break;
 				default:
 					break;
 			}
 		}
 
+	}
+	
+	private void dialogAlarm(final int position){
+		
+		  final int tags = maa.getAlarmRequestCode().get(position);
+		  AlertDialog.Builder builder = new Builder(MainActivity.this);
+		  builder.setMessage(getString(R.string.isDelete));
+	  	  builder.setTitle(getString(R.string.tip));
+	  	  builder.setPositiveButton(getString(R.string.YES), new DialogInterface.OnClickListener(){
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				//删除闹铃
+				Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
+				PendingIntent pi = PendingIntent.getBroadcast(MainActivity.this, tags, intent, 0);
+				AlarmManager am = (AlarmManager) MainActivity.this.getSystemService(Context.ALARM_SERVICE);
+				am.cancel(pi);
+				
+				maa.getAlarmRequestCode().remove(position);
+				maa.getArrayList().remove(position);
+				maa.notifyDataSetChanged();
+				
+			}});
+	  	  builder.setNegativeButton(getString(R.string.Cancel), new DialogInterface.OnClickListener(){
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}});
+
+	  	  builder.create().show();
 	}
 	private void refresh(Record obj,int arg2){
 		
@@ -1946,7 +1985,6 @@ public class MainActivity extends Activity implements OnGestureListener{
 			}else if(num > 1){//多于一个闹铃
 				reBuildAlarmCode(position,getDate(),id);
 		
-				
 			}
 			if( db.getPeriodRecordsByDate(1, getDate()) == null){
 				updateCalendar();

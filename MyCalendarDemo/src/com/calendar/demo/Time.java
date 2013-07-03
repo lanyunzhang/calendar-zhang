@@ -7,6 +7,14 @@ public class Time {
 	private int day;
 	private int hour;
 	private int minutes;
+	private int tag;
+	
+	public int getTag(){
+		return tag;
+	}
+	public void setTag(int tag){
+		this.tag = tag;
+	}
 	
 	public int getYear() {
 		return year;

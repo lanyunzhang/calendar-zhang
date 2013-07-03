@@ -19,9 +19,12 @@ import com.calendar.util.Record;
 
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.app.AlertDialog.Builder;
 import android.app.PendingIntent.CanceledException;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -70,6 +73,7 @@ public class AddActivity extends Activity  implements OnClickListener{
 	private DB db = null;
 	private Record recordintent = null;
 	private TextView addNoteDate = null;
+	private ArrayList<Integer> alarmRequestCode = null;
 	
 	private boolean isPopup = false;
 	private boolean timeScrolled = false;
@@ -83,7 +87,6 @@ public class AddActivity extends Activity  implements OnClickListener{
 	private int curmin = 0;
 	private int currIndex = -1;
 	private int currentyear = 0;
-	
 	
 	
 	@Override
@@ -109,6 +112,7 @@ public class AddActivity extends Activity  implements OnClickListener{
 				ArrayList<AlarmTime> alarmtime = alarmtostring.getAlarmTimes();
 				Date date = new Date();
 				maa.getArrayList().clear();
+				alarmRequestCode.clear();
 				for(AlarmTime alarm :alarmtime){
 					date.setTime( alarm.getTime());
 					Time timeo = new Time(date.getYear(),date.getMonth(),date.getDate(),
@@ -116,6 +120,8 @@ public class AddActivity extends Activity  implements OnClickListener{
 					time.add(timeo);
 					maa.getArrayList().add(date.getYear() + 1900 +"-" +date.getMonth() +"-" + date.getDate() +"-"+
 							date.getHours() +"-" +date.getMinutes());
+					
+					alarmRequestCode.add(alarm.getTag());
 					
 				}
 			}
@@ -172,6 +178,8 @@ public class AddActivity extends Activity  implements OnClickListener{
 			
 		}
 		
+		alarmRequestCode = maa.getAlarmRequestCode(); 
+		
 	}
 	
 	@Override
@@ -217,28 +225,60 @@ public class AddActivity extends Activity  implements OnClickListener{
 			String text = content.trim();
 			Message msg = new Message();
 			Record record = new Record();
+			
+			if(maa.getArrayList().size() > 0){
+				record.setAlarm(1);
+			}
 			if(isAddOrUpdate){
 				
 				record.setTaskDetail(text);
 				record.setUid(1);
 				record.setAlarmTime(date.getTime());
 				String alarmcode = setAlarm(record);
+				System.out.println(alarmcode+"*************");
 				record.setAlarmTimes(alarmcode);
 				record.setId(db.add(record));
 				
-			
 				msg.arg1 = MainActivity.ADD_LIST; 
 				msg.obj = record;
 				APP.getHandler().sendMessage(msg);
 				
 			}else{
 				recordintent.setTaskDetail(text);
-				db.update(recordintent);
+				String alarmcode = "|";
+				if(time.size() != 0){ //有一个或者多个闹铃
+					record.setAlarm(1);
+					
+					for(Time oneTime:time){
+						int alarm = oneTime.getTag();
+						Calendar alarmtime = Calendar.getInstance();
+						alarmtime.set(Calendar.YEAR, oneTime.getYear());
+						alarmtime.set(Calendar.MONTH, oneTime.getMonth());
+						alarmtime.set(Calendar.DAY_OF_MONTH, oneTime.getDay());
+						alarmtime.set(Calendar.HOUR_OF_DAY, oneTime.getHour());
+						alarmtime.set(Calendar.MINUTE, oneTime.getMinutes());
+						alarmtime.set(Calendar.SECOND, 0);
+						
+						alarmcode  = alarmcode + alarmtime.getTimeInMillis(); 
+						alarmcode  = alarmcode + "#" + alarm;
+						alarmcode  = alarmcode + "|";
+			
+					}
+					
+					System.out.println(alarmcode+"----------------------");
+					recordintent.setAlarmTimes(alarmcode);
+					db.update(recordintent);
+				}else{
+					recordintent.setAlarmTimes(alarmcode);
+					db.update(recordintent);
+				}
+				
+				
 				msg.arg1 = MainActivity.UPDATE;
 				msg.obj = recordintent;
 				APP.getHandler().sendMessage(msg);
+				
 			}
-			
 			//普通模式
 			if(!APP.getpreferences().getMemoPlan()){
 				msg.arg2 = MainActivity.NOMEMOPLAN;
@@ -249,7 +289,6 @@ public class AddActivity extends Activity  implements OnClickListener{
 		 		}else if (currIndex == 1){ //计划
 		 			
 		 			msg.arg2 = MainActivity.PLAN;
-		 			record.setAlarm(1); //设置默认闹铃
 		 		}
 			}
 			
@@ -260,6 +299,7 @@ public class AddActivity extends Activity  implements OnClickListener{
 			//区分是添加还是更新，从入口区分
 			//为什么不执行datasetchange也可以呢？
 			finish();
+			
 		}
 		
 	}
@@ -538,12 +578,13 @@ public class AddActivity extends Activity  implements OnClickListener{
 				alarmtime.set(Calendar.HOUR_OF_DAY, oneTime.getHour());
 				alarmtime.set(Calendar.MINUTE, oneTime.getMinutes());
 				alarmtime.set(Calendar.SECOND, 0);
-				 
+				
 				Intent intent = new Intent("com.calendar.demo.alarm");
 				intent.setClass(AddActivity.this, AlarmReceiver.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				intent.putExtra("ALARM", record.getTaskDetail());
 				PendingIntent pi=PendingIntent.getBroadcast(this, alarm, intent,0);
+				oneTime.setTag(alarm);
 				APP.getpreferences().putAlarm(alarm+1);
 				
 				alarmcode  = alarmcode + alarmtime.getTimeInMillis(); 
@@ -566,5 +607,51 @@ public class AddActivity extends Activity  implements OnClickListener{
 		}
 		return alarmcode;
 	}
+	
+	public void dialogAlarm(final int position){
+		
+		  final int tags =alarmRequestCode.get(position);
+		  System.out.println(tags);
+		  AlertDialog.Builder builder = new Builder(AddActivity.this);
+		  builder.setMessage(getString(R.string.isDelete));
+	  	  builder.setTitle(getString(R.string.tip));
+	  	  builder.setPositiveButton(getString(R.string.YES), new DialogInterface.OnClickListener(){
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				//删除闹铃的逻辑有问题
+				Intent intent = new Intent("com.calendar.demo.alarm");
+				intent.setClass(AddActivity.this, AlarmReceiver.class);
+				PendingIntent pi = PendingIntent.getBroadcast(AddActivity.this, tags, intent, 0);
+				AlarmManager am = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+				am.cancel(pi);
+				
+				alarmRequestCode.remove(position);
+				String timestring1 =maa.getArrayList().remove(position);
+				
+				for(Time times :time){
+					String timestring2 = "";
+					timestring2 = (times.getYear()+1900)+"-" +times.getMonth() +"-" + times.getDay() +"-"+
+							times.getHour() +"-" +times.getMinutes();
+					if(timestring2.equals(timestring1)){
+						time.remove(times);
+						break;
+					}
+				}
+				maa.notifyDataSetChanged();
+				
+				//更新数据库的alarmcode
+			
+				
+			}});
+	  	  builder.setNegativeButton(getString(R.string.Cancel), new DialogInterface.OnClickListener(){
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}});
+
+	  	  builder.create().show();
+	}
+	
 
 }
