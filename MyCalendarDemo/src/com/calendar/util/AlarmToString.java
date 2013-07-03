@@ -49,7 +49,7 @@ public class AlarmToString  {
 	}
 	
 	public void StringToAlarms() {
-		if (alarmTimeString.length() != 0) {
+		if (alarmTimeString.length() > 1 ) {
 			int size = alarmTimeString.length();
 			String alarmTimeStrings = alarmTimeString.substring(1, size -1 );
 			String a[] = alarmTimeStrings.split("\\|");
