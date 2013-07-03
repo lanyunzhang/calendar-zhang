@@ -13,6 +13,7 @@ public class Preference {
 	private static final String FIRSTLOCK ="FIRSTLOCK";
 	private static final String ISMEMOPLAN ="ISMEMOPLAN";
 	private static final String ALARM = "ALARM";
+	private static final String ONTOUCH = "TOUCH";
 	
 	public  Preference(Context context){
 		mSharedPreferences = PreferenceManager
@@ -43,5 +44,14 @@ public class Preference {
 	
 	public int getAlarm(){
 		return mSharedPreferences.getInt(ALARM, 0);
+	}
+	
+	public void putOnTouch(boolean flag){
+		mEditor.putBoolean(ONTOUCH, flag);
+		mEditor.commit();
+	}
+	
+	public boolean getOnTouch(){
+		return mSharedPreferences.getBoolean(ONTOUCH, false);
 	}
 }

@@ -69,6 +69,7 @@ public class AddActivity extends Activity  implements OnClickListener{
 	private Date date = null;
 	private DB db = null;
 	private Record recordintent = null;
+	private TextView addNoteDate = null;
 	
 	private boolean isPopup = false;
 	private boolean timeScrolled = false;
@@ -120,6 +121,8 @@ public class AddActivity extends Activity  implements OnClickListener{
 			}
 			maa.notifyDataSetChanged();
 		}
+		//设置文本显示时间
+		addNoteDate.setText((date.getYear() + 1900) +"-" +(date.getMonth()+1) +"-" + date.getDate());
 		
 	}
 	
@@ -131,6 +134,7 @@ public class AddActivity extends Activity  implements OnClickListener{
 		b_alarm = (ImageButton) findViewById(R.id.b_alarm);
 		b_mp = (ImageView) findViewById(R.id.b_mp);
 		alarmlist = (ListView) findViewById(R.id.alarmlist);
+		addNoteDate = (TextView)findViewById(R.id.date);
 		
 		time = new ArrayList<Time>();
 		maa = new MyAlarmAdapter(AddActivity.this);

@@ -40,7 +40,9 @@
            android:layout_width="fill_parent"
            android:layout_height="wrap_content"
            android:id="@+id/date"
-           android:text="@string/date"></TextView>
+           android:text="@string/date">
+           
+       </TextView>
        
     <EditText
         android:id="@+id/add_event_content"

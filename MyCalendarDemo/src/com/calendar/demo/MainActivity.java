@@ -164,6 +164,8 @@ public class MainActivity extends Activity implements OnGestureListener{
 	private int curmonth = 0;
 	private int curday = 0;
 	private int currentpage = 0;
+	private float x1 = 0;
+	private float x2 = 0;
 	
 	private int Calendar_Width = 0;
 	private int Cell_Width = 0;
@@ -414,31 +416,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 	/**
 	 * 触摸事件的监听
 	 */
-	@Override
-	public boolean onTouchEvent(MotionEvent event) {
 	
-		//System.out.println("ONTOUCH");
-		/*switch(event.getAction()){
-		case MotionEvent.ACTION_DOWN:
-			startX = event.getX();
-			break;
-		case MotionEvent.ACTION_UP:
-			
-			if(event.getX() > startX){
-				currentpage = 1;
-				viewflipper.setInAnimation(this,R.anim.in_leftright);
-				viewflipper.setOutAnimation(this, R.anim.out_leftright);
-				viewflipper.showNext();
-			}else if (event.getX() < startX){
-				viewflipper.setInAnimation(this,R.anim.in_rightleft);
-				viewflipper.setInAnimation(this,R.anim.out_rightleft);
-				viewflipper.showPrevious();
-			}
-			break;
-			
-		}*/
-		return gd.onTouchEvent(event);
-	}
 	
 	/**
 	 * 取消的设置
@@ -1854,6 +1832,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 		intent.setClass(MainActivity.this, AddActivity.class);
 		Bundle bundle = new Bundle();
 		bundle.putSerializable("UPDATE", record);
+		bundle.putSerializable("DATE", getDate());
 		bundle.putBoolean("ADD", false);
 		bundle.putInt("INDEX", currIndex);
 		intent.putExtras(bundle);
@@ -2137,6 +2116,9 @@ public class MainActivity extends Activity implements OnGestureListener{
 				APP.getHandler().postDelayed(task, 1500);
 				currentpage = 1-currentpage;
 				
+				APP.getpreferences().putOnTouch(true);
+				System.out.println("TRUETRUE");
+				
 			}else if (e1.getX() - e2.getX() > 200 ){
 				System.out.println("zuo hua");
 				System.out.println(e1.getX() +" " + e2.getX() + " " + velocityX);
@@ -2148,17 +2130,25 @@ public class MainActivity extends Activity implements OnGestureListener{
 				currentpage = 1- currentpage;
 				APP.getHandler().postDelayed(task, 1500);
 				currentpage = 1- currentpage;
+				
+				APP.getpreferences().putOnTouch(true);
+				System.out.println("TRUETRUE");
+			}else{
+				APP.getpreferences().putOnTouch(false);
+				System.out.println("FALSEFALSE");
+	
 			}
+		
+		}else{
+			
 		}
-		
-		
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent ev) {
-		gd.onTouchEvent(ev);
-		return super.dispatchTouchEvent(ev);
+			gd.onTouchEvent(ev);
+			return super.dispatchTouchEvent(ev);	
 	}
 	@Override
 	public void onLongPress(MotionEvent e) {
@@ -2176,7 +2166,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 		/*if(e2.getX() - e1.getX() > 300){
 			btn_pre_month.performClick();
 		}*/
-		return false;
+		return true;
 	}
 
 	@Override

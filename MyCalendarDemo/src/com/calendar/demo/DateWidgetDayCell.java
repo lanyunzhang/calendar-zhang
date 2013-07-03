@@ -26,6 +26,7 @@ import com.calendar.util.Lunar;
 
 /**
  * 日历控件单元格绘制类
+ * 
  * @Description: 日历控件单元格绘制类
 
  * @FileName: DateWidgetDayCell.java 
@@ -107,7 +108,6 @@ public class DateWidgetDayCell extends View {
 		this.bToday = bToday;
 		this.bHoliday = bHoliday;
 		this.hasRecord = hasRecord;
-		
 		
 		 SimpleDateFormat myFormatter = new SimpleDateFormat("yyyy-MM-dd");
 		  try {
@@ -324,7 +324,8 @@ public class DateWidgetDayCell extends View {
 			startPosx = event.getX();
 			startPosy = event.getY();
 			
-			startAlphaAnimIn(DateWidgetDayCell.this);
+			//startAlphaAnimIn(DateWidgetDayCell.this);
+			//doItemClick();
 			System.out.println("CELL ACTION_DOWN");
 		}
 		if (event.getAction() == MotionEvent.ACTION_CANCEL) {
@@ -337,7 +338,7 @@ public class DateWidgetDayCell extends View {
 			bHandled = true;
 			
 			System.out.println("UPUPUPUP");
-			invalidate();
+			//invalidate();
 			bTouchedDown = false;
 			
 			if(!bMove)
