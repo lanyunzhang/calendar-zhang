@@ -1993,10 +1993,10 @@ public class MainActivity extends Activity implements OnGestureListener{
 		@Override
 		public void onClick(DialogInterface dialog, int which) {
 			//删除之后，更新arr
-			if(alarm == 0 || num <= 1){ // 没有闹铃，或者闹铃的个数小于1，可以删除
+			if(alarm == 0 || num < 1){ // 没有闹铃，或者闹铃的个数小于1，可以删除
 				db.delete(id);
 				
-			}else if(num > 1){//多于一个闹铃
+			}else if(num >= 1){//多于一个闹铃
 				reBuildAlarmCode(position,getDate(),id);
 		
 			}
@@ -2048,7 +2048,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 		
     	Record record = db.getRecord(id); 
     	String alarmcode = record.getAlarmTimes();
-    	System.out.println(alarmcode + "before delete");
+    	System.out.println(alarmcode + "MainActivity before delete");
     	AlarmToString alarmtostring = new AlarmToString();
     	alarmtostring.setAlarmTimeString(alarmcode);
     	alarmtostring.StringToAlarms();
@@ -2057,13 +2057,19 @@ public class MainActivity extends Activity implements OnGestureListener{
     	String realarmcode = "|";
     	for(AlarmTime alarmtimes : alarmtime){
     		if(alarmtimes.getTime() >= start && alarmtimes.getTime() <= end){
+    			//取消掉闹铃
+    			Intent intent = new Intent("com.calendar.demo.alarm");
+				intent.setClass(MainActivity.this, AlarmReceiver.class);
+				PendingIntent pi = PendingIntent.getBroadcast(MainActivity.this, alarmtimes.getTag(), intent, 0);
+				AlarmManager am = (AlarmManager) MainActivity.this.getSystemService(Context.ALARM_SERVICE);
+				am.cancel(pi);
     			
     		}else{
     			realarmcode = realarmcode + alarmtimes.getTime();
     			realarmcode = realarmcode + '#' + alarmtimes.getTag()+'|';
     		}
     	}
-    	System.out.println(realarmcode + "after delete");
+    	System.out.println(realarmcode + "MainActivity after delete");
     	record.setAlarmTimes(realarmcode);
     	db.update(record);
     	return realarmcode;
