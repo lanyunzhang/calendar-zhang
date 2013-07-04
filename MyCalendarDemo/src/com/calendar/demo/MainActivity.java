@@ -125,6 +125,7 @@ import com.calendar.util.util;
  *   28. 闹钟的取消已调研清楚，闹钟的数据也已经正常
  *   29. 判断农历日期是否合法，以及将合法的农历日期转化到公历日期
  *   30. 覆盖安装时，数据库中的数据都不会删除，所以先判断用户有没有打开计划或者备忘
+ *   31. 删除一个事件，同时要删除对应的闹铃
  *   
  */
 public class MainActivity extends Activity implements OnGestureListener{
@@ -1921,6 +1922,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 
 	  	  builder.create().show();
 	}
+	//更新数据	 			
 	private void refresh(Record obj,int arg2){
 		
 		if(arg2 == MainActivity.NOMEMOPLAN){
@@ -1929,6 +1931,18 @@ public class MainActivity extends Activity implements OnGestureListener{
 					records.setTaskDetail(obj.getTaskDetail());
 			}
 			adapter.notifyDataSetChanged();
+		}else if (arg2 == MainActivity.MEMO){
+			for(Record records :arrMemoList){
+				if(records.getId() == obj.getId())
+					records.setTaskDetail(obj.getTaskDetail());
+			}
+			memoAdapter.notifyDataSetChanged();
+		}else if( arg2 == MainActivity.PLAN){
+			for(Record records:arrPlanList){
+				if(records.getId() == obj.getId())
+					records.setTaskDetail(obj.getTaskDetail());
+			}
+			planAdapter.notifyDataSetChanged();
 		}
 	}
 	

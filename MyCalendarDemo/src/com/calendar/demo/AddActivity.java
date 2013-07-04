@@ -67,6 +67,7 @@ public class AddActivity extends Activity  implements OnClickListener{
 	private TextView tv5 = null;
 	private PopupWindow popupWindow = null;
 	private ArrayList<Time> time = null;
+	private ArrayList<Time> updateTime = null;
 	private ListView alarmlist = null;
 	private MyAlarmAdapter maa = null;
 	private Date date = null;
@@ -122,6 +123,7 @@ public class AddActivity extends Activity  implements OnClickListener{
 					Time timeo = new Time((date.getYear()+1900),date.getMonth(),date.getDate(),
 							                            date.getHours(),date.getMinutes());
 					timeo.setTag(alarm.getTag());
+					timeo.setIsSetAlarm(true);
 					time.add(timeo);
 					maa.getArrayList().add(date.getYear() + 1900 +"-" +(date.getMonth()+1) +"-" + date.getDate() +"-"+
 							date.getHours() +"-" +date.getMinutes());
@@ -247,7 +249,7 @@ public class AddActivity extends Activity  implements OnClickListener{
 				record.setTaskDetail(text);
 				record.setUid(1);
 				record.setAlarmTime(date.getTime());
-				String alarmcode = setAlarm(record);
+				String alarmcode = setAlarm(record,time);
 				System.out.println(alarmcode+"*************add alarm");
 				record.setAlarmTimes(alarmcode);
 				record.setId(db.add(record));
@@ -258,6 +260,19 @@ public class AddActivity extends Activity  implements OnClickListener{
 				
 			}else{
 				recordintent.setTaskDetail(text);
+				//进入更新后，再次添加闹铃的逻辑,对比time与原time不相同的就添加闹铃
+				ArrayList<Time> updateTime= new ArrayList<Time>();
+				for(Time times:time){
+					if(!times.getIsSetAlarm())
+						updateTime.add(times);
+				}
+				
+				String updateAlarmCode = setAlarm(recordintent,updateTime);
+				System.out.println("new alarm time code" + updateAlarmCode);
+				String newAlarmCode = recordintent.getAlarmTimes() + updateAlarmCode.substring(1);
+				System.out.println("new all alarm time code" + newAlarmCode);
+				recordintent.setAlarmTimes(newAlarmCode);
+				db.update(recordintent);
 				
 				msg.arg1 = MainActivity.UPDATE;
 				msg.obj = recordintent;
@@ -272,7 +287,6 @@ public class AddActivity extends Activity  implements OnClickListener{
 		 		if(currIndex == 0){ //备忘
 		 			msg.arg2 = MainActivity.MEMO;
 		 		}else if (currIndex == 1){ //计划
-		 			
 		 			msg.arg2 = MainActivity.PLAN;
 		 		}
 			}
@@ -541,6 +555,7 @@ public class AddActivity extends Activity  implements OnClickListener{
 	
 	private void addTimeList(int year,int month,int day,int hour,int minutes){
 		Time alarmtime = new Time(year,month,day,hour,minutes);
+		alarmtime.setIsSetAlarm(false);
 		time.add(alarmtime);
 		
 		maa.getArrayList().add(year+"-"+(month+1)+"-"+day+"-"+hour+"-"+minutes);
@@ -548,7 +563,7 @@ public class AddActivity extends Activity  implements OnClickListener{
 	}
 	
 
-	public String setAlarm(Record record){
+	public String setAlarm(Record record,ArrayList<Time> time){
 		//先得到年月日时分
 		String alarmcode ="|";
 		if(time.size() != 0){ //有一个或者多个闹铃
@@ -576,6 +591,7 @@ public class AddActivity extends Activity  implements OnClickListener{
 				intent.putExtra("ALARM", record.getTaskDetail());
 				PendingIntent pi=PendingIntent.getBroadcast(this, alarm, intent,0);
 				oneTime.setTag(alarm);
+				oneTime.setIsSetAlarm(true);
 				APP.getpreferences().putAlarm(alarm+1);
 				
 				alarmcode  = alarmcode + alarmtime.getTimeInMillis(); 
@@ -593,8 +609,9 @@ public class AddActivity extends Activity  implements OnClickListener{
 			  
 			}
 		}else{
-			//没有闹铃
-			record.setAlarm(0);
+			//这里只能说明没有新添加的闹铃，没有闹铃时在删除时已经设置
+			System.out.println("没有闹铃");
+			//record.setAlarm(0);
 		}
 		return alarmcode;
 	}

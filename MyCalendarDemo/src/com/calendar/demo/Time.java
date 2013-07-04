@@ -8,7 +8,14 @@ public class Time {
 	private int hour;
 	private int minutes;
 	private int tag;
+	private boolean isSetAlarm = false;
 	
+	public boolean getIsSetAlarm(){
+		return isSetAlarm;
+	}
+	public void setIsSetAlarm(boolean isSetAlarm){
+		this.isSetAlarm = isSetAlarm;
+	}
 	public int getTag(){
 		return tag;
 	}
